@@ -208,3 +208,10 @@ Wait for consent; never auto-create ADRs. Group related decisions (stacks, authe
 
 ## Code Standards
 See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
+
+## Active Technologies
+- Python 3.11+ (for pathlib atomic operations, match statements, type hints) (001-file-control-plane)
+- File system (local disk) - task files in workflow folders, logs in /Logs directory (001-file-control-plane)
+
+## Recent Changes
+- 001-file-control-plane: Added Python 3.11+ (for pathlib atomic operations, match statements, type hints)
