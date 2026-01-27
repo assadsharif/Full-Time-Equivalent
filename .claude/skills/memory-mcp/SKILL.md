@@ -166,8 +166,124 @@ store_memory({
 - Duplicate information in files and memory
 - Let memories become stale
 
+## Error Handling
+
+### Common Errors and Solutions
+
+**Memory Not Found**
+```
+Error: "No memory found for key: <key>"
+```
+- Key doesn't exist in current context
+- Try searching with `search_memory` to find similar keys
+- Check if correct context is active with `list_contexts`
+- Ask user to clarify what information they're looking for
+
+**Context Already Exists**
+```
+Error: "Context '<name>' already exists"
+```
+- Switch to existing context with `switch_context`
+- Or use different context name
+- Ask user: "Context exists. Switch to it or create with different name?"
+
+**Invalid Key Format**
+```
+Error: "Invalid key format"
+```
+- Use descriptive keys without special characters
+- Format: lowercase-with-hyphens or snake_case
+- Examples: "auth-approach", "database_choice"
+
+**Storage Limit Exceeded**
+```
+Warning: "Memory storage approaching limit"
+```
+- Review and delete obsolete memories
+- Consolidate related memories
+- Move large content to files instead
+
+**Context Switch Failed**
+```
+Error: "Cannot switch to context: <name>"
+```
+- Context doesn't exist - create it first with `create_context`
+- List available contexts with `list_contexts`
+- Check for typos in context name
+
+## Security Considerations
+
+### ⚠️ Critical Security Rules
+
+**NEVER store secrets**
+- API keys, tokens, passwords, credentials
+- Private keys, certificates
+- Database passwords or connection strings with credentials
+- Use `.env` files or secure vaults instead
+
+**Sensitive Information**
+- Personal data (emails, phone numbers, addresses)
+- Financial information (credit cards, account numbers)
+- Health information
+- Authentication tokens
+
+**What to Store Safely**
+- Architectural decisions and rationale
+- Coding standards and preferences
+- Feature requirements and business logic
+- Design patterns and best practices
+- Non-sensitive configuration choices
+
+**Review Before Storing**
+Always check that memory content:
+- Contains no secrets or credentials
+- Contains no personally identifiable information (PII)
+- Is appropriate for long-term storage
+- Won't violate privacy or security policies
+
+## Clarifications
+
+### When to Ask User
+
+**Before Storing Sensitive-Looking Content:**
+If content contains patterns like:
+- "password", "token", "key", "secret"
+- Email addresses, phone numbers
+- URLs with credentials
+Ask: "⚠️ This content may contain sensitive information. Store it anyway?"
+
+**When Memory Key is Ambiguous:**
+- Multiple similar keys exist
+- User says "remember this" without specifying key
+- Ask: "What should I call this memory? (e.g., 'auth-strategy')"
+
+**When Context is Unclear:**
+- No context is active
+- Multiple contexts could apply
+- Ask: "Which context should this memory belong to?"
+
+**When Memory Conflicts with Existing:**
+- Key already exists with different value
+- Ask: "Memory exists for this key. Update it or use different key?"
+
+### When NOT to Ask
+
+**Clear Storage Requests:**
+- User provides explicit key and value
+- Context is obvious from current work
+- Standard memory types (Decision, Fact, Pattern, Preference)
+
+**Obvious Context:**
+- Working on specific feature, use feature context
+- General decisions, use architecture context
+
+**Retrieval Operations:**
+- Searching is always safe
+- Listing contexts is informational
+
 ## Reference
 
 For detailed documentation:
 - [Memory MCP README](../../mcp/memory/README.md)
 - [MCP Installation Summary](../../mcp/INSTALLATION_SUMMARY.md)
+- [Memory Server Documentation](https://github.com/modelcontextprotocol/servers/tree/main/src/memory)

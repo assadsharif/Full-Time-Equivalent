@@ -194,9 +194,164 @@ Create issue: "Implement ADR-001: Database choice"
 5. Tag version
 ```
 
+## Error Handling
+
+### Common Errors and Solutions
+
+**Authentication Failed**
+```
+Error: "Bad credentials" or "401 Unauthorized"
+```
+- GitHub token is invalid or expired
+- Token lacks required scopes (repo, workflow, read:org)
+- Regenerate token with correct permissions
+- Update GITHUB_TOKEN environment variable
+
+**Resource Not Found**
+```
+Error: "404 Not Found"
+```
+- Repository, issue, or PR doesn't exist
+- Check spelling of owner/repo names
+- Verify you have access to private repositories
+- Confirm issue/PR number is correct
+
+**Rate Limit Exceeded**
+```
+Error: "API rate limit exceeded"
+```
+- Authenticated: 5,000 requests/hour
+- Wait for rate limit reset (check headers)
+- Reduce frequency of API calls
+- Use conditional requests where possible
+
+**Permission Denied**
+```
+Error: "403 Forbidden" or "Resource not accessible"
+```
+- Token lacks necessary permissions
+- Repository is private and token doesn't have access
+- Organization requires SSO authorization
+- Check repository settings and token scopes
+
+**Merge Conflict**
+```
+Error: "Merge conflict" when merging PR
+```
+- Update branch with base branch changes first
+- Resolve conflicts locally
+- Push resolved changes
+- Retry merge operation
+
+**Branch Protection**
+```
+Error: "Required status checks must pass" or "Review required"
+```
+- Complete required status checks
+- Request and obtain required reviews
+- Follow branch protection rules
+- May need admin override in some cases
+
+**Resource Already Exists**
+```
+Error: "Repository/Branch/Issue already exists"
+```
+- Use different name for new resource
+- Or fetch and use existing resource
+- Ask user: "Resource exists. Use existing or create with different name?"
+
+## Security Considerations
+
+### ⚠️ Critical Security Rules
+
+**Token Management**
+- NEVER commit GitHub tokens to repository
+- Store tokens in environment variables or secure vaults
+- Use tokens with minimum required scopes
+- Rotate tokens regularly (every 90 days)
+- Revoke compromised tokens immediately
+
+**Dangerous Operations Require Confirmation**
+
+Before executing these operations, ALWAYS ask user:
+- Deleting repositories - Permanent and irreversible
+- Force pushing to main/master - Overwrites history, affects team
+- Closing issues in bulk - May close important issues
+- Merging PRs without review - Bypasses code review
+- Making repositories public - Exposes code permanently
+- Deleting branches with unmerged changes - Loses work
+
+**Example confirmation:**
+```
+⚠️ This will delete the repository permanently. All code, issues, and history will be lost.
+Continue? (yes/no)
+```
+
+**Repository Visibility**
+- Always confirm before making private repo public
+- Check for secrets/credentials before public release
+- Verify team agrees on visibility changes
+- Consider legal/compliance requirements
+
+**Issue and PR Content**
+- Never include secrets in issue/PR descriptions
+- Sanitize error messages that might contain credentials
+- Avoid exposing internal URLs or infrastructure details
+- Review content before creating issues/PRs
+
+**Branch Protection Best Practices**
+- Require reviews for main/master branches
+- Require status checks before merge
+- Prevent force pushes to protected branches
+- Limit who can push to main/master
+
+## Clarifications
+
+### When to Ask User
+
+**Before Destructive Operations:**
+- Deleting repositories, branches, or releases
+- Force pushing to any branch
+- Making repositories public
+- Closing multiple issues at once
+
+**When Multiple Valid Approaches Exist:**
+- Multiple repositories match search criteria
+- Several branches could be base for PR
+- Unclear which issue to link to PR
+
+**When Context is Ambiguous:**
+- "Create an issue" - which repository?
+- "Merge PR" - which PR number?
+- "List repos" - personal or organization?
+
+**When Configuration Needed:**
+- Creating repository: public or private?
+- Creating branch: from which base branch?
+- Creating PR: which base and head branches?
+
+### When NOT to Ask
+
+**Read-Only Operations:**
+- Listing repositories, issues, PRs
+- Getting file contents
+- Viewing commit history
+- Searching code or issues
+
+**Clear User Instructions:**
+- User provides repository owner/name
+- User specifies issue/PR number
+- User provides exact branch names
+
+**Standard Patterns:**
+- Creating PR from feature to main (default pattern)
+- Creating issues with full details provided
+- Standard branch naming conventions
+
 ## Reference
 
 For detailed documentation:
 - [GitHub MCP README](../../mcp/github/README.md)
 - [MCP Installation Summary](../../mcp/INSTALLATION_SUMMARY.md)
-- [GitHub API Docs](https://docs.github.com/rest)
+- [GitHub REST API Documentation](https://docs.github.com/rest)
+- [GitHub API Best Practices](https://docs.github.com/rest/guides/best-practices-for-integrators)
