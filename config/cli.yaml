@@ -1,0 +1,84 @@
+# CLI Configuration
+# Configuration file for the FTE CLI tool
+
+# Vault Settings
+vault:
+  # Default vault path (can be overridden with --vault-path flag)
+  default_path: ~/AI_Employee_Vault
+  # Auto-detect vault location
+  auto_detect: true
+
+# Logging Settings
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: INFO
+  # Enable colored output (Rich styling)
+  colored: true
+  # Log file path (null disables file logging)
+  file: null
+
+# Watcher Settings
+watcher:
+  # Process manager: pm2 or supervisord
+  process_manager: pm2
+  # Default poll interval in seconds
+  poll_interval: 30
+  # Default log tail lines
+  log_tail_lines: 50
+
+# MCP Settings
+mcp:
+  # MCP server registry file
+  registry_file: config/mcp_servers.yaml
+  # Health check timeout in seconds
+  health_check_timeout: 5
+  # Tool discovery cache TTL in seconds
+  tool_cache_ttl: 300
+
+# Approval Settings
+approval:
+  # Approval timeout in seconds (12 hours default)
+  timeout: 43200
+  # Auto-display pending approvals on status check
+  auto_display_pending: true
+
+# Briefing Settings
+briefing:
+  # Default date range for briefing (days)
+  default_range_days: 7
+  # PDF generation enabled
+  pdf_enabled: true
+  # Default viewer: auto, typora, obsidian, cat
+  viewer: auto
+
+# Output Settings
+output:
+  # Output format: table, json, yaml
+  format: table
+  # Enable progress bars
+  show_progress: true
+  # Pager for long output (less, more, none)
+  pager: less
+
+# Performance Settings
+performance:
+  # Enable parallel health checks
+  parallel_checks: true
+  # Max concurrent checks
+  max_concurrent_checks: 5
+  # Startup time target in milliseconds
+  startup_time_target: 100
+
+# Telemetry Settings
+telemetry:
+  # Enable anonymous usage stats (opt-out)
+  enabled: false
+  # Telemetry endpoint (null disables remote reporting)
+  endpoint: null
+
+# Feature Flags
+features:
+  # Enable experimental features
+  experimental: false
+  # Enable verbose debugging
+  debug: false

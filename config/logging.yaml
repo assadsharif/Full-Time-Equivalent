@@ -1,0 +1,62 @@
+# Logging Infrastructure Configuration (P2)
+# This configuration defines default settings for the Digital FTE logging system
+
+# Log directory (daily log files: YYYY-MM-DD.log)
+log_dir: "./Logs"
+
+# Global log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+level: "INFO"
+
+# Per-module log level overrides (optional)
+module_levels: {}
+  # Example overrides:
+  # src.control_plane: "DEBUG"
+  # src.mcp_servers: "WARNING"
+
+# Output format: json, console, hybrid
+format: "json"
+
+# Async logging settings
+async_enabled: true              # Use async logging queue
+async_writer:
+  buffer_size: 1000              # Number of log entries to buffer before flushing
+  flush_interval_seconds: 1.0    # Maximum time between flushes (seconds)
+
+# Secret redaction patterns
+secret_redaction:
+  enabled: true
+  patterns:
+    - "(?i)(api[_-]?key|apikey)[\"']?\\s*[:=]\\s*[\"']?([a-zA-Z0-9_\\-]{20,})"
+    - "(?i)(password|passwd|pwd)[\"']?\\s*[:=]\\s*[\"']?([^\\s\"']{6,})"
+    - "(?i)(token|auth)[\"']?\\s*[:=]\\s*[\"']?([a-zA-Z0-9_\\-\\.]{20,})"
+    - "(?i)(secret|private[_-]?key)[\"']?\\s*[:=]\\s*[\"']?([a-zA-Z0-9_\\-]{20,})"
+  redaction_text: "***REDACTED***"
+
+# Log retention and archival
+retention:
+  max_log_age_days: 30         # Archive logs older than 30 days
+  max_archive_size_mb: 100     # Max log file size before rotation (MB)
+  compression: "gzip"          # Compression algorithm (gzip, bzip2, xz)
+
+# DuckDB query engine settings (US2 - future)
+query_engine:
+  database_path: ":memory:"    # Use in-memory database for queries
+  read_only: true              # Open log files in read-only mode
+  max_memory: "1GB"            # Maximum memory for query execution
+
+# Trace ID settings (US1)
+trace:
+  enabled: true
+  auto_generate: true          # Auto-generate trace IDs if not provided
+  header_name: "X-Trace-Id"    # HTTP header name for trace propagation
+
+# Metrics logging (US4 - future)
+metrics:
+  enabled: true
+  aggregation_interval_seconds: 60  # Aggregate metrics every 60 seconds
+
+# Constitutional compliance notes:
+# - Section 2: Logs written to disk (log_file path)
+# - Section 3: Secrets redacted (secret_redaction.enabled)
+# - Section 8: Append-only (enforced by LoggerService)
+# - Section 9: Errors logged, never hidden (default_level)
