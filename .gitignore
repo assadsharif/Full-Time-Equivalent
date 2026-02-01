@@ -59,3 +59,10 @@ htmlcov/
 
 # Packaged skills
 *.skill
+
+# detect-secrets
+.secrets.baseline.new
+.secrets.pr.baseline
+current.json
+new.json
+changed_files.txt

@@ -1,0 +1,53 @@
+{
+  "version": "0.1.0",
+  "last_updated": "2026-02-01T18:08:44.269641Z",
+  "vault": {
+    "path": "/tmp/pytest-of-asad/pytest-2/test_vault_initialization0/new_vault",
+    "initialized": true,
+    "last_status_check": "2026-02-01T18:08:43.576871Z"
+  },
+  "watchers": {
+    "gmail": {
+      "status": "stopped",
+      "pid": null,
+      "uptime": null,
+      "last_start": "2026-02-01T18:08:44.217057Z",
+      "last_stop": "2026-02-01T18:08:44.269599Z"
+    },
+    "whatsapp": {
+      "status": "stopped",
+      "pid": null,
+      "uptime": null,
+      "last_start": null,
+      "last_stop": null
+    },
+    "filesystem": {
+      "status": "stopped",
+      "pid": null,
+      "uptime": null,
+      "last_start": null,
+      "last_stop": null
+    }
+  },
+  "mcp_servers": {
+    "registry_loaded": false,
+    "last_health_check": "2026-02-01T18:08:43.811087Z",
+    "servers": []
+  },
+  "approvals": {
+    "pending_count": 0,
+    "last_review": null,
+    "last_approval": "2026-01-28T16:03:32.145276Z",
+    "last_rejection": "2026-01-28T16:03:32.328534Z"
+  },
+  "briefings": {
+    "last_generated": null,
+    "last_viewed": null,
+    "total_generated": 0
+  },
+  "cli_usage": {
+    "total_commands": 37,
+    "last_command": "mcp add --help",
+    "last_command_time": "2026-01-29T00:11:08.431625Z"
+  }
+}
