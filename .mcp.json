@@ -19,6 +19,10 @@
     "sqlmodel_orm_mcp": {
       "command": "/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/.venv/bin/python",
       "args": ["/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/src/mcp_servers/sqlmodel_orm_mcp.py"]
+    },
+    "nextjs_app_router_mcp": {
+      "command": "/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/.venv/bin/python",
+      "args": ["/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/src/mcp_servers/nextjs_app_router_mcp.py"]
     }
   }
 }
