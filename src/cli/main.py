@@ -149,6 +149,10 @@ cli.add_command(approval_group)
 from cli.briefing import briefing_group
 cli.add_command(briefing_group)
 
+# Import tdd command group from cli.tdd module
+from cli.tdd import tdd_group
+cli.add_command(tdd_group)
+
 
 def main():
     """Main entry point for CLI"""
