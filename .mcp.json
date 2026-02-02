@@ -3,6 +3,18 @@
     "tdd_mcp": {
       "command": "/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/.venv/bin/python",
       "args": ["/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/src/mcp_servers/tdd_mcp.py"]
+    },
+    "docker_containerization_mcp": {
+      "command": "/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/.venv/bin/python",
+      "args": ["/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/src/mcp_servers/docker_containerization_mcp.py"]
+    },
+    "fastapi_backend_mcp": {
+      "command": "/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/.venv/bin/python",
+      "args": ["/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/src/mcp_servers/fastapi_backend_mcp.py"]
+    },
+    "web_content_fetch_mcp": {
+      "command": "/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/.venv/bin/python",
+      "args": ["/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/src/mcp_servers/web_content_fetch_mcp.py"]
     }
   }
 }
