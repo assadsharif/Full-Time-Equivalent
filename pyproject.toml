@@ -19,6 +19,7 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "pydantic>=2.0.0",
     "requests>=2.31.0",
+    "mcp[cli]>=1.0.0",
 ]
 
 [project.optional-dependencies]
@@ -27,6 +28,7 @@ dev = [
     "pytest>=7.4.0",
     "pytest-cov>=4.1.0",
     "pytest-click>=1.1.0",
+    "hypothesis>=6.0.0",
 ]
 
 [project.scripts]

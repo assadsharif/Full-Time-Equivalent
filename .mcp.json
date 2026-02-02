@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "tdd_mcp": {
+      "command": "/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/.venv/bin/python",
+      "args": ["/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/src/mcp_servers/tdd_mcp.py"]
+    }
+  }
+}
