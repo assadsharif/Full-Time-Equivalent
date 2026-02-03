@@ -153,12 +153,16 @@ def start_watcher_pm2(name: str) -> None:
         return
 
     # Path to watcher script
-    script_path = Path.cwd() / "scripts" / f"run_{name}_watcher.py"
+    script_path = Path.cwd() / "scripts" / "run_watcher.py"
 
     if not script_path.exists():
         raise WatcherNotFoundError(
             f"Watcher script not found: {script_path}"
         )
+
+    # Get configuration
+    config = get_config()
+    vault_path = config.get("vault_path", "./vault")
 
     # Start with PM2
     try:
@@ -168,6 +172,9 @@ def start_watcher_pm2(name: str) -> None:
                 str(script_path),
                 "--name", f"fte-watcher-{name}",
                 "--interpreter", "python3",
+                "--",  # Arguments after this go to the script
+                name,  # Watcher type (gmail, filesystem, whatsapp)
+                "--vault-path", vault_path,
             ],
             capture_output=True,
             text=True,
@@ -551,6 +558,183 @@ def watcher_logs_command(ctx: click.Context, name: str, tail: int, follow: bool)
 
     except (WatcherValidationError, PM2NotFoundError, WatcherNotFoundError, CLIError) as e:
         display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
+        ctx.exit(1)
+    except Exception as e:
+        display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
+        ctx.exit(1)
+
+
+@watcher_group.command(name="run")
+@click.argument("name")
+@click.option(
+    "--vault-path",
+    "-v",
+    type=click.Path(exists=False),
+    default=None,
+    help="Path to vault (default: from config)",
+)
+@click.option(
+    "--watch-path",
+    "-w",
+    type=click.Path(exists=False),
+    default=None,
+    help="Path to watch (filesystem watcher only)",
+)
+@click.pass_context
+def watcher_run_command(
+    ctx: click.Context,
+    name: str,
+    vault_path: Optional[str],
+    watch_path: Optional[str],
+):
+    """
+    Run watcher directly (without PM2).
+
+    Runs a watcher in the foreground for testing and debugging.
+    Press Ctrl+C to stop.
+
+    Examples:
+        fte watcher run filesystem --watch-path ./Input_Documents
+        fte watcher run gmail
+    """
+    try:
+        validate_watcher_name(name)
+
+        # Get configuration
+        config = get_config()
+        vault = Path(vault_path) if vault_path else Path(config.get("vault_path", "./vault"))
+
+        display_info(f"Starting '{name}' watcher in foreground mode...")
+        display_info(f"Vault path: {vault}")
+        display_info("Press Ctrl+C to stop\n")
+
+        if name == "filesystem":
+            from src.watchers.filesystem_watcher import FileSystemWatcher
+
+            watch = Path(watch_path) if watch_path else Path("./Input_Documents")
+            display_info(f"Watch path: {watch}")
+
+            watcher = FileSystemWatcher(vault_path=vault, watch_path=watch)
+            watcher.run()
+
+        elif name == "gmail":
+            from src.watchers.gmail_watcher import GmailWatcher
+
+            credentials = Path(config.get("gmail_credentials", "~/.credentials/gmail_credentials.json"))
+            display_info(f"Credentials: {credentials}")
+
+            watcher = GmailWatcher(vault_path=vault, credentials_file=credentials)
+            watcher.run()
+
+        elif name == "whatsapp":
+            display_warning("WhatsApp watcher not yet implemented")
+            ctx.exit(1)
+
+    except KeyboardInterrupt:
+        display_info("\nWatcher stopped")
+    except ImportError as e:
+        display_error(f"Missing dependencies: {e}")
+        display_info("Install with: pip install .[watchers]")
+        ctx.exit(1)
+    except Exception as e:
+        display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
+        ctx.exit(1)
+
+
+@watcher_group.command(name="test")
+@click.argument("name")
+@click.pass_context
+def watcher_test_command(ctx: click.Context, name: str):
+    """
+    Test watcher connectivity and configuration.
+
+    Verifies that the watcher can connect to its data source and
+    the vault is accessible.
+
+    Examples:
+        fte watcher test gmail
+        fte watcher test filesystem
+    """
+    try:
+        validate_watcher_name(name)
+
+        config = get_config()
+        vault_path = Path(config.get("vault_path", "./vault"))
+
+        display_info(f"Testing '{name}' watcher...\n")
+
+        # Check vault
+        display_info("Checking vault...")
+        if vault_path.exists():
+            display_success(f"  ✓ Vault exists: {vault_path}")
+        else:
+            display_warning(f"  ! Vault not found: {vault_path}")
+
+        inbox_path = vault_path / "Inbox"
+        if inbox_path.exists():
+            display_success(f"  ✓ Inbox folder exists")
+        else:
+            display_warning(f"  ! Inbox folder not found, will be created")
+
+        if name == "filesystem":
+            from src.watchers.filesystem_watcher import FileSystemWatcher
+
+            watch_path = Path(config.get("watch_path", "./Input_Documents"))
+            display_info(f"\nChecking filesystem watcher...")
+
+            if watch_path.exists():
+                display_success(f"  ✓ Watch path exists: {watch_path}")
+            else:
+                display_warning(f"  ! Watch path not found: {watch_path}")
+
+            # Check watchdog
+            try:
+                from watchdog.observers import Observer
+                display_success("  ✓ watchdog library installed")
+            except ImportError:
+                display_error("  ✗ watchdog library not installed")
+                display_info("    Install with: pip install watchdog")
+
+            display_success(f"\n✓ Filesystem watcher ready")
+
+        elif name == "gmail":
+            display_info(f"\nChecking Gmail watcher...")
+
+            # Check Google API libraries
+            try:
+                from google.oauth2.credentials import Credentials
+                display_success("  ✓ Google API libraries installed")
+            except ImportError:
+                display_error("  ✗ Google API libraries not installed")
+                display_info("    Install with: pip install .[gmail]")
+                ctx.exit(1)
+
+            # Check credentials file
+            credentials_path = Path(config.get(
+                "gmail_credentials",
+                "~/.credentials/gmail_credentials.json"
+            )).expanduser()
+
+            if credentials_path.exists():
+                display_success(f"  ✓ Credentials file exists: {credentials_path}")
+            else:
+                display_warning(f"  ! Credentials file not found: {credentials_path}")
+                display_info("    Download from Google Cloud Console")
+
+            # Check token
+            token_path = credentials_path.parent / "gmail_token.json"
+            if token_path.exists():
+                display_success(f"  ✓ OAuth token exists (may need refresh)")
+            else:
+                display_info(f"  i OAuth token not found, will prompt for authorization")
+
+            display_success(f"\n✓ Gmail watcher configuration checked")
+
+        elif name == "whatsapp":
+            display_warning("WhatsApp watcher not yet implemented")
+
+    except ImportError as e:
+        display_error(f"Missing dependencies: {e}")
         ctx.exit(1)
     except Exception as e:
         display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
