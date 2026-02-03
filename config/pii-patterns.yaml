@@ -1,0 +1,47 @@
+# PII Detection Patterns
+# Used by PIIRedactor for log sanitization
+
+patterns:
+  # Email addresses
+  email:
+    pattern: '\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    replacement: "[REDACTED_EMAIL]"
+
+  # US Phone numbers
+  phone_us:
+    pattern: '\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b'
+    replacement: "[REDACTED_PHONE]"
+
+  # International phone numbers
+  phone_intl:
+    pattern: '\+\d{1,3}[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}\b'
+    replacement: "[REDACTED_PHONE]"
+
+  # Social Security Numbers (US)
+  ssn:
+    pattern: '\b\d{3}[-.\s]?\d{2}[-.\s]?\d{4}\b'
+    replacement: "[REDACTED_SSN]"
+
+  # Credit card numbers
+  credit_card:
+    pattern: '\b(?:\d{4}[-.\s]?){3}\d{4}\b'
+    replacement: "[REDACTED_CC]"
+
+  # IP addresses
+  ip_address:
+    pattern: '\b(?:\d{1,3}\.){3}\d{1,3}\b'
+    replacement: "[REDACTED_IP]"
+
+# Sensitive field names (keys in JSON/YAML)
+# Values of these fields are always redacted
+sensitive_fields:
+  - password
+  - passwd
+  - secret
+  - api_key
+  - apikey
+  - token
+  - access_token
+  - refresh_token
+  - private_key
+  - client_secret

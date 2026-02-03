@@ -1,0 +1,48 @@
+# Gmail Watcher Configuration
+
+# OAuth2 credentials file path
+credentials_file: "${GMAIL_CREDENTIALS:~/.credentials/gmail_credentials.json}"
+
+# Token storage path (refresh tokens)
+token_file: "${GMAIL_TOKEN:~/.credentials/gmail_token.json}"
+
+# Poll interval in seconds
+poll_interval: 30
+
+# Maximum emails to fetch per poll
+max_results: 10
+
+# Gmail labels to monitor
+labels:
+  include:
+    - INBOX
+    - UNREAD
+  exclude:
+    - SPAM
+    - TRASH
+
+# Mark emails as read after processing
+mark_as_read: true
+
+# Download attachments
+attachments:
+  enabled: true
+  # Maximum attachment size in bytes (0 = no limit)
+  max_size: 10485760  # 10MB
+  # File types to download (empty = all)
+  allowed_types: []
+
+# PII redaction for logging
+redact_pii: true
+
+# Priority detection keywords
+priority_keywords:
+  urgent:
+    - urgent
+    - asap
+    - critical
+    - emergency
+  high:
+    - important
+    - priority
+    - deadline

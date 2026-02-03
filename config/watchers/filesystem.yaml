@@ -1,0 +1,41 @@
+# FileSystem Watcher Configuration
+
+# Directories to watch (can be multiple)
+watch_paths:
+  - "${WATCH_PATH:./Input_Documents}"
+
+# Enable recursive directory monitoring
+recursive: true
+
+# Respect .gitignore patterns
+gitignore: true
+
+# File patterns to include (glob patterns)
+include_patterns:
+  - "*.pdf"
+  - "*.docx"
+  - "*.xlsx"
+  - "*.txt"
+  - "*.md"
+  - "*.csv"
+  - "*.json"
+
+# File patterns to exclude (glob patterns)
+exclude_patterns:
+  - "*.tmp"
+  - "*.swp"
+  - "*.bak"
+  - "~*"
+  - ".DS_Store"
+  - "Thumbs.db"
+
+# Events to monitor: created, modified, deleted, moved
+events:
+  - created
+
+# Skip hash computation for files larger than this (bytes)
+# 0 = no limit
+max_hash_size: 1073741824  # 1GB
+
+# Debounce delay for rapid file events (milliseconds)
+debounce_ms: 500

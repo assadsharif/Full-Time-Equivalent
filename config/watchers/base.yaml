@@ -1,0 +1,27 @@
+# Base Watcher Configuration
+# Shared settings for all watchers
+
+# Path to Obsidian vault root
+vault_path: "${VAULT_PATH:./vault}"
+
+# Logging level: DEBUG, INFO, WARNING, ERROR
+log_level: INFO
+
+# Default poll interval in seconds
+poll_interval: 30
+
+# Retry settings
+retry:
+  max_retries: 5
+  base_delay: 1.0  # seconds
+  max_delay: 60.0  # seconds
+
+# Circuit breaker settings
+circuit_breaker:
+  failure_threshold: 5
+  timeout: 300  # seconds
+
+# PII redaction
+pii_redaction:
+  enabled: true
+  patterns_file: config/pii-patterns.yaml
