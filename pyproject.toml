@@ -31,6 +31,19 @@ dev = [
     "pytest-click>=1.1.0",
     "hypothesis>=6.0.0",
 ]
+gmail = [
+    "google-auth>=2.23.0",
+    "google-auth-oauthlib>=1.1.0",
+    "google-api-python-client>=2.100.0",
+    "markdownify>=0.11.0",
+]
+watchers = [
+    "google-auth>=2.23.0",
+    "google-auth-oauthlib>=1.1.0",
+    "google-api-python-client>=2.100.0",
+    "markdownify>=0.11.0",
+    "flask>=3.0.0",
+]
 
 [project.scripts]
 fte = "cli.main:main"
