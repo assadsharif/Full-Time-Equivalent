@@ -76,6 +76,10 @@ class LoggerService:
             redaction_text=config.redaction_text
         )
 
+        # Runtime level overrides (mutable, separate from frozen config)
+        self._runtime_level: Optional[LogLevel] = None
+        self._runtime_module_levels: Dict[str, LogLevel] = {}
+
         # Initialize async writer (but don't start yet)
         self._writer: Optional[AsyncWriter] = None
         if config.async_enabled:
@@ -183,8 +187,15 @@ class LoggerService:
                 redacted_context = self._redactor.redact_dict(merged_context)
 
             # Capture caller information (module, function, line)
+            # Go 2 frames up to skip the convenience method (info, error, etc.)
             frame = inspect.currentframe()
-            if frame and frame.f_back:
+            if frame and frame.f_back and frame.f_back.f_back:
+                caller_frame = frame.f_back.f_back
+                module = caller_frame.f_globals.get("__name__", "unknown")
+                function = caller_frame.f_code.co_name
+                line_number = caller_frame.f_lineno
+            elif frame and frame.f_back:
+                # Fallback if called directly (not via convenience method)
                 caller_frame = frame.f_back
                 module = caller_frame.f_globals.get("__name__", "unknown")
                 function = caller_frame.f_code.co_name
@@ -354,9 +365,9 @@ class LoggerService:
             module: Optional module name (global if None)
         """
         if module is None:
-            self.config.level = level
+            self._runtime_level = level
         else:
-            self.config.module_levels[module] = level
+            self._runtime_module_levels[module] = level
 
     def get_level(self, module: Optional[str] = None) -> LogLevel:
         """
@@ -369,8 +380,13 @@ class LoggerService:
             Current log level
         """
         if module is None:
-            return self.config.level
-        return self.config.module_levels.get(module, self.config.level)
+            # Return runtime override if set, otherwise config default
+            return self._runtime_level if self._runtime_level is not None else self.config.level
+
+        # Check runtime module overrides first, then config, then global
+        if module in self._runtime_module_levels:
+            return self._runtime_module_levels[module]
+        return self.config.module_levels.get(module, self.get_level())
 
     def _should_log(self, level: LogLevel) -> bool:
         """Check if log level should be logged."""
@@ -382,13 +398,19 @@ class LoggerService:
         else:
             module = ""
 
-        # Check module-specific level
+        # Check runtime module-specific level first
+        for mod_prefix, mod_level in self._runtime_module_levels.items():
+            if module.startswith(mod_prefix):
+                return level >= mod_level
+
+        # Check config module-specific level
         for mod_prefix, mod_level in self.config.module_levels.items():
             if module.startswith(mod_prefix):
                 return level >= mod_level
 
-        # Check global level
-        return level >= self.config.level
+        # Check runtime global level, then config global level
+        global_level = self._runtime_level if self._runtime_level is not None else self.config.level
+        return level >= global_level
 
     def _merge_context(self, context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         """Merge bound context with provided context."""

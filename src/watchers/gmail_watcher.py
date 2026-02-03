@@ -258,7 +258,7 @@ class GmailWatcher(BaseWatcher):
 
             logger.info(
                 f"Polled Gmail: {len(new_messages)} new emails",
-                extra={"total_found": len(messages), "new": len(new_messages)},
+                context={"total_found": len(messages), "new": len(new_messages)},
             )
 
             return new_messages
@@ -344,7 +344,7 @@ class GmailWatcher(BaseWatcher):
 
         logger.debug(
             f"Parsed email: {subject[:50]}...",
-            extra={
+            context={
                 "message_id": message_id,
                 "sender": self.pii_redactor.redact(sender).text,
                 "has_attachments": has_attachments,
@@ -446,7 +446,7 @@ class GmailWatcher(BaseWatcher):
         if self.max_attachment_size > 0 and size > self.max_attachment_size:
             logger.warning(
                 f"Skipping large attachment: {filename} ({size} bytes)",
-                extra={"message_id": message_id, "size": size},
+                context={"message_id": message_id, "size": size},
             )
             return None
 
@@ -475,7 +475,7 @@ class GmailWatcher(BaseWatcher):
 
             logger.info(
                 f"Downloaded attachment: {filename}",
-                extra={"message_id": message_id, "size": len(content)},
+                context={"message_id": message_id, "size": len(content)},
             )
 
             return file_path
@@ -550,7 +550,7 @@ class GmailWatcher(BaseWatcher):
 
             logger.info(
                 f"Processed email: {email.subject[:50]}...",
-                extra={
+                context={
                     "email_id": email.id,
                     "priority": email.priority,
                     "attachments": len(email.attachments),
@@ -562,7 +562,7 @@ class GmailWatcher(BaseWatcher):
         except Exception as e:
             logger.error(
                 f"Failed to process email {message_id}: {e}",
-                extra={"message_id": message_id},
+                context={"message_id": message_id},
             )
             checkpoint = self.load_checkpoint()
             self.increment_errors(checkpoint)

@@ -10,6 +10,12 @@ import pytest
 from src.watchers.filesystem_watcher import FileSystemWatcher
 from src.watchers.models import FileEvent
 
+try:
+    import pathspec
+    HAS_PATHSPEC = True
+except ImportError:
+    HAS_PATHSPEC = False
+
 
 class TestFileSystemWatcher:
     """Test suite for FileSystemWatcher."""
@@ -149,6 +155,7 @@ class TestFileSystemWatcher:
             result = watcher._sanitize_filename(input_name)
             assert result == expected, f"Failed for {input_name}"
 
+    @pytest.mark.skipif(not HAS_PATHSPEC, reason="pathspec library not installed")
     def test_load_gitignore(self):
         """Test .gitignore loading."""
         # Create .gitignore file

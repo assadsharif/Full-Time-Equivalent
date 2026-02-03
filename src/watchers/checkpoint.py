@@ -92,7 +92,7 @@ class CheckpointManager:
             checkpoint = CheckpointData(**data)
             logger.debug(
                 f"Loaded checkpoint for {watcher_name}",
-                extra={
+                context={
                     "last_processed_id": checkpoint.last_processed_id,
                     "events_processed": checkpoint.events_processed,
                 },
@@ -135,7 +135,7 @@ class CheckpointManager:
             temp_path.rename(checkpoint_path)
             logger.debug(
                 f"Saved checkpoint for {checkpoint.watcher_name}",
-                extra={"events_processed": checkpoint.events_processed},
+                context={"events_processed": checkpoint.events_processed},
             )
         except Exception as e:
             logger.error(f"Error saving checkpoint for {checkpoint.watcher_name}: {e}")

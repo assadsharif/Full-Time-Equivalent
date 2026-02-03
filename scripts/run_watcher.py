@@ -45,15 +45,27 @@ def run_gmail_watcher(args):
 
 def run_whatsapp_watcher(args):
     """Run WhatsApp watcher."""
+    import os
+
     try:
         from src.watchers.whatsapp_watcher import WhatsAppWatcher
-    except ImportError:
-        print("WhatsApp watcher not implemented yet.")
+    except ImportError as e:
+        print(f"WhatsApp watcher dependencies not installed: {e}")
+        print("Install with: pip install flask requests")
+        sys.exit(1)
+
+    # Get verify token from args or environment
+    verify_token = args.verify_token or os.environ.get("WHATSAPP_VERIFY_TOKEN", "")
+    if not verify_token:
+        print("Error: No verify token configured")
+        print("Set --verify-token or WHATSAPP_VERIFY_TOKEN environment variable")
         sys.exit(1)
 
     watcher = WhatsAppWatcher(
         vault_path=args.vault_path,
+        verify_token=verify_token,
         port=args.port,
+        host=args.host,
     )
     watcher.run()
 
@@ -119,6 +131,16 @@ def main():
         type=int,
         default=5000,
         help="Webhook server port (default: 5000)",
+    )
+    wa_parser.add_argument(
+        "--host",
+        default="0.0.0.0",
+        help="Webhook server host (default: 0.0.0.0)",
+    )
+    wa_parser.add_argument(
+        "--verify-token",
+        default=None,
+        help="Webhook verify token (or set WHATSAPP_VERIFY_TOKEN env var)",
     )
     wa_parser.set_defaults(func=run_whatsapp_watcher)
 

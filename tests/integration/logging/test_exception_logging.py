@@ -252,7 +252,7 @@ class TestExceptionLoggingPatterns:
 
         def risky_operation():
             """Simulated operation that might fail."""
-            raise IOError("File not found")
+            raise OSError("File not found")
 
         try:
             result = risky_operation()
@@ -271,7 +271,7 @@ class TestExceptionLoggingPatterns:
         content = log_files[0].read_text()
         entry = json.loads(content.strip())
 
-        assert entry["exception"]["type"] == "IOError"
+        assert entry["exception"]["type"] == "OSError"
         assert entry["context"]["operation"] == "risky_operation"
 
     @pytest.mark.asyncio
@@ -381,7 +381,7 @@ class TestExceptionDetails:
             ValueError("value error"),
             TypeError("type error"),
             RuntimeError("runtime error"),
-            IOError("io error"),
+            OSError("os error"),
             KeyError("key error"),
         ]
 
@@ -406,7 +406,7 @@ class TestExceptionDetails:
         assert "ValueError" in exception_types
         assert "TypeError" in exception_types
         assert "RuntimeError" in exception_types
-        assert "IOError" in exception_types
+        assert "OSError" in exception_types
         assert "KeyError" in exception_types
 
     @pytest.mark.asyncio

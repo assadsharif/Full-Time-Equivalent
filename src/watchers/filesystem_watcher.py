@@ -267,7 +267,7 @@ class FileSystemWatcher(BaseWatcher, FileSystemEventHandler):
 
             logger.info(
                 f"Created task for file: {file_path.name}",
-                extra={
+                context={
                     "file_size": file_size,
                     "file_type": file_type,
                     "task_id": event_model.id,
@@ -311,7 +311,7 @@ class FileSystemWatcher(BaseWatcher, FileSystemEventHandler):
 
         logger.info(
             f"FileSystem watcher started",
-            extra={
+            context={
                 "watch_path": str(self.watch_path),
                 "recursive": self.recursive,
                 "vault_path": str(self.vault_path),

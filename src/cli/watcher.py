@@ -162,7 +162,7 @@ def start_watcher_pm2(name: str) -> None:
 
     # Get configuration
     config = get_config()
-    vault_path = config.get("vault_path", "./vault")
+    vault_path = config.vault.default_path
 
     # Start with PM2
     try:
@@ -602,7 +602,7 @@ def watcher_run_command(
 
         # Get configuration
         config = get_config()
-        vault = Path(vault_path) if vault_path else Path(config.get("vault_path", "./vault"))
+        vault = Path(vault_path) if vault_path else Path(config.vault.default_path)
 
         display_info(f"Starting '{name}' watcher in foreground mode...")
         display_info(f"Vault path: {vault}")
@@ -620,15 +620,33 @@ def watcher_run_command(
         elif name == "gmail":
             from src.watchers.gmail_watcher import GmailWatcher
 
-            credentials = Path(config.get("gmail_credentials", "~/.credentials/gmail_credentials.json"))
+            credentials = Path("~/.credentials/gmail_credentials.json")
             display_info(f"Credentials: {credentials}")
 
             watcher = GmailWatcher(vault_path=vault, credentials_file=credentials)
             watcher.run()
 
         elif name == "whatsapp":
-            display_warning("WhatsApp watcher not yet implemented")
-            ctx.exit(1)
+            from src.watchers.whatsapp_watcher import WhatsAppWatcher
+
+            import os
+            port = int(os.environ.get("WHATSAPP_PORT", "5000"))
+            verify_token = os.environ.get("WHATSAPP_VERIFY_TOKEN", "")
+
+            if not verify_token:
+                display_error("No verify token configured")
+                display_info("Set WHATSAPP_VERIFY_TOKEN environment variable")
+                ctx.exit(1)
+
+            display_info(f"Webhook port: {port}")
+            display_info(f"Verify token: {'*' * len(verify_token)}")
+
+            watcher = WhatsAppWatcher(
+                vault_path=vault,
+                verify_token=verify_token,
+                port=port,
+            )
+            watcher.run()
 
     except KeyboardInterrupt:
         display_info("\nWatcher stopped")
@@ -659,7 +677,7 @@ def watcher_test_command(ctx: click.Context, name: str):
         validate_watcher_name(name)
 
         config = get_config()
-        vault_path = Path(config.get("vault_path", "./vault"))
+        vault_path = Path(config.vault.default_path)
 
         display_info(f"Testing '{name}' watcher...\n")
 
@@ -679,7 +697,7 @@ def watcher_test_command(ctx: click.Context, name: str):
         if name == "filesystem":
             from src.watchers.filesystem_watcher import FileSystemWatcher
 
-            watch_path = Path(config.get("watch_path", "./Input_Documents"))
+            watch_path = Path("./Input_Documents")
             display_info(f"\nChecking filesystem watcher...")
 
             if watch_path.exists():
@@ -710,10 +728,7 @@ def watcher_test_command(ctx: click.Context, name: str):
                 ctx.exit(1)
 
             # Check credentials file
-            credentials_path = Path(config.get(
-                "gmail_credentials",
-                "~/.credentials/gmail_credentials.json"
-            )).expanduser()
+            credentials_path = Path("~/.credentials/gmail_credentials.json").expanduser()
 
             if credentials_path.exists():
                 display_success(f"  ✓ Credentials file exists: {credentials_path}")
@@ -731,7 +746,45 @@ def watcher_test_command(ctx: click.Context, name: str):
             display_success(f"\n✓ Gmail watcher configuration checked")
 
         elif name == "whatsapp":
-            display_warning("WhatsApp watcher not yet implemented")
+            display_info(f"\nChecking WhatsApp watcher...")
+
+            # Check Flask
+            try:
+                from flask import Flask
+                display_success("  ✓ Flask library installed")
+            except ImportError:
+                display_error("  ✗ Flask library not installed")
+                display_info("    Install with: pip install flask")
+
+            # Check verify token
+            import os
+            verify_token = os.environ.get("WHATSAPP_VERIFY_TOKEN", "")
+            if verify_token:
+                display_success(f"  ✓ Verify token configured")
+            else:
+                display_warning("  ! Verify token not configured")
+                display_info("    Set WHATSAPP_VERIFY_TOKEN environment variable")
+
+            # Check app secret
+            app_secret = os.environ.get("WHATSAPP_APP_SECRET", "")
+            if app_secret:
+                display_success(f"  ✓ App secret configured")
+            else:
+                display_warning("  ! App secret not configured (signature verification disabled)")
+                display_info("    Set WHATSAPP_APP_SECRET environment variable")
+
+            # Check access token (for media download)
+            access_token = os.environ.get("WHATSAPP_ACCESS_TOKEN", "")
+            if access_token:
+                display_success(f"  ✓ Access token configured (media download enabled)")
+            else:
+                display_info("  i Access token not configured (media download disabled)")
+                display_info("    Set WHATSAPP_ACCESS_TOKEN environment variable")
+
+            port = int(os.environ.get("WHATSAPP_PORT", "5000"))
+            display_info(f"  i Webhook port: {port}")
+
+            display_success(f"\n✓ WhatsApp watcher configuration checked")
 
     except ImportError as e:
         display_error(f"Missing dependencies: {e}")

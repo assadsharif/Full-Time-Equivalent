@@ -123,7 +123,7 @@ class PIIRedactor:
         if redaction_count > 0:
             logger.debug(
                 f"Redacted {redaction_count} PII instances",
-                extra={"patterns": patterns_found, "count": redaction_count},
+                context={"patterns": patterns_found, "count": redaction_count},
             )
 
         return RedactionResult(

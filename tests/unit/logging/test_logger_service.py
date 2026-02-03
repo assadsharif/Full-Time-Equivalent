@@ -13,6 +13,7 @@ Tests cover:
 """
 
 import asyncio
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -59,8 +60,8 @@ class TestLoggerServiceInitialization:
 
     def test_init_with_async_disabled(self, logger_config):
         """Should handle async disabled config."""
-        logger_config.async_enabled = False
-        logger = LoggerService(logger_config)
+        config = replace(logger_config, async_enabled=False)
+        logger = LoggerService(config)
 
         assert logger._writer is None
 
@@ -213,8 +214,8 @@ class TestLevelFiltering:
 
     def test_should_log_filters_by_level(self, logger_config):
         """Should filter logs below configured level."""
-        logger_config.level = LogLevel.WARNING
-        logger = LoggerService(logger_config)
+        config = replace(logger_config, level=LogLevel.WARNING)
+        logger = LoggerService(config)
 
         # DEBUG and INFO should be filtered (not logged)
         # WARNING, ERROR, CRITICAL should be logged
@@ -333,8 +334,8 @@ class TestErrorHandling:
 
     def test_fallback_to_stderr(self, logger_config):
         """Should fallback to stderr if writer unavailable."""
-        logger_config.async_enabled = False
-        logger = LoggerService(logger_config)
+        config = replace(logger_config, async_enabled=False)
+        logger = LoggerService(config)
 
         # Should write to stderr without crashing
         logger.info("Fallback message")

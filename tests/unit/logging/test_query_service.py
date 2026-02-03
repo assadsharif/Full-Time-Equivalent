@@ -40,6 +40,10 @@ def temp_log_dir_with_data(tmp_path):
             "message": "Application started",
             "function": "main",
             "line_number": 10,
+            "context": {},
+            "exception": None,
+            "duration_ms": None,
+            "tags": [],
         },
         {
             "trace_id": "trace-001",
@@ -49,6 +53,10 @@ def temp_log_dir_with_data(tmp_path):
             "message": "Debug message",
             "function": "debug_func",
             "line_number": 20,
+            "context": {"debug": True},
+            "exception": None,
+            "duration_ms": None,
+            "tags": [],
         },
         {
             "trace_id": "trace-002",
@@ -58,6 +66,10 @@ def temp_log_dir_with_data(tmp_path):
             "message": "Disk full error occurred",
             "function": "write_file",
             "line_number": 30,
+            "context": {"disk": "/dev/sda1"},
+            "exception": {"type": "IOError", "message": "No space left"},
+            "duration_ms": 150.5,
+            "tags": ["disk", "error"],
         },
         {
             "trace_id": "trace-002",
@@ -67,6 +79,10 @@ def temp_log_dir_with_data(tmp_path):
             "message": "Warning message",
             "function": "warn_func",
             "line_number": 40,
+            "context": {},
+            "exception": None,
+            "duration_ms": None,
+            "tags": ["warning"],
         },
         {
             "trace_id": "trace-003",
@@ -76,6 +92,10 @@ def temp_log_dir_with_data(tmp_path):
             "message": "Critical error",
             "function": "critical_func",
             "line_number": 50,
+            "context": {"severity": "high"},
+            "exception": {"type": "CriticalError", "message": "System failure"},
+            "duration_ms": 500.0,
+            "tags": ["critical", "system"],
         },
     ]
 

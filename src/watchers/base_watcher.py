@@ -150,14 +150,14 @@ class BaseWatcher(ABC):
             except permanent_errors as e:
                 logger.error(
                     f"Permanent error in {self.watcher_name}, not retrying: {e}",
-                    extra={"error_type": type(e).__name__, "watcher": self.watcher_name},
+                    context={"error_type": type(e).__name__, "watcher": self.watcher_name},
                 )
                 raise
             except Exception as e:
                 if attempt == self.max_retries - 1:
                     logger.error(
                         f"Max retries exhausted in {self.watcher_name}: {e}",
-                        extra={
+                        context={
                             "error_type": type(e).__name__,
                             "watcher": self.watcher_name,
                             "attempts": self.max_retries,
@@ -168,7 +168,7 @@ class BaseWatcher(ABC):
                 delay = min(self.base_delay * (2**attempt), self.max_delay)
                 logger.warning(
                     f"Retry {attempt + 1}/{self.max_retries} for {self.watcher_name} after {delay}s: {e}",
-                    extra={
+                    context={
                         "error_type": type(e).__name__,
                         "retry_delay": delay,
                         "attempt": attempt + 1,
@@ -189,16 +189,24 @@ class BaseWatcher(ABC):
         Returns:
             Sanitized filename safe for all platforms
         """
+        # Strip leading/trailing whitespace first
+        filename = filename.strip()
+
+        # Strip spaces around the extension separator before other processing
+        if "." in filename:
+            name, ext = filename.rsplit(".", 1)
+            filename = name.rstrip() + "." + ext.lstrip()
+
         # Remove invalid characters for Windows/Linux/macOS
         invalid_chars = '<>:"/\\|?*\0'
         for char in invalid_chars:
             filename = filename.replace(char, "_")
 
-        # Replace whitespace with underscores
+        # Replace remaining internal whitespace with underscores
         filename = filename.replace(" ", "_")
 
-        # Remove leading/trailing dots and spaces
-        filename = filename.strip(". ")
+        # Remove leading/trailing dots
+        filename = filename.strip(".")
 
         # Truncate to 255 characters (filesystem limit)
         if len(filename) > 255:

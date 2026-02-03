@@ -96,10 +96,11 @@ class AsyncWriter:
 
         Graceful shutdown:
         1. Stop accepting new entries
-        2. Drain queue
-        3. Flush buffer
-        4. Close file handle
-        5. Cancel background task
+        2. Allow pending write tasks to complete
+        3. Cancel background task
+        4. Drain remaining items from queue to buffer
+        5. Flush buffer
+        6. Close file handle
 
         Example:
             >>> await writer.stop()
@@ -110,13 +111,26 @@ class AsyncWriter:
         # Stop accepting new entries
         self._running = False
 
-        # Wait for queue to drain (with timeout)
-        if self._queue is not None:
+        # Give pending write() tasks a chance to execute and put entries in queue
+        await asyncio.sleep(0.05)
+
+        # Cancel background task (so it stops taking items from queue)
+        if self._writer_task is not None:
+            self._writer_task.cancel()
             try:
-                await asyncio.wait_for(self._queue.join(), timeout=5.0)
-            except asyncio.TimeoutError:
-                # Force flush remaining items
+                await self._writer_task
+            except asyncio.CancelledError:
                 pass
+
+        # Drain remaining items from queue to buffer
+        if self._queue is not None:
+            while not self._queue.empty():
+                try:
+                    entry = self._queue.get_nowait()
+                    self._buffer.append(entry)
+                    self._queue.task_done()
+                except Exception:
+                    break
 
         # Flush buffer
         await self._flush()
@@ -125,14 +139,6 @@ class AsyncWriter:
         if self._current_file_handle is not None:
             self._current_file_handle.close()
             self._current_file_handle = None
-
-        # Cancel background task
-        if self._writer_task is not None:
-            self._writer_task.cancel()
-            try:
-                await self._writer_task
-            except asyncio.CancelledError:
-                pass
 
     async def write(self, entry: LogEntry) -> None:
         """
@@ -149,7 +155,8 @@ class AsyncWriter:
         Example:
             >>> await writer.write(log_entry)
         """
-        if not self._running or self._queue is None:
+        # Only check if queue exists - allow writes during graceful shutdown
+        if self._queue is None:
             raise RuntimeError("AsyncWriter not started. Call start() first.")
 
         try:
@@ -169,6 +176,19 @@ class AsyncWriter:
         Example:
             >>> await writer.flush()
         """
+        # Give pending write() tasks a chance to execute
+        await asyncio.sleep(0.01)
+
+        # Drain queue to buffer first
+        if self._queue is not None:
+            while not self._queue.empty():
+                try:
+                    entry = self._queue.get_nowait()
+                    self._buffer.append(entry)
+                    self._queue.task_done()
+                except Exception:
+                    break
+
         await self._flush()
 
     async def _writer_loop(self) -> None:
