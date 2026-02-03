@@ -63,6 +63,26 @@
     "pptx_mcp": {
       "command": "/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/.venv/bin/python",
       "args": ["/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/src/mcp_servers/pptx_mcp.py"]
+    },
+    "frontend_design_mcp": {
+      "command": "/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/.venv/bin/python",
+      "args": ["/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/src/mcp_servers/frontend_design_mcp.py"]
+    },
+    "theme_factory_mcp": {
+      "command": "/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/.venv/bin/python",
+      "args": ["/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/src/mcp_servers/theme_factory_mcp.py"]
+    },
+    "webapp_testing_mcp": {
+      "command": "/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/.venv/bin/python",
+      "args": ["/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/src/mcp_servers/webapp_testing_mcp.py"]
+    },
+    "web_artifacts_mcp": {
+      "command": "/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/.venv/bin/python",
+      "args": ["/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/src/mcp_servers/web_artifacts_mcp.py"]
+    },
+    "interview_mcp": {
+      "command": "/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/.venv/bin/python",
+      "args": ["/mnt/c/Users/HomePC/Desktop/CODE/Personal AI Employee Hackathon 0/src/mcp_servers/interview_mcp.py"]
     }
   }
 }
