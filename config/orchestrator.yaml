@@ -1,0 +1,30 @@
+# Orchestrator configuration
+# Loaded by OrchestratorConfig.from_yaml()
+
+orchestrator:
+  vault_path: ~/AI_Employee_Vault   # resolved at runtime
+  poll_interval: 30                 # seconds between discovery sweeps
+  max_concurrent_tasks: 5           # parallel Claude invocations (future)
+  claude_timeout: 3600              # seconds per Claude invocation (1 h)
+  stop_hook_file: .claude_stop      # sentinel filename in vault root
+  max_iterations: 100               # Ralph Wiggum bound
+
+priority_weights:
+  urgency: 0.4
+  deadline: 0.3
+  sender: 0.3
+
+vip_senders:
+  - ceo@company.com
+  - board@company.com
+
+# Keywords that force a task through the HITL approval gate
+approval_keywords:
+  - deploy
+  - production
+  - delete
+  - payment
+  - wire
+  - send email
+  - execute
+  - remove
