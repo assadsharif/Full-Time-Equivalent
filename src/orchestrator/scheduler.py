@@ -119,6 +119,13 @@ class Orchestrator:
                 else:
                     self._log(f"[sweep {self._iteration}] No tasks — sleeping {self.config.poll_interval}s")
 
+                # --- resume previously-approved tasks ---
+                approved = self._discover_approved()
+                if approved:
+                    self._log(f"[sweep {self._iteration}] {len(approved)} approved task(s) — resuming")
+                    for task in approved:
+                        self._resume_task(task)
+
                 self._save_checkpoint()
                 time.sleep(self.config.poll_interval)
 
@@ -131,17 +138,25 @@ class Orchestrator:
 
     def run_once(self) -> list[LoopExit]:
         """
-        Single sweep: discover, score, process all tasks.  Does NOT loop.
-        Useful for testing and CI.
+        Single sweep: discover new tasks, process them, then resume any
+        previously-parked tasks whose approval has since been granted.
+        Does NOT loop.  Useful for testing and CI.
         """
         self._started_at = datetime.now(timezone.utc)
         self._log("Orchestrator: single-sweep mode")
 
+        # --- new tasks ---
         tasks = self._discover()
-        self._log(f"  Found {len(tasks)} task(s)")
-
+        self._log(f"  Found {len(tasks)} new task(s)")
         for task in tasks:
             self._process_task(task)
+
+        # --- resume approved tasks ---
+        approved = self._discover_approved()
+        if approved:
+            self._log(f"  Found {len(approved)} approved task(s) — resuming")
+        for task in approved:
+            self._resume_task(task)
 
         self._save_checkpoint()
         self._print_summary()
@@ -163,6 +178,40 @@ class Orchestrator:
                 continue
             score = self._scorer.score(md)
             records.append(TaskRecord(file_path=md, priority_score=score))
+
+        records.sort(key=lambda r: r.priority_score, reverse=True)
+        return records
+
+    def _discover_approved(self) -> list[TaskRecord]:
+        """Scan Approvals for tasks whose approval has been granted.
+
+        APR-* files are approval *requests* — skip them.  Everything else
+        is a real task file that was moved here during PLANNING → PENDING_APPROVAL.
+        """
+        approvals_dir = self.config.vault_path / "Approvals"
+        if not approvals_dir.exists():
+            return []
+
+        records: list[TaskRecord] = []
+        for md in approvals_dir.glob("*.md"):
+            # APR-* files are approval requests — skip
+            if md.name.startswith("APR-"):
+                continue
+            if md.name in self._active_tasks:
+                continue
+            # Only consider files that have task structure; this filters out
+            # approval-response files (legacy or otherwise) that were placed
+            # in Approvals as side-channels.
+            if "**Priority**:" not in md.read_text(encoding="utf-8"):
+                continue
+            if not self._approvals.is_approved(md):
+                continue
+            score = self._scorer.score(md)
+            records.append(TaskRecord(
+                file_path=md,
+                priority_score=score,
+                state=TaskState.PENDING_APPROVAL,
+            ))
 
         records.sort(key=lambda r: r.priority_score, reverse=True)
         return records
@@ -226,6 +275,54 @@ class Orchestrator:
                 self._record_exit(task, "done", True, start)
             else:
                 # 5b. EXECUTING → REJECTED
+                task.error = result.stderr[:200]
+                task.file_path = self._state_machine.transition(
+                    task.file_path, TaskState.EXECUTING, TaskState.REJECTED
+                )
+                task.state = TaskState.REJECTED
+                self._log(f"  [{task.name}] → REJECTED ✗ — {task.error}")
+                self._record_exit(task, "hard_failure", False, start)
+
+        except TransitionError as exc:
+            task.error = str(exc)
+            self._log(f"  [{task.name}] TransitionError: {exc}")
+            self._record_exit(task, "transition_error", False, start)
+
+        except Exception as exc:
+            task.error = str(exc)
+            self._log(f"  [{task.name}] Unexpected error: {exc}")
+            self._record_exit(task, "unexpected_error", False, start)
+
+        finally:
+            self._active_tasks.pop(task.name, None)
+
+    def _resume_task(self, task: TaskRecord) -> None:
+        """Resume a task that was parked in PENDING_APPROVAL after approval."""
+        self._active_tasks[task.name] = task
+        start = time.monotonic()
+
+        try:
+            # PENDING_APPROVAL → EXECUTING
+            task.file_path = self._state_machine.transition(
+                task.file_path, TaskState.PENDING_APPROVAL, TaskState.EXECUTING
+            )
+            task.state = TaskState.EXECUTING
+            self._log(f"  [{task.name}] PENDING_APPROVAL → EXECUTING (resumed)")
+
+            # Invoke Claude via persistence loop (bounded retry)
+            result = self._persistence.run(task.file_path, dry_run=self.dry_run)
+
+            task.claude_pid = result.pid
+            task.attempts += 1
+
+            if result.success:
+                task.file_path = self._state_machine.transition(
+                    task.file_path, TaskState.EXECUTING, TaskState.DONE
+                )
+                task.state = TaskState.DONE
+                self._log(f"  [{task.name}] → DONE ✓ ({result.duration_seconds}s)")
+                self._record_exit(task, "done", True, start)
+            else:
                 task.error = result.stderr[:200]
                 task.file_path = self._state_machine.transition(
                     task.file_path, TaskState.EXECUTING, TaskState.REJECTED

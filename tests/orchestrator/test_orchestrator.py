@@ -478,3 +478,107 @@ class TestOrchestratorLoop:
         data = json.loads(cp.read_text())
         assert "exit_log" in data
         assert len(data["exit_log"]) == 1
+
+
+# ===========================================================================
+# HITL Resume Flow — park → approve → resume → done
+# ===========================================================================
+
+
+class TestHITLResumeFlow:
+    """Integration tests for the full approve-then-resume cycle."""
+
+    def test_approve_and_resume_completes_task(self, vault_dir):
+        """Full cycle: deploy task parked → approved → resumed → done."""
+        from src.orchestrator.scheduler import Orchestrator
+        from src.orchestrator.models import OrchestratorConfig
+
+        cfg = OrchestratorConfig(vault_path=vault_dir)
+
+        # Sweep 1: task with approval keyword gets parked
+        _task_md(vault_dir, name="deploy-svc.md", body="deploy to production")
+        orch = Orchestrator(config=cfg, dry_run=True)
+        exits1 = orch.run_once()
+
+        assert len(exits1) == 1
+        assert exits1[0].reason == "pending_approval"
+        assert (vault_dir / "Approvals" / "deploy-svc.md").exists()
+
+        # Simulate human approval via legacy approval file
+        (vault_dir / "Approvals" / "approval-deploy-svc.md").write_text(
+            "# Approved\n**Status**: ✅ Approved\n"
+        )
+
+        # Sweep 2: fresh orchestrator discovers and resumes the approved task
+        orch2 = Orchestrator(config=cfg, dry_run=True)
+        exits2 = orch2.run_once()
+
+        assert len(exits2) == 1
+        assert exits2[0].success is True
+        assert exits2[0].reason == "done"
+        assert (vault_dir / "Done" / "deploy-svc.md").exists()
+
+    def test_unapproved_task_not_resumed(self, vault_dir):
+        """A parked task that hasn't been approved stays in Approvals."""
+        from src.orchestrator.scheduler import Orchestrator
+        from src.orchestrator.models import OrchestratorConfig
+
+        cfg = OrchestratorConfig(vault_path=vault_dir)
+
+        # Sweep 1: park the task
+        _task_md(vault_dir, name="risky-deploy.md", body="deploy to production")
+        orch = Orchestrator(config=cfg, dry_run=True)
+        exits1 = orch.run_once()
+        assert exits1[0].reason == "pending_approval"
+
+        # Sweep 2: no approval written — nothing should resume
+        orch2 = Orchestrator(config=cfg, dry_run=True)
+        exits2 = orch2.run_once()
+
+        assert exits2 == []
+        assert (vault_dir / "Approvals" / "risky-deploy.md").exists()
+
+    def test_apr_request_files_not_resumed(self, vault_dir):
+        """APR-* files in Approvals are approval requests, not resumable tasks."""
+        from src.orchestrator.scheduler import Orchestrator
+        from src.orchestrator.models import OrchestratorConfig
+
+        cfg = OrchestratorConfig(vault_path=vault_dir)
+
+        # Write a fake APR-* file directly (simulates a created approval request)
+        (vault_dir / "Approvals" / "APR-deploy-svc-20260204.md").write_text(
+            "---\n"
+            "approval_id: APR-deploy-svc-20260204\n"
+            "nonce: abc\n"
+            "approval_status: approved\n"
+            "created_at: '2026-02-04T10:00:00+00:00'\n"
+            "expires_at: '2026-02-04T22:00:00+00:00'\n"
+            "---\n\n# Approval Request\n"
+        )
+
+        orch = Orchestrator(config=cfg, dry_run=True)
+        exits = orch.run_once()
+
+        # APR-* file should not be picked up as a resumable task
+        assert exits == []
+
+    def test_resume_exit_log_has_correct_final_state(self, vault_dir):
+        """Resumed task exit log records final_state as 'done'."""
+        from src.orchestrator.scheduler import Orchestrator
+        from src.orchestrator.models import OrchestratorConfig, TaskState
+
+        cfg = OrchestratorConfig(vault_path=vault_dir)
+
+        # Park a deploy task
+        _task_md(vault_dir, name="deploy-check.md", body="deploy to production")
+        Orchestrator(config=cfg, dry_run=True).run_once()
+
+        # Approve it
+        (vault_dir / "Approvals" / "approval-deploy-check.md").write_text(
+            "# Approved\n**Status**: ✅ Approved\n"
+        )
+
+        # Resume
+        exits = Orchestrator(config=cfg, dry_run=True).run_once()
+        assert len(exits) == 1
+        assert exits[0].final_state == TaskState.DONE
