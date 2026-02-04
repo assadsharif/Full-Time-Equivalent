@@ -29,6 +29,7 @@ from src.orchestrator.metrics import MetricsCollector
 from src.orchestrator.health_check import HealthCheck
 from src.orchestrator.dashboard import OrchestratorDashboard
 from src.orchestrator.queue_visualizer import QueueVisualizer
+from src.orchestrator.webhooks import WebhookNotifier
 from src.orchestrator.scheduler import Orchestrator
 
 __all__ = [
@@ -48,6 +49,7 @@ __all__ = [
     "HealthCheck",
     "OrchestratorDashboard",
     "QueueVisualizer",
+    "WebhookNotifier",
     # Main
     "Orchestrator",
 ]

@@ -35,6 +35,7 @@ from src.orchestrator.state_machine import StateMachine, TransitionError
 from src.orchestrator.claude_invoker import ClaudeInvoker
 from src.orchestrator.persistence_loop import PersistenceLoop, RetryPolicy
 from src.orchestrator.metrics import MetricsCollector
+from src.orchestrator.webhooks import WebhookNotifier
 
 
 class Orchestrator:
@@ -83,6 +84,9 @@ class Orchestrator:
             log_path=self.config.vault_path.parent / ".fte" / "orchestrator_metrics.log"
         )
 
+        # Webhook notifier (fire-and-forget HTTP POST)
+        self._webhooks = WebhookNotifier.from_config(self.config)
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -102,6 +106,9 @@ class Orchestrator:
         self._log(f"  Dry-run      : {self.dry_run}")
         self._log(f"  Poll interval: {self.config.poll_interval}s")
         self._log("=" * 60)
+
+        # Notify via webhook
+        self._webhooks.orchestrator_started(self.config.vault_path, dry_run=self.dry_run)
 
         try:
             while True:
@@ -140,6 +147,7 @@ class Orchestrator:
 
         except KeyboardInterrupt:
             self._log("KeyboardInterrupt — saving checkpoint and exiting.")
+            self._webhooks.orchestrator_stopped(reason="KeyboardInterrupt")
         finally:
             self._save_checkpoint()
             self._log("Orchestrator stopped.")
@@ -292,6 +300,7 @@ class Orchestrator:
                 # 5b. EXECUTING → REJECTED
                 task.error = result.stderr[:200]
                 self._metrics.task_failed(task.name, elapsed, task.error)
+                self._webhooks.task_failed(task.name, task.error, task.priority_score)
                 task.file_path = self._state_machine.transition(
                     task.file_path, TaskState.EXECUTING, TaskState.REJECTED
                 )
@@ -344,6 +353,7 @@ class Orchestrator:
             else:
                 task.error = result.stderr[:200]
                 self._metrics.task_failed(task.name, elapsed, task.error)
+                self._webhooks.task_failed(task.name, task.error, task.priority_score)
                 task.file_path = self._state_machine.transition(
                     task.file_path, TaskState.EXECUTING, TaskState.REJECTED
                 )
@@ -354,6 +364,7 @@ class Orchestrator:
         except TransitionError as exc:
             task.error = str(exc)
             self._log(f"  [{task.name}] TransitionError: {exc}")
+            self._webhooks.task_failed(task.name, task.error, task.priority_score)
             self._record_exit(task, "transition_error", False, start)
 
         except Exception as exc:

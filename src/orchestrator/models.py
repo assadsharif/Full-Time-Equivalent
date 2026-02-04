@@ -66,21 +66,35 @@ class OrchestratorConfig:
     retry_max_delay: float = 16.0      # seconds
     retry_jitter: float = 0.2          # ±fraction
 
+    # Webhook notifications (Phase 7 T046)
+    notifications_enabled: bool = False
+    notification_webhook_url: Optional[str] = None
+    notification_events: list[str] = field(default_factory=lambda: [
+        "task_failed", "health_degraded", "orchestrator_stopped"
+    ])
+
     @classmethod
-    def from_yaml(cls, path: Path) -> "OrchestratorConfig":
+    def from_yaml(cls, path: Path, vault_path_override: Optional[Path] = None) -> "OrchestratorConfig":
         """Load config from YAML file. Falls back to defaults if file missing."""
         import yaml  # noqa: E402  (lazy import — yaml is optional at module level)
 
         if not path.exists():
-            return cls()
+            config = cls()
+            if vault_path_override:
+                config.vault_path = vault_path_override
+            return config
+
         with open(path) as fh:
             raw = yaml.safe_load(fh) or {}
 
         orch = raw.get("orchestrator", {})
         prio = raw.get("priority_weights", {})
+        notifs = raw.get("notifications", {})
+
+        vault = vault_path_override or Path(orch.get("vault_path", str(cls.vault_path)))
 
         return cls(
-            vault_path=Path(orch.get("vault_path", str(cls.vault_path))),
+            vault_path=vault,
             poll_interval=orch.get("poll_interval", 30),
             max_concurrent_tasks=orch.get("max_concurrent_tasks", 5),
             claude_timeout=orch.get("claude_timeout", 3600),
@@ -95,6 +109,9 @@ class OrchestratorConfig:
             retry_base_delay=raw.get("retry", {}).get("base_delay", 1.0),
             retry_max_delay=raw.get("retry", {}).get("max_delay", 16.0),
             retry_jitter=raw.get("retry", {}).get("jitter", 0.2),
+            notifications_enabled=notifs.get("enabled", False),
+            notification_webhook_url=notifs.get("webhook_url"),
+            notification_events=notifs.get("events", cls.notification_events),
         )
 
 
