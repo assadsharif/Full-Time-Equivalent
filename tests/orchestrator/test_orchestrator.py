@@ -242,7 +242,7 @@ class TestApprovalChecker:
 
         assert approval_path.exists()
         content = approval_path.read_text()
-        assert "Pending Review" in content
+        assert "pending" in content          # approval_status: pending (YAML frontmatter)
         assert "deploy" in content
         assert "production" in content
 
