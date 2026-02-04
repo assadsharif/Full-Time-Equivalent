@@ -25,6 +25,7 @@ from src.orchestrator.approval_checker import ApprovalChecker
 from src.orchestrator.state_machine import StateMachine
 from src.orchestrator.claude_invoker import ClaudeInvoker
 from src.orchestrator.persistence_loop import PersistenceLoop
+from src.orchestrator.metrics import MetricsCollector
 from src.orchestrator.scheduler import Orchestrator
 
 __all__ = [
@@ -40,6 +41,7 @@ __all__ = [
     "StateMachine",
     "ClaudeInvoker",
     "PersistenceLoop",
+    "MetricsCollector",
     # Main
     "Orchestrator",
 ]

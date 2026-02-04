@@ -34,6 +34,7 @@ from src.orchestrator.approval_checker import ApprovalChecker
 from src.orchestrator.state_machine import StateMachine, TransitionError
 from src.orchestrator.claude_invoker import ClaudeInvoker
 from src.orchestrator.persistence_loop import PersistenceLoop, RetryPolicy
+from src.orchestrator.metrics import MetricsCollector
 
 
 class Orchestrator:
@@ -76,6 +77,11 @@ class Orchestrator:
 
         # Checkpoint path
         self._checkpoint_path = self.config.vault_path.parent / ".fte" / "orchestrator.checkpoint.json"
+
+        # Metrics collector (append-only event log)
+        self._metrics = MetricsCollector(
+            log_path=self.config.vault_path.parent / ".fte" / "orchestrator_metrics.log"
+        )
 
     # ------------------------------------------------------------------
     # Public API
@@ -260,13 +266,16 @@ class Orchestrator:
             self._log(f"  [{task.name}] → EXECUTING")
 
             # 4. Invoke Claude via persistence loop (bounded retry)
+            self._metrics.task_started(task.name, task.priority_score)
             result = self._persistence.run(task.file_path, dry_run=self.dry_run)
 
             task.claude_pid = result.pid
             task.attempts += 1
+            elapsed = round(time.monotonic() - start, 2)
 
             if result.success:
                 # 5a. EXECUTING → DONE
+                self._metrics.task_completed(task.name, elapsed)
                 task.file_path = self._state_machine.transition(
                     task.file_path, TaskState.EXECUTING, TaskState.DONE
                 )
@@ -276,6 +285,7 @@ class Orchestrator:
             else:
                 # 5b. EXECUTING → REJECTED
                 task.error = result.stderr[:200]
+                self._metrics.task_failed(task.name, elapsed, task.error)
                 task.file_path = self._state_machine.transition(
                     task.file_path, TaskState.EXECUTING, TaskState.REJECTED
                 )
@@ -310,12 +320,15 @@ class Orchestrator:
             self._log(f"  [{task.name}] PENDING_APPROVAL → EXECUTING (resumed)")
 
             # Invoke Claude via persistence loop (bounded retry)
+            self._metrics.task_started(task.name, task.priority_score)
             result = self._persistence.run(task.file_path, dry_run=self.dry_run)
 
             task.claude_pid = result.pid
             task.attempts += 1
+            elapsed = round(time.monotonic() - start, 2)
 
             if result.success:
+                self._metrics.task_completed(task.name, elapsed)
                 task.file_path = self._state_machine.transition(
                     task.file_path, TaskState.EXECUTING, TaskState.DONE
                 )
@@ -324,6 +337,7 @@ class Orchestrator:
                 self._record_exit(task, "done", True, start)
             else:
                 task.error = result.stderr[:200]
+                self._metrics.task_failed(task.name, elapsed, task.error)
                 task.file_path = self._state_machine.transition(
                     task.file_path, TaskState.EXECUTING, TaskState.REJECTED
                 )

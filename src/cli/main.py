@@ -157,6 +157,10 @@ cli.add_command(tdd_group)
 from cli.security import security_group
 cli.add_command(security_group)
 
+# Import orchestrator command group from cli.orchestrator module
+from cli.orchestrator import orchestrator_group
+cli.add_command(orchestrator_group)
+
 
 def main():
     """Main entry point for CLI"""
