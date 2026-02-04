@@ -27,6 +27,7 @@ from src.orchestrator.claude_invoker import ClaudeInvoker
 from src.orchestrator.persistence_loop import PersistenceLoop
 from src.orchestrator.metrics import MetricsCollector
 from src.orchestrator.health_check import HealthCheck
+from src.orchestrator.dashboard import OrchestratorDashboard
 from src.orchestrator.scheduler import Orchestrator
 
 __all__ = [
@@ -44,6 +45,7 @@ __all__ = [
     "PersistenceLoop",
     "MetricsCollector",
     "HealthCheck",
+    "OrchestratorDashboard",
     # Main
     "Orchestrator",
 ]
