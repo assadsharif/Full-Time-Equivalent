@@ -2,13 +2,20 @@
 Priority Scorer — weighted scoring for task triage.
 
 Formula (all components normalised to 1-5):
-    score = urgency_w * urgency + deadline_w * deadline_urgency + sender_w * sender_importance
+    score = urgency_w * urgency + deadline_w * deadline_urgency + sender_w * sender_importance + age_boost
+
+Age-based priority boost prevents task starvation:
+    - Tasks >7 days old: +1.0 boost
+    - Tasks 3-7 days old: +0.5 boost
+    - Tasks 1-3 days old: +0.25 boost
+    - Tasks <1 day old: no boost
 
 Keyword tables and VIP list are driven by OrchestratorConfig so they can
 be tuned in config/orchestrator.yaml without code changes.
 """
 
 import re
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -47,18 +54,25 @@ class PriorityScorer:
     # ------------------------------------------------------------------
 
     def score(self, task_path: Path) -> float:
-        """Read task markdown, extract signals, return weighted score."""
+        """
+        Read task markdown, extract signals, return weighted score with age boost.
+
+        Age boost prevents task starvation by gradually increasing priority
+        for tasks that have been waiting longer.
+        """
         text = task_path.read_text(encoding="utf-8")
         urgency = self._score_urgency(text)
         deadline = self._score_deadline(text)
         sender = self._score_sender(text)
+        age_boost = self._calculate_age_boost(task_path)
 
         raw = (
             self.config.urgency_weight * urgency
             + self.config.deadline_weight * deadline
             + self.config.sender_weight * sender
+            + age_boost
         )
-        # Clamp to [1, 5]
+        # Clamp to [1, 5] after age boost
         return max(1.0, min(5.0, raw))
 
     # ------------------------------------------------------------------
@@ -119,3 +133,31 @@ class PriorityScorer:
         if sender_domain in vip_domains:
             return 3.0
         return 2.0
+
+    def _calculate_age_boost(self, task_path: Path) -> float:
+        """
+        Calculate priority boost based on task age (file modification time).
+
+        Prevents task starvation by gradually increasing priority for older tasks.
+        Boost levels:
+        - >7 days old: +1.0 boost
+        - 3-7 days old: +0.5 boost
+        - 1-3 days old: +0.25 boost
+        - <1 day old: no boost
+        """
+        try:
+            mtime = task_path.stat().st_mtime
+            age_seconds = time.time() - mtime
+            age_days = age_seconds / 86400.0  # seconds per day
+
+            if age_days >= 7.0:
+                return 1.0
+            elif age_days >= 3.0:
+                return 0.5
+            elif age_days >= 1.0:
+                return 0.25
+            else:
+                return 0.0
+        except Exception:
+            # If we can't determine age, no boost
+            return 0.0
