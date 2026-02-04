@@ -1,1 +1,28 @@
-servers: {}
+servers:
+  quality_enforcer_mcp:
+    script: src/mcp_servers/quality_enforcer_mcp.py
+    transport: stdio
+    status: running
+    pid: 15553
+    tools:
+      - quality_run_diagnostics   # full diagnostic session (CLEAN/BLOCKED/UNSAFE)
+      - quality_classify_error    # classify raw error → ErrorClass + Severity
+      - quality_validate_clean    # boolean error-free check on paths
+    description: >
+      Zero-defect diagnostics with fail-closed semantics.
+      AST-based syntax scanning, keyword-heuristic error classification.
+
+  k8s_deployment_mcp:
+    script: src/mcp_servers/k8s_deployment_mcp.py
+    transport: stdio
+    status: running
+    pid: 15583
+    tools:
+      - k8s_generate_deployment   # apps/v1 Deployment manifest
+      - k8s_generate_service      # v1 Service manifest
+      - k8s_generate_configmap    # v1 ConfigMap manifest
+      - k8s_generate_stack        # full Deployment + Service + ConfigMap stack
+      - k8s_validate_manifest     # structural YAML validation (no network)
+    description: >
+      Generates and validates Kubernetes manifests.
+      DNS-1123 validation, Pydantic v2 strict models, deterministic YAML output.
