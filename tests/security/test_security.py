@@ -259,3 +259,176 @@ class TestSecretsScanner:
         # "short" is only 5 chars — should not match any pattern
         token_findings = [f for f in findings if f.secret_type == "Token"]
         assert token_findings == []
+
+
+# ===========================================================================
+# MCPVerifier — Silver tier
+# ===========================================================================
+
+
+class TestMCPVerifier:
+    def _verifier(self, tmp: Path):
+        from src.security.mcp_verifier import MCPVerifier
+
+        return MCPVerifier(tmp / "mcp-signatures.json")
+
+    def test_calculate_signature_deterministic(self, tmp_dir):
+        from src.security.mcp_verifier import MCPVerifier
+
+        f = tmp_dir / "server.py"
+        f.write_text("print('hello')\n")
+        sig1 = MCPVerifier.calculate_signature(f)
+        sig2 = MCPVerifier.calculate_signature(f)
+        assert sig1 == sig2
+        assert len(sig1) == 64  # SHA256 hex
+
+    def test_calculate_signature_changes_on_edit(self, tmp_dir):
+        from src.security.mcp_verifier import MCPVerifier
+
+        f = tmp_dir / "server.py"
+        f.write_text("v1\n")
+        sig1 = MCPVerifier.calculate_signature(f)
+        f.write_text("v2\n")
+        sig2 = MCPVerifier.calculate_signature(f)
+        assert sig1 != sig2
+
+    def test_calculate_signature_missing_file(self, tmp_dir):
+        from src.security.mcp_verifier import MCPVerifier
+
+        with pytest.raises(FileNotFoundError):
+            MCPVerifier.calculate_signature(tmp_dir / "ghost.py")
+
+    def test_add_and_list_trusted(self, tmp_dir):
+        v = self._verifier(tmp_dir)
+        v.add_trusted("gmail-mcp", "abc123")
+        v.add_trusted("slack-mcp", "def456")
+        store = v.list_trusted()
+        assert store == {"gmail-mcp": "abc123", "slack-mcp": "def456"}
+
+    def test_remove_trusted(self, tmp_dir):
+        v = self._verifier(tmp_dir)
+        v.add_trusted("svc", "sig")
+        v.remove_trusted("svc")
+        assert v.list_trusted() == {}
+
+    def test_verify_server_success(self, tmp_dir):
+        from src.security.mcp_verifier import MCPVerifier
+
+        v = self._verifier(tmp_dir)
+        f = tmp_dir / "server.py"
+        f.write_text("content\n")
+        sig = MCPVerifier.calculate_signature(f)
+        v.add_trusted("test-mcp", sig)
+        assert v.verify_server("test-mcp", f) is True
+
+    def test_verify_server_tampered(self, tmp_dir):
+        from src.security.mcp_verifier import MCPVerifier, VerificationError
+
+        v = self._verifier(tmp_dir)
+        f = tmp_dir / "server.py"
+        f.write_text("original\n")
+        sig = MCPVerifier.calculate_signature(f)
+        v.add_trusted("test-mcp", sig)
+
+        # Tamper with the file
+        f.write_text("tampered!\n")
+        with pytest.raises(VerificationError):
+            v.verify_server("test-mcp", f)
+
+    def test_verify_server_not_in_store(self, tmp_dir):
+        v = self._verifier(tmp_dir)
+        with pytest.raises(KeyError):
+            v.verify_server("unknown", tmp_dir / "any.py")
+
+    def test_is_trusted_returns_false_for_unknown(self, tmp_dir):
+        v = self._verifier(tmp_dir)
+        assert v.is_trusted("unknown", tmp_dir / "any.py") is False
+
+    def test_is_trusted_returns_false_for_tampered(self, tmp_dir):
+        from src.security.mcp_verifier import MCPVerifier
+
+        v = self._verifier(tmp_dir)
+        f = tmp_dir / "server.py"
+        f.write_text("original\n")
+        v.add_trusted("svc", MCPVerifier.calculate_signature(f))
+        f.write_text("tampered\n")
+        assert v.is_trusted("svc", f) is False
+
+
+# ===========================================================================
+# RateLimiter — Silver tier
+# ===========================================================================
+
+
+class TestRateLimiter:
+    def _limiter(self, tmp: Path, limits: dict = None):
+        from src.security.rate_limiter import RateLimiter
+
+        return RateLimiter(
+            state_path=tmp / "rate_limits.json",
+            default_limits=limits or {
+                "email": {"per_minute": 10, "per_hour": 100},
+                "payment": {"per_minute": 1, "per_hour": 10},
+            },
+        )
+
+    def test_consume_succeeds_within_limit(self, tmp_dir):
+        rl = self._limiter(tmp_dir)
+        assert rl.consume("gmail", "email") is True
+
+    def test_consume_exhausts_bucket(self, tmp_dir):
+        from src.security.rate_limiter import RateLimitExceededError
+
+        # Use a tiny bucket: max 3 tokens, 1/min refill
+        rl = self._limiter(tmp_dir, {"action": {"per_minute": 1, "per_hour": 3}})
+        rl.consume("svc", "action")
+        rl.consume("svc", "action")
+        rl.consume("svc", "action")
+        with pytest.raises(RateLimitExceededError):
+            rl.consume("svc", "action")
+
+    def test_remaining_reflects_consumed(self, tmp_dir):
+        rl = self._limiter(tmp_dir, {"pay": {"per_minute": 1, "per_hour": 10}})
+        before = rl.remaining("svc", "pay")
+        rl.consume("svc", "pay", tokens=3)
+        after = rl.remaining("svc", "pay")
+        assert after < before
+
+    def test_unknown_action_uses_generous_default(self, tmp_dir):
+        """Actions without explicit config get a permissive fallback."""
+        rl = self._limiter(tmp_dir, {})  # no configured limits
+        # Should not raise — default is 3600 tokens/hour
+        assert rl.consume("svc", "unknown_action") is True
+
+    def test_separate_buckets_per_server(self, tmp_dir):
+        from src.security.rate_limiter import RateLimitExceededError
+
+        rl = self._limiter(tmp_dir, {"pay": {"per_minute": 1, "per_hour": 1}})
+        rl.consume("server-a", "pay")  # exhausts server-a's bucket
+        with pytest.raises(RateLimitExceededError):
+            rl.consume("server-a", "pay")
+        # server-b still has a full bucket
+        assert rl.consume("server-b", "pay") is True
+
+    def test_add_limit_overrides_default(self, tmp_dir):
+        rl = self._limiter(tmp_dir, {"email": {"per_minute": 10, "per_hour": 100}})
+        rl.add_limit("email", per_minute=1, per_hour=2)
+        # New bucket for a fresh server will use the updated limit
+        rl.consume("new-svc", "email")
+        rl.consume("new-svc", "email")
+        from src.security.rate_limiter import RateLimitExceededError
+
+        with pytest.raises(RateLimitExceededError):
+            rl.consume("new-svc", "email")
+
+    def test_state_persisted_to_disk(self, tmp_dir):
+        rl = self._limiter(tmp_dir, {"pay": {"per_minute": 1, "per_hour": 10}})
+        rl.consume("svc", "pay", tokens=5)
+
+        state_file = tmp_dir / "rate_limits.json"
+        assert state_file.exists()
+        import json
+
+        data = json.loads(state_file.read_text())
+        assert "svc:pay" in data
+        assert data["svc:pay"]["tokens"] == 5.0
