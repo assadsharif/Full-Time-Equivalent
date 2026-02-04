@@ -1,18 +1,18 @@
 {
   "version": "0.1.0",
-  "last_updated": "2026-02-01T18:08:44.269641Z",
+  "last_updated": "2026-02-04T13:09:35.844905Z",
   "vault": {
-    "path": "/tmp/pytest-of-asad/pytest-2/test_vault_initialization0/new_vault",
+    "path": "/tmp/pytest-of-asad/pytest-8/test_vault_init_with_force0/force_vault",
     "initialized": true,
-    "last_status_check": "2026-02-01T18:08:43.576871Z"
+    "last_status_check": "2026-02-04T13:09:35.026004Z"
   },
   "watchers": {
     "gmail": {
       "status": "stopped",
       "pid": null,
       "uptime": null,
-      "last_start": "2026-02-01T18:08:44.217057Z",
-      "last_stop": "2026-02-01T18:08:44.269599Z"
+      "last_start": "2026-02-04T13:09:35.727302Z",
+      "last_stop": "2026-02-04T13:09:35.844879Z"
     },
     "whatsapp": {
       "status": "stopped",
@@ -31,14 +31,14 @@
   },
   "mcp_servers": {
     "registry_loaded": false,
-    "last_health_check": "2026-02-01T18:08:43.811087Z",
+    "last_health_check": "2026-02-04T13:08:28.846280Z",
     "servers": []
   },
   "approvals": {
     "pending_count": 0,
     "last_review": null,
-    "last_approval": "2026-01-28T16:03:32.145276Z",
-    "last_rejection": "2026-01-28T16:03:32.328534Z"
+    "last_approval": "2026-02-04T13:09:35.373762Z",
+    "last_rejection": "2026-02-04T13:09:35.581277Z"
   },
   "briefings": {
     "last_generated": null,
@@ -46,8 +46,8 @@
     "total_generated": 0
   },
   "cli_usage": {
-    "total_commands": 37,
-    "last_command": "mcp add --help",
-    "last_command_time": "2026-01-29T00:11:08.431625Z"
+    "total_commands": 156,
+    "last_command": "tests/ --ignore=tests/performance -q -v --tb=short",
+    "last_command_time": "2026-02-04T13:08:32.443745Z"
   }
 }

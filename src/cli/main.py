@@ -153,6 +153,10 @@ cli.add_command(briefing_group)
 from cli.tdd import tdd_group
 cli.add_command(tdd_group)
 
+# Import security command group from cli.security module
+from cli.security import security_group
+cli.add_command(security_group)
+
 
 def main():
     """Main entry point for CLI"""

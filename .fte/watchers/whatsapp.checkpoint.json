@@ -1,7 +1,7 @@
 {
   "watcher_name": "whatsapp",
   "last_processed_id": "wamid.dup123",
-  "last_poll_time": "2026-02-03T22:00:55.959279+00:00",
-  "events_processed": 29,
+  "last_poll_time": "2026-02-04T13:10:17.185374+00:00",
+  "events_processed": 65,
   "errors_count": 0
 }
