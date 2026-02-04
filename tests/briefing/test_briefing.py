@@ -1,5 +1,5 @@
 """
-CEO Briefing tests (spec 007 — Bronze Tier).
+CEO Briefing tests (spec 007 — Bronze + Silver Tier).
 
 Coverage map:
   TestTaskParsing          — plain markdown, YAML-frontmatter + persistence_loop,
@@ -8,6 +8,8 @@ Coverage map:
                              stats computation (by_priority, by_sender, top_senders)
   TestTemplateRenderer     — render returns string, render_to_file creates file,
                              template placeholders fully resolved
+  TestPDFGenerator         — returns bytes, valid PDF magic, write-to-file,
+                             empty data, large task list, output size budget
   TestBriefingEndToEnd     — vault layout simulation: populate /Done → aggregate
                              → render → verify output in /Briefings
 """
@@ -258,6 +260,95 @@ class TestTemplateRenderer:
         renderer.render_to_file("executive_summary.md.j2", self._sample_data(), target)
         assert target.exists()
         assert "Executive Briefing" in target.read_text()
+
+
+# ===========================================================================
+# PDFGenerator (Silver Tier)
+# ===========================================================================
+
+
+class TestPDFGenerator:
+    """Tests for src/briefing/pdf_generator.py."""
+
+    def _sample_data(self) -> BriefingData:
+        now = datetime.now(timezone.utc)
+        return BriefingData(
+            period_start=now.replace(day=max(now.day - 7, 1)),
+            period_end=now,
+            generated_at=now,
+            tasks=[
+                TaskSummary(name="deploy-prod", priority="urgent", sender="ops@co.com",
+                            body="Deployed.", persistence_iterations=2),
+                TaskSummary(name="client-report", priority="high", sender="sales@co.com",
+                            body="Report sent.", persistence_iterations=1),
+                TaskSummary(name="docs-update", priority="low", sender="docs@co.com",
+                            body="Docs updated.", persistence_iterations=0),
+            ],
+            total_tasks=3,
+            by_priority={"urgent": 1, "high": 1, "low": 1},
+            by_sender={"ops@co.com": 1, "sales@co.com": 1, "docs@co.com": 1},
+            avg_iterations=1.0,
+            top_senders=[("ops@co.com", 1), ("sales@co.com", 1), ("docs@co.com", 1)],
+        )
+
+    def test_returns_bytes(self):
+        from src.briefing.pdf_generator import generate_pdf
+
+        result = generate_pdf(self._sample_data())
+        assert isinstance(result, bytes)
+        assert len(result) > 0
+
+    def test_valid_pdf_magic_bytes(self):
+        from src.briefing.pdf_generator import generate_pdf
+
+        pdf_bytes = generate_pdf(self._sample_data())
+        # PDF files start with %PDF-
+        assert pdf_bytes[:5] == b"%PDF-"
+
+    def test_write_to_file(self, vault_dir):
+        from src.briefing.pdf_generator import generate_pdf_to_file
+
+        out = vault_dir / "Briefings" / "report.pdf"
+        result = generate_pdf_to_file(self._sample_data(), out)
+        assert result.exists()
+        assert result.stat().st_size > 0
+        assert result.read_bytes()[:5] == b"%PDF-"
+
+    def test_write_creates_parent_dirs(self, vault_dir):
+        from src.briefing.pdf_generator import generate_pdf_to_file
+
+        out = vault_dir / "a" / "b" / "report.pdf"
+        generate_pdf_to_file(self._sample_data(), out)
+        assert out.exists()
+
+    def test_empty_data_still_produces_pdf(self):
+        from src.briefing.pdf_generator import generate_pdf
+
+        now = datetime.now(timezone.utc)
+        empty = BriefingData(period_start=now, period_end=now, generated_at=now)
+        pdf_bytes = generate_pdf(empty)
+        assert pdf_bytes[:5] == b"%PDF-"
+
+    def test_large_task_list_stays_under_size_budget(self):
+        """50 tasks should produce a PDF well under 1 MB (spec budget)."""
+        from src.briefing.pdf_generator import generate_pdf
+
+        now = datetime.now(timezone.utc)
+        tasks = [
+            TaskSummary(name=f"task-{i:03d}", priority="medium",
+                        sender=f"user{i % 5}@co.com", body=f"Body {i}.")
+            for i in range(50)
+        ]
+        data = BriefingData(
+            period_start=now, period_end=now, generated_at=now,
+            tasks=tasks, total_tasks=50,
+            by_priority={"medium": 50},
+            by_sender={f"user{i}@co.com": 10 for i in range(5)},
+            avg_iterations=2.5,
+            top_senders=[(f"user{i}@co.com", 10) for i in range(5)],
+        )
+        pdf_bytes = generate_pdf(data)
+        assert len(pdf_bytes) < 1_000_000  # < 1 MB
 
 
 # ===========================================================================
