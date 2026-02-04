@@ -60,6 +60,12 @@ htmlcov/
 # Packaged skills
 *.skill
 
+# Credentials / secrets
+Inbox/credentials/
+**/gmail_credentials.json
+**/gmail_token.json
+~/.credentials/
+
 # detect-secrets
 .secrets.baseline.new
 .secrets.pr.baseline
