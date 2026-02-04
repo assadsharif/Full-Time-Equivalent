@@ -1,0 +1,8 @@
+# CEO Briefing configuration (spec 007)
+
+briefing:
+  done_path: null              # defaults to {vault_path}/Done
+  briefings_path: null         # defaults to {vault_path}/Briefings
+  template_dir: templates/briefing
+  default_template: executive_summary.md.j2
+  lookback_days: 7             # how far back to aggregate tasks
