@@ -138,3 +138,79 @@ def metrics_command(ctx: click.Context, since: str, vault_path: Optional[Path]):
     except Exception as exc:
         display_error(exc, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
         ctx.exit(1)
+
+
+# ---------------------------------------------------------------------------
+# fte orchestrator health
+# ---------------------------------------------------------------------------
+
+
+@orchestrator_group.command(name="health")
+@click.option(
+    "--json",
+    "output_json",
+    is_flag=True,
+    help="Output health status as JSON",
+)
+@click.option(
+    "--vault-path",
+    type=click.Path(path_type=Path),
+    help="Path to vault (overrides config)",
+)
+@click.pass_context
+def health_command(ctx: click.Context, output_json: bool, vault_path: Optional[Path]):
+    """
+    Check orchestrator health status.
+
+    Runs diagnostic checks for scheduler liveness, task backlog,
+    error rate, and completion staleness. Outputs a summary status
+    (healthy / degraded / unhealthy).
+
+    \b
+    Examples:
+        fte orchestrator health
+        fte orchestrator health --json
+    """
+    try:
+        if vault_path is None:
+            vault_path = resolve_vault_path()
+        validate_vault_or_error(vault_path)
+
+        # Import locally to avoid circular imports at module load time
+        from orchestrator.health_check import HealthCheck
+
+        health = HealthCheck(vault_path=vault_path)
+        result = health.get_health_status()
+
+        if output_json:
+            import json
+            console.print(json.dumps(result, indent=2))
+        else:
+            # Rich text output
+            status = result["status"]
+            status_color = {
+                "healthy": "green",
+                "degraded": "yellow",
+                "unhealthy": "red",
+            }.get(status, "white")
+
+            console.print(f"\n[bold]Orchestrator Health Status[/bold]: [{status_color}]{status.upper()}[/{status_color}]")
+            console.print(f"  Checked at: {result['timestamp']}\n")
+
+            table = Table(show_header=True, header_style="bold cyan")
+            table.add_column("Check", style="bold")
+            table.add_column("Status")
+            table.add_column("Message")
+
+            for check_name, check_data in result["checks"].items():
+                check_label = check_name.replace("_", " ").title()
+                ok = check_data["ok"]
+                msg = check_data["message"]
+                status_icon = "[green]✓ PASS[/green]" if ok else "[red]✗ FAIL[/red]"
+                table.add_row(check_label, status_icon, msg)
+
+            console.print(table)
+
+    except Exception as exc:
+        display_error(exc, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
+        ctx.exit(1)
