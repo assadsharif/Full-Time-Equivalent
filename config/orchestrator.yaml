@@ -35,3 +35,29 @@ retry:
   base_delay: 1.0       # seconds (first backoff step)
   max_delay: 16.0       # seconds (backoff ceiling)
   jitter: 0.2           # ±20 %
+
+# Metrics settings (US8)
+metrics:
+  enabled: true
+  retention_days: 30    # keep metrics for 30 days
+
+# Health check thresholds (US9)
+health_check:
+  max_stale_seconds: 300     # checkpoint older than this → stopped (5 min)
+  max_backlog: 20            # warn if >20 pending tasks
+  max_error_rate: 0.10       # warn if >10% failures
+  max_idle_seconds: 3600     # warn if no completions in 1 hour
+
+# Dashboard settings (US7)
+dashboard:
+  refresh_interval: 5        # seconds (for --watch mode)
+  max_recent_tasks: 10       # show last N completions
+
+# Notifications (optional, US10 + Polish)
+notifications:
+  enabled: false
+  webhook_url: null          # set to Slack webhook URL or similar
+  events:
+    - task_failed
+    - health_degraded
+    - orchestrator_stopped
