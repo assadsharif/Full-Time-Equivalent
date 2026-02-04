@@ -38,3 +38,58 @@ secrets:
     - password
     - token
     - secret
+
+# ---------------------------------------------------------------------------
+# Circuit Breakers  (Platinum – US12)
+# ---------------------------------------------------------------------------
+circuit_breakers:
+  enabled: true
+  failure_threshold: 5           # consecutive failures before OPEN
+  failure_window_seconds: 60
+  open_timeout_seconds: 30       # seconds in OPEN before HALF_OPEN probe
+  success_threshold: 2           # probes needed to close HALF_OPEN
+
+# ---------------------------------------------------------------------------
+# Anomaly Detection  (Platinum – US11)
+# ---------------------------------------------------------------------------
+anomaly_detection:
+  enabled: true
+  baseline_window_days: 7
+  std_deviation_threshold: 2.0
+  min_sample_count: 3
+
+# ---------------------------------------------------------------------------
+# Notifications / Webhooks  (Platinum – Polish)
+# ---------------------------------------------------------------------------
+notifications:
+  enabled: true
+  webhook_url: null              # override via FTE_SECURITY_WEBHOOK_URL
+  events:
+    - anomaly_detected
+    - mcp_isolated
+    - credential_rotation
+    - circuit_breaker_tripped
+    - health_degraded
+
+# ---------------------------------------------------------------------------
+# Health-Check Thresholds  (Platinum – Polish)
+# ---------------------------------------------------------------------------
+health_check:
+  max_error_rate: 0.10           # warn when error_rate > 10 %
+  max_throttled_buckets: 3       # warn when this many buckets < 10 %
+  max_open_circuits: 1           # warn when this many circuits OPEN
+  max_unresolved_alerts: 5       # warn when alert backlog exceeds this
+
+# ---------------------------------------------------------------------------
+# Credential Vault  (Bronze)
+# ---------------------------------------------------------------------------
+credential_vault:
+  backend: keyring               # keyring | encrypted_file
+  rotation_reminder_days: 90
+
+# ---------------------------------------------------------------------------
+# Dashboard  (Platinum – US13)
+# ---------------------------------------------------------------------------
+dashboard:
+  refresh_interval: 5            # live-refresh seconds
+  max_alerts: 10

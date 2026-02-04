@@ -593,3 +593,280 @@ def _parse_time_window(time_str: str) -> int:
     else:
         # Assume hours
         return int(time_str)
+
+
+@security_group.command(name="dashboard")
+@click.option(
+    "--watch",
+    is_flag=True,
+    help="Live-refresh every 5 seconds (Ctrl-C to stop)",
+)
+@click.option(
+    "--json",
+    "json_output",
+    is_flag=True,
+    help="Output as JSON",
+)
+def dashboard_command(watch: bool, json_output: bool):
+    """
+    Real-time security posture overview.
+
+    Aggregates credential, verification, rate-limit, circuit-breaker,
+    alert, and isolation status into a single dashboard.
+
+    \b
+    Examples:
+      fte security dashboard          # One-shot snapshot
+      fte security dashboard --watch  # Live refresh every 5 s
+      fte security dashboard --json   # Machine-readable snapshot
+    """
+    import signal
+    import time as _time
+    from src.security.dashboard import SecurityDashboard
+
+    config = get_config()
+    vault_path = Path(config.vault_path)
+
+    audit_log = vault_path / "Logs" / "security_audit.log"
+    alert_log = vault_path / "Logs" / "anomaly_alerts.log"
+    incident_log = vault_path / "Logs" / "incident_response.log"
+
+    dashboard = SecurityDashboard(audit_log, alert_log, incident_log)
+
+    def _render_once():
+        snap = dashboard.snapshot()
+
+        if json_output:
+            import json as _json
+            from dataclasses import asdict
+            console.print(_json.dumps(asdict(snap), indent=2, default=str))
+            return
+
+        console.clear() if watch else None
+
+        console.print("[bold cyan]╔══════════════════════════════════════════╗[/bold cyan]")
+        console.print("[bold cyan]║       FTE  Security  Dashboard           ║[/bold cyan]")
+        console.print("[bold cyan]╚══════════════════════════════════════════╝[/bold cyan]")
+        console.print(f"[dim]{snap.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')}[/dim]\n")
+
+        # ── Credentials ──
+        cred_icon = "[green]●[/green]" if snap.credentials.count > 0 else "[yellow]○[/yellow]"
+        backend = "keyring" if snap.credentials.keyring_backed else "encrypted-file"
+        console.print(f"  {cred_icon} Credentials: {snap.credentials.count} services  [{backend}]")
+
+        # ── Verified MCPs ──
+        ver_icon = "[green]●[/green]" if snap.verification.trusted_count > 0 else "[yellow]○[/yellow]"
+        console.print(f"  {ver_icon} Verified MCPs: {snap.verification.trusted_count}")
+
+        # ── Rate Limits ──
+        if snap.rate_limits.throttled_count > 0:
+            rl_icon = "[red]●[/red]"
+            throttle_msg = f"  {snap.rate_limits.throttled_count} throttled"
+        else:
+            rl_icon = "[green]●[/green]"
+            throttle_msg = ""
+        console.print(f"  {rl_icon} Rate Limits: {len(snap.rate_limits.buckets)} buckets{throttle_msg}")
+
+        # ── Circuit Breakers ──
+        if snap.circuit_breakers.open_count > 0:
+            cb_icon = "[red]●[/red]"
+        elif snap.circuit_breakers.half_open_count > 0:
+            cb_icon = "[yellow]●[/yellow]"
+        else:
+            cb_icon = "[green]●[/green]"
+        console.print(
+            f"  {cb_icon} Circuits: "
+            f"{snap.circuit_breakers.open_count} open  "
+            f"{snap.circuit_breakers.half_open_count} half-open"
+        )
+
+        # ── Isolated Servers ──
+        if snap.isolated_servers:
+            console.print(f"  [red]⛓[/red] Isolated: {', '.join(snap.isolated_servers)}")
+
+        console.print()
+
+        # ── Recent Alerts ──
+        if snap.recent_alerts:
+            console.print("  [bold yellow]Recent Alerts[/bold yellow]")
+            for a in snap.recent_alerts[-5:]:
+                sev = a.severity.upper()
+                icon = "[red]🔴[/red]" if sev in ("HIGH", "CRITICAL") else "[yellow]🟡[/yellow]"
+                console.print(f"    {icon} [{sev}] {a.description}")
+            console.print()
+        else:
+            console.print("  [green]No recent alerts[/green]\n")
+
+        if watch:
+            console.print("[dim]Refreshing in 5 s …  Ctrl-C to stop[/dim]")
+
+    try:
+        if watch:
+            while True:
+                _render_once()
+                _time.sleep(5)
+        else:
+            _render_once()
+    except (KeyboardInterrupt, SystemExit):
+        console.print("\n[yellow]Dashboard stopped[/yellow]")
+
+
+@security_group.command(name="health")
+@click.option(
+    "--json",
+    "json_output",
+    is_flag=True,
+    help="Output as JSON",
+)
+@click.option(
+    "--verbose",
+    "-v",
+    is_flag=True,
+    help="Detailed check results",
+)
+def health_command(json_output: bool, verbose: bool):
+    """
+    Security-system health check.
+
+    Evaluates error rate, throttled buckets, open circuits, and
+    unresolved alerts against configured thresholds.
+
+    Exit codes: 0 = HEALTHY, 1 = DEGRADED, 2 = UNHEALTHY
+    """
+    import sys
+    from datetime import timedelta
+    from src.security.dashboard import SecurityDashboard
+    from src.security.metrics import SecurityMetrics
+
+    config = get_config()
+    vault_path = Path(config.vault_path)
+
+    audit_log = vault_path / "Logs" / "security_audit.log"
+    alert_log = vault_path / "Logs" / "anomaly_alerts.log"
+    incident_log = vault_path / "Logs" / "incident_response.log"
+
+    dashboard = SecurityDashboard(audit_log, alert_log, incident_log)
+    metrics = SecurityMetrics(audit_log)
+
+    # Thresholds (hard-coded defaults; config/security.yaml override TBD)
+    MAX_ERROR_RATE = 0.10
+    MAX_THROTTLED = 3
+    MAX_OPEN_CIRCUITS = 1
+    MAX_ALERTS = 5
+
+    # ── Gather data ──
+    from datetime import datetime, timezone
+    since_1h = datetime.now(timezone.utc) - timedelta(hours=1)
+
+    snap = dashboard.snapshot()
+    error_rate = metrics.error_rate(since=since_1h)
+
+    # ── Evaluate ──
+    warnings_list = []
+    if error_rate > MAX_ERROR_RATE:
+        warnings_list.append(f"Error rate {error_rate:.1%} > {MAX_ERROR_RATE:.0%}")
+    if snap.rate_limits.throttled_count > MAX_THROTTLED:
+        warnings_list.append(f"{snap.rate_limits.throttled_count} throttled buckets > {MAX_THROTTLED}")
+    if snap.circuit_breakers.open_count > MAX_OPEN_CIRCUITS:
+        warnings_list.append(f"{snap.circuit_breakers.open_count} open circuits > {MAX_OPEN_CIRCUITS}")
+    if len(snap.recent_alerts) > MAX_ALERTS:
+        warnings_list.append(f"{len(snap.recent_alerts)} unresolved alerts > {MAX_ALERTS}")
+
+    if len(warnings_list) == 0:
+        status, exit_code = "HEALTHY", 0
+        status_style = "[green]"
+    elif len(warnings_list) <= 2:
+        status, exit_code = "DEGRADED", 1
+        status_style = "[yellow]"
+    else:
+        status, exit_code = "UNHEALTHY", 2
+        status_style = "[red]"
+
+    # ── Output ──
+    if json_output:
+        import json
+        console.print(json.dumps({
+            "status": status,
+            "error_rate": round(error_rate, 4),
+            "throttled_buckets": snap.rate_limits.throttled_count,
+            "open_circuits": snap.circuit_breakers.open_count,
+            "alert_count": len(snap.recent_alerts),
+            "warnings": warnings_list,
+        }, indent=2))
+    else:
+        console.print(f"\n{status_style}[bold]{status}[/bold][/{status_style.strip('[]')}]")
+
+        if verbose:
+            console.print(f"\n  Error rate:        {error_rate:.2%}")
+            console.print(f"  Throttled buckets: {snap.rate_limits.throttled_count}")
+            console.print(f"  Open circuits:     {snap.circuit_breakers.open_count}")
+            console.print(f"  Active alerts:     {len(snap.recent_alerts)}")
+
+            if warnings_list:
+                console.print("\n  [yellow]Warnings:[/yellow]")
+                for w in warnings_list:
+                    console.print(f"    ⚠ {w}")
+            console.print()
+
+    sys.exit(exit_code)
+
+
+@security_group.command(name="metrics")
+@click.option(
+    "--since",
+    default="24h",
+    help="Time window (e.g., 1h, 24h, 7d)",
+)
+@click.option(
+    "--json",
+    "json_output",
+    is_flag=True,
+    help="Output as JSON",
+)
+def metrics_command(since: str, json_output: bool):
+    """
+    Security event metrics over a time window.
+
+    Shows credential access counts, verification failures, rate-limit
+    hits, circuit trips, and per-server breakdowns.
+
+    \b
+    Examples:
+      fte security metrics              # Last 24 h
+      fte security metrics --since 7d   # Last week
+      fte security metrics --json       # Machine-readable
+    """
+    from datetime import datetime, timedelta, timezone
+    from src.security.metrics import SecurityMetrics
+
+    config = get_config()
+    vault_path = Path(config.vault_path)
+    audit_log = vault_path / "Logs" / "security_audit.log"
+
+    metrics = SecurityMetrics(audit_log)
+
+    hours = _parse_time_window(since)
+    since_dt = datetime.now(timezone.utc) - timedelta(hours=hours)
+    summary = metrics.summary(since=since_dt)
+
+    if json_output:
+        import json
+        console.print(json.dumps(summary, indent=2))
+        return
+
+    console.print(f"\n[bold cyan]Security Metrics  (last {since})[/bold cyan]\n")
+    console.print(f"  Credential accesses:      {summary['credential_access_count']}")
+    console.print(f"  MCP actions:              {summary['mcp_action_count']}")
+    console.print(f"  Verification failures:    {summary['verification_failure_count']}")
+    console.print(f"  Rate-limit hits:          {summary['rate_limit_hit_count']}")
+    console.print(f"  Circuit trips:            {summary['circuit_open_count']}")
+    console.print(f"  Error rate:               {summary['error_rate']:.2%}")
+
+    if summary["per_server_actions"]:
+        console.print("\n  [bold]Per-Server Actions[/bold]")
+        for srv, count in sorted(summary["per_server_actions"].items(), key=lambda x: -x[1]):
+            errs = summary["per_server_errors"].get(srv, 0)
+            err_label = f"  [red]({errs} errors)[/red]" if errs else ""
+            console.print(f"    {srv}: {count}{err_label}")
+
+    console.print()
