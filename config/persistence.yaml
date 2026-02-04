@@ -1,0 +1,19 @@
+# Persistence Loop configuration (Plan 04 — Ralph Wiggum Persistence Rule)
+# Shared defaults also mirrored in orchestrator.yaml → retry section.
+# Loaded by PersistenceLoop via OrchestratorConfig fields.
+
+persistence_loop:
+  max_iterations: 100          # overall iteration ceiling (Ralph Wiggum bound)
+  warn_threshold: 0.8          # warn at 80 % of max_iterations
+  checkpoint_interval: 1       # checkpoint after every attempt
+
+  retry:
+    max_attempts: 3            # consecutive transient failures before giving up
+    backoff_strategy: exponential
+    base_delay: 1.0            # seconds (first backoff step)
+    max_delay: 16.0            # seconds (backoff ceiling)
+    jitter: 0.2                # ±20 %
+
+  timeout:
+    per_step: 300              # seconds per invocation step
+    total: 3600                # seconds total per task (matches claude_timeout)

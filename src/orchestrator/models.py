@@ -60,6 +60,12 @@ class OrchestratorConfig:
         "send email", "execute", "remove",
     ])
 
+    # Persistence-loop retry policy (Plan 04)
+    retry_max_attempts: int = 3
+    retry_base_delay: float = 1.0      # seconds
+    retry_max_delay: float = 16.0      # seconds
+    retry_jitter: float = 0.2          # ±fraction
+
     @classmethod
     def from_yaml(cls, path: Path) -> "OrchestratorConfig":
         """Load config from YAML file. Falls back to defaults if file missing."""
@@ -85,6 +91,10 @@ class OrchestratorConfig:
             sender_weight=prio.get("sender", 0.3),
             vip_senders=raw.get("vip_senders", ["ceo@company.com", "board@company.com"]),
             approval_keywords=raw.get("approval_keywords", cls.approval_keywords),
+            retry_max_attempts=raw.get("retry", {}).get("max_attempts", 3),
+            retry_base_delay=raw.get("retry", {}).get("base_delay", 1.0),
+            retry_max_delay=raw.get("retry", {}).get("max_delay", 16.0),
+            retry_jitter=raw.get("retry", {}).get("jitter", 0.2),
         )
 
 

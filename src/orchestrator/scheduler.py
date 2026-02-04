@@ -33,6 +33,7 @@ from src.orchestrator.stop_hook import StopHook
 from src.orchestrator.approval_checker import ApprovalChecker
 from src.orchestrator.state_machine import StateMachine, TransitionError
 from src.orchestrator.claude_invoker import ClaudeInvoker
+from src.orchestrator.persistence_loop import PersistenceLoop, RetryPolicy
 
 
 class Orchestrator:
@@ -52,6 +53,17 @@ class Orchestrator:
         self._approvals = ApprovalChecker(self.config)
         self._state_machine = StateMachine(self.config.vault_path)
         self._invoker = ClaudeInvoker(timeout=self.config.claude_timeout)
+        self._persistence = PersistenceLoop(
+            max_iterations=self.config.max_iterations,
+            retry_policy=RetryPolicy(
+                max_attempts=self.config.retry_max_attempts,
+                base_delay=self.config.retry_base_delay,
+                max_delay=self.config.retry_max_delay,
+                jitter=self.config.retry_jitter,
+            ),
+            invoker=self._invoker,
+            stop_hook=self._stop,
+        )
 
         # Vault folder shortcuts
         self._needs_action = self.config.vault_path / "Needs_Action"
@@ -198,11 +210,8 @@ class Orchestrator:
             task.state = TaskState.EXECUTING
             self._log(f"  [{task.name}] → EXECUTING")
 
-            # 4. Invoke Claude (or dry-run)
-            if self.dry_run:
-                result = self._invoker.dry_run(task.file_path)
-            else:
-                result = self._invoker.invoke(task.file_path)
+            # 4. Invoke Claude via persistence loop (bounded retry)
+            result = self._persistence.run(task.file_path, dry_run=self.dry_run)
 
             task.claude_pid = result.pid
             task.attempts += 1

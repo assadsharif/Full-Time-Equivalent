@@ -28,3 +28,10 @@ approval_keywords:
   - send email
   - execute
   - remove
+
+# Persistence-loop retry policy (Plan 04)
+retry:
+  max_attempts: 3       # consecutive transient failures before giving up
+  base_delay: 1.0       # seconds (first backoff step)
+  max_delay: 16.0       # seconds (backoff ceiling)
+  jitter: 0.2           # ±20 %
