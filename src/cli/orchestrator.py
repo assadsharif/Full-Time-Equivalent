@@ -344,3 +344,102 @@ def dashboard_command(ctx: click.Context, watch: bool, vault_path: Optional[Path
     except Exception as exc:
         display_error(exc, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
         ctx.exit(1)
+
+
+# ---------------------------------------------------------------------------
+# fte orchestrator queue
+# ---------------------------------------------------------------------------
+
+
+@orchestrator_group.command(name="queue")
+@click.option(
+    "--verbose",
+    is_flag=True,
+    help="Show detailed task information (file paths)",
+)
+@click.option(
+    "--watch",
+    is_flag=True,
+    help="Live refresh mode (update every 5 seconds)",
+)
+@click.option(
+    "--vault-path",
+    type=click.Path(path_type=Path),
+    help="Path to vault (overrides config)",
+)
+@click.pass_context
+def queue_command(ctx: click.Context, verbose: bool, watch: bool, vault_path: Optional[Path]):
+    """
+    Display orchestrator task queue.
+
+    Shows pending tasks from Needs_Action folder sorted by priority score,
+    with wait times since each task was added.
+
+    \b
+    Examples:
+        fte orchestrator queue
+        fte orchestrator queue --verbose
+        fte orchestrator queue --watch
+    """
+    try:
+        if vault_path is None:
+            vault_path = resolve_vault_path()
+        validate_vault_or_error(vault_path)
+
+        # Import locally to avoid circular imports at module load time
+        from orchestrator.queue_visualizer import QueueVisualizer
+
+        visualizer = QueueVisualizer(vault_path=vault_path)
+
+        def render_queue():
+            """Render a single queue frame."""
+            queue = visualizer.render_queue_table(verbose=verbose)
+
+            console.print(f"\n[bold]Orchestrator Task Queue[/bold] ({len(queue)} pending)")
+            console.print()
+
+            if queue:
+                table = Table(show_header=True, header_style="bold cyan")
+                table.add_column("Priority", style="bold", justify="right")
+                table.add_column("Task")
+                table.add_column("Wait Time", justify="right")
+                if verbose:
+                    table.add_column("Path", style="dim")
+
+                for task in queue:
+                    pri = task["priority"]
+                    # Highlight high-priority tasks
+                    pri_str = f"[yellow]{pri:.1f}[/yellow]" if pri > 3.0 else f"{pri:.1f}"
+                    wait = task["wait_time_display"]
+                    # Highlight stale tasks (> 1 hour)
+                    wait_str = f"[red]{wait}[/red]" if task["wait_time_seconds"] > 3600 else wait
+
+                    row = [pri_str, task["name"], wait_str]
+                    if verbose:
+                        row.append(task["path"])
+                    table.add_row(*row)
+
+                console.print(table)
+            else:
+                console.print("  [dim]Queue is empty[/dim]")
+
+            if watch:
+                console.print(f"\n[dim]Refreshing every 5s... (Ctrl+C to exit)[/dim]")
+
+        if watch:
+            # Live refresh mode
+            try:
+                while True:
+                    console.clear()
+                    render_queue()
+                    import time as time_module
+                    time_module.sleep(5)
+            except KeyboardInterrupt:
+                console.print("\n[yellow]Queue monitor stopped[/yellow]")
+        else:
+            # Single render
+            render_queue()
+
+    except Exception as exc:
+        display_error(exc, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
+        ctx.exit(1)

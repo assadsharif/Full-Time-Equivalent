@@ -28,6 +28,7 @@ from src.orchestrator.persistence_loop import PersistenceLoop
 from src.orchestrator.metrics import MetricsCollector
 from src.orchestrator.health_check import HealthCheck
 from src.orchestrator.dashboard import OrchestratorDashboard
+from src.orchestrator.queue_visualizer import QueueVisualizer
 from src.orchestrator.scheduler import Orchestrator
 
 __all__ = [
@@ -46,6 +47,7 @@ __all__ = [
     "MetricsCollector",
     "HealthCheck",
     "OrchestratorDashboard",
+    "QueueVisualizer",
     # Main
     "Orchestrator",
 ]
