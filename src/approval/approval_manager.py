@@ -17,6 +17,7 @@ from typing import Optional
 
 import yaml
 
+from src.approval.audit_logger import ApprovalAuditLogger
 from src.approval.integrity_checker import IntegrityChecker
 from src.approval.models import ApprovalRequest, ApprovalStatus
 from src.approval.nonce_generator import NonceGenerator
@@ -30,11 +31,21 @@ class ApprovalManager:
     # High-risk action types for automatic risk classification
     _HIGH_RISK_TYPES = {"payment", "wire", "deploy", "delete"}
 
-    def __init__(self, approvals_path: Path, audit_path: Optional[Path] = None):
+    def __init__(
+        self,
+        approvals_path: Path,
+        audit_path: Optional[Path] = None,
+        approval_audit_log_path: Optional[Path] = None,
+    ):
         self.approvals_path = approvals_path
         self.approvals_path.mkdir(parents=True, exist_ok=True)
         audit_path = audit_path or approvals_path.parent / ".fte" / "approval_nonces.txt"
         self._nonces = NonceGenerator(audit_path)
+        approval_audit_log_path = (
+            approval_audit_log_path
+            or approvals_path.parent / ".fte" / "approval_audit.log"
+        )
+        self._audit_logger = ApprovalAuditLogger(approval_audit_log_path)
 
     # ------------------------------------------------------------------
     # Create
@@ -90,6 +101,10 @@ class ApprovalManager:
         file_path = self.approvals_path / f"{approval_id}.md"
         file_path.write_text(f"---\n{fm_yaml}\n---\n\n{body}")
 
+        self._audit_logger.log_created(
+            request.approval_id, request.task_id,
+            request.action_type, request.risk_level,
+        )
         return request
 
     # ------------------------------------------------------------------
@@ -132,6 +147,10 @@ class ApprovalManager:
         request.status = ApprovalStatus.APPROVED
         self._update_status(request)
         self._nonces.record_used(request.nonce)
+        self._audit_logger.log_approved(
+            request.approval_id, request.task_id,
+            request.action_type, request.risk_level,
+        )
         return request
 
     def reject(self, approval_id: str, reason: str = "") -> ApprovalRequest:
@@ -146,6 +165,11 @@ class ApprovalManager:
             )
         request.status = ApprovalStatus.REJECTED
         self._update_status(request, reason=reason)
+        self._audit_logger.log_rejected(
+            request.approval_id, request.task_id,
+            request.action_type, request.risk_level,
+            reason=reason,
+        )
         return request
 
     # ------------------------------------------------------------------
@@ -168,6 +192,10 @@ class ApprovalManager:
             if req and req.status == ApprovalStatus.PENDING and now > req.expires_at:
                 req.status = ApprovalStatus.TIMEOUT
                 self._update_status(req)
+                self._audit_logger.log_timeout(
+                    req.approval_id, req.task_id,
+                    req.action_type, req.risk_level,
+                )
                 expired.append(req)
         return expired
 

@@ -478,3 +478,136 @@ def approval_review_command(
     except Exception as e:
         display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
         ctx.exit(1)
+
+
+# ---------------------------------------------------------------------------
+# Audit trail display helpers
+# ---------------------------------------------------------------------------
+
+_STATUS_COLORS = {
+    "pending": "yellow",
+    "approved": "green",
+    "rejected": "red",
+    "timeout": "orange1",
+}
+
+
+def _display_audit_events(events: List[Dict]) -> None:
+    """Render approval audit events as a Rich table."""
+    if not events:
+        console.print("[yellow]No audit events found[/yellow]")
+        return
+
+    table = Table(title="Approval Audit Trail", show_header=True, header_style="bold cyan")
+    table.add_column("Timestamp", style="dim")
+    table.add_column("Event", style="bold")
+    table.add_column("Approval ID", overflow="fold")
+    table.add_column("Task ID", overflow="fold")
+    table.add_column("Action", style="cyan")
+    table.add_column("Risk", justify="center")
+    table.add_column("Status")
+    table.add_column("Details")
+
+    for e in events:
+        status = e.get("status", "")
+        color = _STATUS_COLORS.get(status, "white")
+        details_parts: List[str] = []
+        if e.get("approver"):
+            details_parts.append(f"approver={e['approver']}")
+        if e.get("reason"):
+            details_parts.append(f"reason={e['reason']}")
+
+        table.add_row(
+            e.get("timestamp", "-")[:19],
+            e.get("event_type", "-").replace("approval_", ""),
+            e.get("approval_id", "-"),
+            e.get("task_id", "-"),
+            e.get("action_type", "-"),
+            f"[{color}]{e.get('risk_level', '-').upper()}[/{color}]",
+            f"[{color}]{status.upper()}[/{color}]",
+            " | ".join(details_parts) if details_parts else "-",
+        )
+
+    console.print(table)
+    console.print(f"\n[dim]{len(events)} event(s)[/dim]")
+
+
+def _display_audit_stats(stats: Dict) -> None:
+    """Render aggregate approval statistics as a Rich table."""
+    table = Table(title="Approval Statistics", show_header=False, border_style="cyan")
+    table.add_column("Metric", style="bold", width=30)
+    table.add_column("Value", justify="right")
+
+    table.add_row("Total Events", str(stats["total_events"]))
+    table.add_row("Approved", f"[green]{stats['approved_count']}[/green]")
+    table.add_row("Rejected", f"[red]{stats['rejected_count']}[/red]")
+    table.add_row("Timed Out", f"[orange1]{stats['timeout_count']}[/orange1]")
+    table.add_row("Approval Rate", f"{stats['approval_rate'] * 100:.1f}%")
+    table.add_row("Avg Response Time", f"{stats['avg_response_time_seconds']:.1f}s")
+
+    console.print(table)
+
+
+# ---------------------------------------------------------------------------
+# Audit CLI command
+# ---------------------------------------------------------------------------
+
+
+@approval_group.command(name="audit")
+@click.option("--task-id", type=str, default=None, help="Filter by task ID")
+@click.option("--approval-id", type=str, default=None, help="Filter by approval ID")
+@click.option(
+    "--status",
+    type=click.Choice(["pending", "approved", "rejected", "timeout"]),
+    default=None,
+    help="Filter by status",
+)
+@click.option("--stats", "show_stats", is_flag=True, help="Show aggregate statistics")
+@click.option(
+    "--vault-path",
+    type=click.Path(path_type=Path),
+    help="Path to vault (overrides config)",
+)
+@click.pass_context
+def approval_audit_command(
+    ctx: click.Context,
+    task_id: Optional[str],
+    approval_id: Optional[str],
+    status: Optional[str],
+    show_stats: bool,
+    vault_path: Optional[Path],
+):
+    """
+    Display the approval audit trail.
+
+    Shows all recorded approval lifecycle events with optional filters.
+    Use --stats for aggregate statistics (approval rate, response time).
+
+    Examples:
+        fte approval audit
+        fte approval audit --task-id task-123
+        fte approval audit --status approved
+        fte approval audit --stats
+    """
+    try:
+        if vault_path is None:
+            vault_path = resolve_vault_path()
+        validate_vault_or_error(vault_path)
+
+        from approval.audit_query import ApprovalAuditQuery
+
+        audit_log_path = vault_path / ".fte" / "approval_audit.log"
+        query_svc = ApprovalAuditQuery(audit_log_path)
+
+        if show_stats:
+            stats = query_svc.query_approval_stats()
+            _display_audit_stats(stats)
+        else:
+            events = query_svc.query_approval_events(
+                task_id=task_id, approval_id=approval_id, status=status,
+            )
+            _display_audit_events(events)
+
+    except Exception as e:
+        display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
+        ctx.exit(1)
