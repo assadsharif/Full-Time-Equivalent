@@ -54,6 +54,102 @@ def orchestrator_group():
 
 
 # ---------------------------------------------------------------------------
+# fte orchestrator run
+# ---------------------------------------------------------------------------
+
+
+@orchestrator_group.command(name="run")
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Dry-run mode: discover and score tasks but don't invoke Claude",
+)
+@click.option(
+    "--once",
+    is_flag=True,
+    help="Run a single sweep and exit (useful for testing)",
+)
+@click.option(
+    "--config",
+    type=click.Path(exists=True, path_type=Path),
+    help="Path to orchestrator config YAML (default: config/orchestrator.yaml)",
+)
+@click.pass_context
+def run_command(ctx, dry_run: bool, once: bool, config: Optional[Path]):
+    """
+    Start the orchestrator (Ralph Wiggum Loop).
+
+    Continuously discovers tasks in Needs_Action, scores priorities, enforces
+    HITL approvals, invokes Claude Code, and drives tasks to Done/Rejected.
+
+    \b
+    Examples:
+      fte orchestrator run               # Continuous operation
+      fte orchestrator run --once        # Single sweep
+      fte orchestrator run --dry-run     # Test without execution
+      fte orchestrator run --config custom.yaml
+    """
+    vault_path = ctx.obj.get("vault_path") if ctx.obj else None
+    if not vault_path:
+        vault_path = resolve_vault_path(None)
+
+    # Validate vault
+    if not validate_vault_or_error(vault_path):
+        return
+
+    # Load config
+    try:
+        from orchestrator.models import OrchestratorConfig
+
+        if config:
+            orch_config = OrchestratorConfig.from_yaml(config, vault_path_override=vault_path)
+        else:
+            # Try default config location
+            default_config = Path("config/orchestrator.yaml")
+            if default_config.exists():
+                orch_config = OrchestratorConfig.from_yaml(
+                    default_config, vault_path_override=vault_path
+                )
+            else:
+                # Use defaults
+                orch_config = OrchestratorConfig(vault_path=vault_path)
+
+        # Create and start orchestrator
+        from orchestrator.scheduler import Orchestrator
+
+        orchestrator = Orchestrator(config=orch_config, dry_run=dry_run)
+
+        if dry_run:
+            display_info("Orchestrator starting in DRY-RUN mode (no execution)")
+        if once:
+            display_info("Orchestrator running single sweep")
+
+        if once:
+            # Run single sweep
+            exits = orchestrator.run_once()
+            if exits:
+                console.print(f"\n[green]✓[/green] Processed {len(exits)} task(s)")
+                for exit in exits:
+                    status_icon = "✓" if exit.success else "✗"
+                    status_color = "green" if exit.success else "red"
+                    console.print(
+                        f"  [{status_color}]{status_icon}[/{status_color}] {exit.task_name}"
+                    )
+            else:
+                console.print("[yellow]No tasks to process[/yellow]")
+            return
+
+        # Start continuous loop
+        orchestrator.run()
+
+    except KeyboardInterrupt:
+        display_info("\nOrchestrator stopped by user (Ctrl+C)")
+    except Exception as e:
+        display_error(f"Orchestrator error: {e}")
+        raise
+
+
+# ---------------------------------------------------------------------------
 # fte orchestrator metrics
 # ---------------------------------------------------------------------------
 
