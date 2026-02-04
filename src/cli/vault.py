@@ -702,6 +702,17 @@ def vault_validate_command(
         if result.returncode != 0:
             exit_code = 1
 
+        display_info("Running filename validation...")
+        filename_script = _find_validation_script("validate_filename.py")
+        result = subprocess.run(
+            [sys.executable, str(filename_script), str(vault_path)],
+            capture_output=True,
+            text=True,
+        )
+        console.print(result.stdout)
+        if result.returncode != 0:
+            exit_code = 1
+
         if exit_code == 0:
             display_success("\nAll validations passed.")
         else:
