@@ -432,3 +432,137 @@ class TestRateLimiter:
         data = json.loads(state_file.read_text())
         assert "svc:pay" in data
         assert data["svc:pay"]["tokens"] == 5.0
+
+
+# ===========================================================================
+# CredentialVault.rotate — Gold tier
+# ===========================================================================
+
+
+class TestCredentialRotation:
+    def _vault(self, tmp: Path):
+        from src.security.credential_vault import CredentialVault
+
+        return CredentialVault(tmp)
+
+    def test_rotate_returns_old_credential(self, tmp_dir):
+        vault = self._vault(tmp_dir)
+        vault.store("svc", "user", "old-secret")
+        old = vault.rotate("svc", "user", "new-secret")
+        assert old == "old-secret"
+
+    def test_rotate_stores_new_credential(self, tmp_dir):
+        vault = self._vault(tmp_dir)
+        vault.store("svc", "user", "original")
+        vault.rotate("svc", "user", "rotated")
+        assert vault.retrieve("svc", "user") == "rotated"
+
+    def test_rotate_missing_raises(self, tmp_dir):
+        from src.security.credential_vault import CredentialNotFoundError
+
+        vault = self._vault(tmp_dir)
+        with pytest.raises(CredentialNotFoundError):
+            vault.rotate("ghost", "nobody", "val")
+
+
+# ===========================================================================
+# MCPGuard — Gold tier (composite gate)
+# ===========================================================================
+
+
+class TestMCPGuard:
+    def _guard(self, tmp: Path):
+        from src.security.audit_logger import SecurityAuditLogger
+        from src.security.rate_limiter import RateLimiter
+        from src.security.mcp_guard import MCPGuard
+
+        rl = RateLimiter(
+            state_path=tmp / "rate_limits.json",
+            default_limits={"email": {"per_minute": 10, "per_hour": 100}},
+        )
+        audit = SecurityAuditLogger(tmp / "audit.log")
+        return MCPGuard(rate_limiter=rl, audit_logger=audit, failure_threshold=2, recovery_timeout=0.1)
+
+    def test_successful_call_logged(self, tmp_dir):
+        from src.security.audit_logger import SecurityAuditLogger
+        from src.security.models import RiskLevel
+
+        guard = self._guard(tmp_dir)
+        result = guard.call("gmail", "email", lambda: "ok", risk_level=RiskLevel.MEDIUM)
+        assert result == "ok"
+
+        audit = SecurityAuditLogger(tmp_dir / "audit.log")
+        events = audit.query_recent()
+        assert len(events) == 1
+        assert events[0]["result"] == "success"
+        assert events[0]["mcp_server"] == "gmail"
+
+    def test_exception_in_fn_is_logged_and_raised(self, tmp_dir):
+        from src.security.audit_logger import SecurityAuditLogger
+
+        guard = self._guard(tmp_dir)
+
+        def boom():
+            raise ValueError("explode")
+
+        with pytest.raises(ValueError, match="explode"):
+            guard.call("slack", "email", boom)
+
+        audit = SecurityAuditLogger(tmp_dir / "audit.log")
+        events = audit.query_recent()
+        assert "ValueError" in events[0]["result"]
+
+    def test_rate_limit_fires_and_is_logged(self, tmp_dir):
+        from src.security.audit_logger import SecurityAuditLogger
+        from src.security.rate_limiter import RateLimiter, RateLimitExceededError
+        from src.security.mcp_guard import MCPGuard
+
+        # Tiny bucket: 2 tokens max
+        rl = RateLimiter(
+            state_path=tmp_dir / "rate_limits.json",
+            default_limits={"pay": {"per_minute": 1, "per_hour": 2}},
+        )
+        audit = SecurityAuditLogger(tmp_dir / "audit.log")
+        guard = MCPGuard(rate_limiter=rl, audit_logger=audit)
+
+        guard.call("svc", "pay", lambda: None)
+        guard.call("svc", "pay", lambda: None)
+
+        with pytest.raises(RateLimitExceededError):
+            guard.call("svc", "pay", lambda: None)
+
+        events = audit.query_recent()
+        assert events[-1]["result"] == "rate_limit_exceeded"
+
+    def test_circuit_breaker_opens_after_failures(self, tmp_dir):
+        from src.watchers.circuit_breaker import CircuitBreakerError
+
+        guard = self._guard(tmp_dir)  # failure_threshold=2
+
+        # Two failures trip the circuit
+        for _ in range(2):
+            with pytest.raises(RuntimeError):
+                guard.call("flaky", "email", lambda: (_ for _ in ()).throw(RuntimeError("fail")))
+
+        # Third call should hit open circuit
+        with pytest.raises(CircuitBreakerError):
+            guard.call("flaky", "email", lambda: None)
+
+    def test_breaker_state_default_is_closed(self, tmp_dir):
+        guard = self._guard(tmp_dir)
+        assert guard.breaker_state("unknown-server") == "closed"
+
+    def test_duration_ms_recorded(self, tmp_dir):
+        import time as _time
+
+        from src.security.audit_logger import SecurityAuditLogger
+
+        guard = self._guard(tmp_dir)
+
+        def slow():
+            _time.sleep(0.05)
+            return "done"
+
+        guard.call("gmail", "email", slow)
+        events = SecurityAuditLogger(tmp_dir / "audit.log").query_recent()
+        assert events[0]["duration_ms"] >= 40  # ~50ms sleep, allow margin

@@ -72,6 +72,16 @@ class CredentialVault:
         else:
             self._delete_fallback(service, username)
 
+    def rotate(self, service: str, username: str, new_credential: str) -> str:
+        """Replace a credential atomically, returning the previous value.
+
+        Raises CredentialNotFoundError if no credential exists yet (use
+        ``store`` for first-time setup).
+        """
+        old = self.retrieve(service, username)
+        self.store(service, username, new_credential)
+        return old
+
     def list_services(self) -> list[str]:
         """Return all service names in the fallback store.
 
