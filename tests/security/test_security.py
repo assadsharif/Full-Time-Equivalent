@@ -1,0 +1,261 @@
+"""
+MCP Security — Bronze tier unit tests (spec 004).
+
+Coverage map:
+  TestCredentialVault    — store/retrieve, overwrite, delete, missing, list, isolation
+  TestAuditLogger        — mcp_action, credential_access, scan_result, query_recent,
+                           empty log, append-only ordering
+  TestSecretsScanner     — AWS key, password, clean text, scan_file, scan_directory,
+                           redaction, no false positives on short strings
+"""
+
+import shutil
+import tempfile
+from pathlib import Path
+
+import pytest
+
+# ---------------------------------------------------------------------------
+# Fixtures
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def tmp_dir():
+    d = Path(tempfile.mkdtemp())
+    yield d
+    shutil.rmtree(d, ignore_errors=True)
+
+
+# ===========================================================================
+# CredentialVault
+# ===========================================================================
+
+
+class TestCredentialVault:
+    def _vault(self, tmp: Path):
+        from src.security.credential_vault import CredentialVault
+
+        return CredentialVault(tmp)
+
+    def test_store_and_retrieve(self, tmp_dir):
+        vault = self._vault(tmp_dir)
+        vault.store("gmail-mcp", "user@x.com", "secret-key-123")
+        assert vault.retrieve("gmail-mcp", "user@x.com") == "secret-key-123"
+
+    def test_overwrite_credential(self, tmp_dir):
+        vault = self._vault(tmp_dir)
+        vault.store("svc", "alice", "old")
+        vault.store("svc", "alice", "new")
+        assert vault.retrieve("svc", "alice") == "new"
+
+    def test_delete_credential(self, tmp_dir):
+        from src.security.credential_vault import CredentialNotFoundError
+
+        vault = self._vault(tmp_dir)
+        vault.store("svc", "bob", "val")
+        vault.delete("svc", "bob")
+        with pytest.raises(CredentialNotFoundError):
+            vault.retrieve("svc", "bob")
+
+    def test_retrieve_missing_raises(self, tmp_dir):
+        from src.security.credential_vault import CredentialNotFoundError
+
+        vault = self._vault(tmp_dir)
+        with pytest.raises(CredentialNotFoundError):
+            vault.retrieve("nonexistent", "nobody")
+
+    def test_delete_missing_raises(self, tmp_dir):
+        from src.security.credential_vault import CredentialNotFoundError
+
+        vault = self._vault(tmp_dir)
+        with pytest.raises(CredentialNotFoundError):
+            vault.delete("no-svc", "no-user")
+
+    def test_list_services(self, tmp_dir):
+        vault = self._vault(tmp_dir)
+        vault.store("alpha", "u1", "c1")
+        vault.store("beta", "u2", "c2")
+        services = vault.list_services()
+        assert "alpha" in services
+        assert "beta" in services
+
+    def test_multiple_users_same_service(self, tmp_dir):
+        vault = self._vault(tmp_dir)
+        vault.store("svc", "alice", "a-secret")
+        vault.store("svc", "bob", "b-secret")
+        assert vault.retrieve("svc", "alice") == "a-secret"
+        assert vault.retrieve("svc", "bob") == "b-secret"
+
+    def test_delete_one_user_keeps_other(self, tmp_dir):
+        vault = self._vault(tmp_dir)
+        vault.store("svc", "alice", "a")
+        vault.store("svc", "bob", "b")
+        vault.delete("svc", "alice")
+        assert vault.retrieve("svc", "bob") == "b"
+
+    def test_delete_last_user_removes_service(self, tmp_dir):
+        vault = self._vault(tmp_dir)
+        vault.store("solo", "only", "val")
+        vault.delete("solo", "only")
+        assert "solo" not in vault.list_services()
+
+    def test_encrypted_file_is_not_plaintext(self, tmp_dir):
+        """The on-disk credential file must not contain the plaintext secret."""
+        vault = self._vault(tmp_dir)
+        vault.store("test-svc", "u", "SUPER_SECRET_VALUE_12345")
+        enc_file = tmp_dir / ".fte" / "security" / "credentials.json.enc"
+        raw = enc_file.read_bytes()
+        assert b"SUPER_SECRET_VALUE_12345" not in raw
+
+
+# ===========================================================================
+# SecurityAuditLogger
+# ===========================================================================
+
+
+class TestAuditLogger:
+    def _logger(self, tmp: Path):
+        from src.security.audit_logger import SecurityAuditLogger
+
+        return SecurityAuditLogger(tmp / "audit.log")
+
+    def test_log_mcp_action(self, tmp_dir):
+        from src.security.models import RiskLevel
+
+        logger = self._logger(tmp_dir)
+        logger.log_mcp_action(
+            mcp_server="gmail-mcp",
+            action="send_email",
+            approved=True,
+            risk_level=RiskLevel.HIGH,
+            result="success",
+            duration_ms=234,
+        )
+        events = logger.query_recent()
+        assert len(events) == 1
+        assert events[0]["event_type"] == "mcp_action"
+        assert events[0]["mcp_server"] == "gmail-mcp"
+        assert events[0]["approved"] is True
+        assert events[0]["risk_level"] == "high"
+        assert events[0]["duration_ms"] == 234
+
+    def test_log_credential_access(self, tmp_dir):
+        logger = self._logger(tmp_dir)
+        logger.log_credential_access("gmail-mcp", "store", "user@x.com")
+        events = logger.query_recent()
+        assert len(events) == 1
+        assert events[0]["event_type"] == "credential_access"
+        assert events[0]["risk_level"] == "critical"
+        assert events[0]["details"]["operation"] == "store"
+
+    def test_log_scan_result_with_findings(self, tmp_dir):
+        logger = self._logger(tmp_dir)
+        findings = [{"type": "AWS Key", "line": 3}]
+        logger.log_scan_result("vault/secret.md", findings)
+        events = logger.query_recent()
+        assert events[0]["risk_level"] == "high"
+        assert events[0]["details"]["finding_count"] == 1
+
+    def test_log_scan_result_no_findings(self, tmp_dir):
+        logger = self._logger(tmp_dir)
+        logger.log_scan_result("vault/clean.md", [])
+        events = logger.query_recent()
+        assert events[0]["risk_level"] == "low"
+        assert events[0]["details"]["finding_count"] == 0
+
+    def test_query_recent_empty_log(self, tmp_dir):
+        logger = self._logger(tmp_dir)
+        assert logger.query_recent() == []
+
+    def test_append_only_ordering(self, tmp_dir):
+        from src.security.models import RiskLevel
+
+        logger = self._logger(tmp_dir)
+        for i in range(5):
+            logger.log_mcp_action("svc", f"action-{i}", True, RiskLevel.LOW)
+        events = logger.query_recent()
+        assert len(events) == 5
+        # Actions appear in insertion order
+        for i, ev in enumerate(events):
+            assert ev["action"] == f"action-{i}"
+
+    def test_query_recent_respects_limit(self, tmp_dir):
+        from src.security.models import RiskLevel
+
+        logger = self._logger(tmp_dir)
+        for i in range(10):
+            logger.log_mcp_action("svc", f"a{i}", True, RiskLevel.LOW)
+        events = logger.query_recent(limit=3)
+        assert len(events) == 3
+        # Should be the last 3
+        assert events[0]["action"] == "a7"
+
+
+# ===========================================================================
+# SecretsScanner
+# ===========================================================================
+
+
+class TestSecretsScanner:
+    def _scanner(self):
+        from src.security.secrets_scanner import SecretsScanner
+
+        return SecretsScanner()
+
+    def test_detects_aws_access_key(self):
+        scanner = self._scanner()
+        text = 'aws_access_key_id = "AKIAIOSFODNN7EXAMPLE"\n'
+        findings = scanner.scan_text(text)
+        assert len(findings) >= 1
+        assert any("AWS" in f.secret_type or "Key" in f.secret_type for f in findings)
+
+    def test_detects_password(self):
+        scanner = self._scanner()
+        text = 'password = "hunter2supersecret"\n'
+        findings = scanner.scan_text(text)
+        assert len(findings) >= 1
+
+    def test_clean_text_no_findings(self):
+        scanner = self._scanner()
+        text = "This is a normal line of text with no secrets.\nHello world.\n"
+        findings = scanner.scan_text(text)
+        assert findings == []
+
+    def test_scan_file(self, tmp_dir):
+        scanner = self._scanner()
+        f = tmp_dir / "leaky.txt"
+        f.write_text('API_KEY = "AKIAIOSFODNN7EXAMPLE"\n')
+        findings = scanner.scan_file(f)
+        assert len(findings) >= 1
+        assert findings[0].file_path == str(f)
+        assert findings[0].line_number is not None
+
+    def test_scan_missing_file_returns_empty(self, tmp_dir):
+        scanner = self._scanner()
+        assert scanner.scan_file(tmp_dir / "ghost.txt") == []
+
+    def test_scan_directory(self, tmp_dir):
+        scanner = self._scanner()
+        (tmp_dir / "clean.md").write_text("# Hello\nJust a doc.\n")
+        (tmp_dir / "leaky.md").write_text('secret_key = "abcdefghijklmnopqrstuvwxyz1234"\n')
+        findings = scanner.scan_directory(tmp_dir, glob="*.md")
+        # At least the leaky file should produce a finding
+        assert len(findings) >= 1
+        assert any("leaky.md" in (f.file_path or "") for f in findings)
+
+    def test_redacted_context_hides_secret(self):
+        scanner = self._scanner()
+        text = 'API_KEY = "AKIAIOSFODNN7EXAMPLE"\n'
+        findings = scanner.scan_text(text)
+        for f in findings:
+            assert "AKIAIOSFODNN7EXAMPLE" not in f.redacted_context
+
+    def test_short_values_not_flagged_as_tokens(self):
+        """Short identifiers like variable names must not trigger Token pattern."""
+        scanner = self._scanner()
+        text = "token = short\n"
+        findings = scanner.scan_text(text)
+        # "short" is only 5 chars — should not match any pattern
+        token_findings = [f for f in findings if f.secret_type == "Token"]
+        assert token_findings == []

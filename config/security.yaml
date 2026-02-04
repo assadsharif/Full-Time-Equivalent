@@ -1,0 +1,40 @@
+# Security policy configuration (spec 004)
+# ---------------------------------------------------------------------------
+# All controls are opt-in with safe defaults.  Flip ``enabled: false`` to
+# disable a control without removing the config block.
+# ---------------------------------------------------------------------------
+
+mcp_servers:
+  verification:
+    enabled: true
+    require_signature: true
+    trusted_sources:
+      - https://github.com/anthropics/mcp-servers
+      - https://github.com/modelcontextprotocol/
+
+  rate_limiting:
+    enabled: true
+    limits:
+      email:
+        per_minute: 10
+        per_hour: 100
+      payment:
+        per_minute: 1
+        per_hour: 10
+      deploy:
+        per_minute: 2
+        per_hour: 20
+
+audit:
+  log_all_mcp_actions: true
+  log_credential_access: true
+  alert_on_suspicious: true
+
+secrets:
+  scan_enabled: true
+  redact_in_logs: true
+  patterns:
+    - api_key
+    - password
+    - token
+    - secret
