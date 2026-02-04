@@ -208,6 +208,11 @@ def metrics_command(ctx: click.Context, since: str, vault_path: Optional[Path]):
         avg_latency = collector.calculate_avg_latency(since_dt)
         error_rate = collector.calculate_error_rate(since_dt)
 
+        # Resource usage (if available)
+        avg_cpu = collector.calculate_avg_cpu_percent(since_dt)
+        avg_memory = collector.calculate_avg_memory_mb(since_dt)
+        peak_memory = collector.get_peak_memory_mb(since_dt)
+
         # Display
         console.print(f"\n[bold]Orchestrator Metrics[/bold] (since {since})")
         console.print(f"  Window: {since_dt.strftime('%Y-%m-%d %H:%M UTC')} → now\n")
@@ -225,6 +230,13 @@ def metrics_command(ctx: click.Context, since: str, vault_path: Optional[Path]):
             "Error Rate",
             f"[red]{error_rate * 100:.1f}%[/red]" if error_rate > 0 else "0.0%",
         )
+
+        # Resource metrics (if captured)
+        if avg_cpu > 0 or avg_memory > 0:
+            table.add_row("", "")  # Separator
+            table.add_row("Avg CPU Usage", f"{avg_cpu:.1f}%")
+            table.add_row("Avg Memory", f"{avg_memory:.1f} MB")
+            table.add_row("Peak Memory", f"{peak_memory:.1f} MB")
 
         console.print(table)
 

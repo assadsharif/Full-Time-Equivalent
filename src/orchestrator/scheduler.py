@@ -107,6 +107,9 @@ class Orchestrator:
             while True:
                 self._iteration += 1
 
+                # --- capture resource snapshot ---
+                self._metrics.resource_snapshot()
+
                 # --- stop-hook check ---
                 if self._stop.is_set:
                     self._log("Stop-hook detected — shutting down gracefully.")
@@ -150,6 +153,9 @@ class Orchestrator:
         """
         self._started_at = datetime.now(timezone.utc)
         self._log("Orchestrator: single-sweep mode")
+
+        # --- capture resource snapshot ---
+        self._metrics.resource_snapshot()
 
         # --- new tasks ---
         tasks = self._discover()

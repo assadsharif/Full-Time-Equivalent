@@ -47,6 +47,34 @@ class MetricsCollector:
             "error": error,
         })
 
+    def resource_snapshot(self) -> None:
+        """
+        Record current resource usage (CPU, RAM).
+
+        Uses psutil to capture process-level resource consumption.
+        Snapshots should be taken periodically (e.g., every sweep iteration).
+        """
+        try:
+            import psutil
+            process = psutil.Process()
+
+            # Get CPU and memory usage
+            cpu_percent = process.cpu_percent(interval=0.1)  # 100ms sample
+            memory_info = process.memory_info()
+            memory_mb = round(memory_info.rss / (1024 * 1024), 2)  # RSS in MB
+
+            self._write({
+                "event": "resource_snapshot",
+                "cpu_percent": round(cpu_percent, 2),
+                "memory_mb": memory_mb,
+            })
+        except ImportError:
+            # psutil not available - silently skip
+            pass
+        except Exception:
+            # Don't fail on monitoring errors
+            pass
+
     # ------------------------------------------------------------------
     # Calculations
     # ------------------------------------------------------------------
@@ -96,6 +124,44 @@ class MetricsCollector:
         if total == 0:
             return 0.0
         return round(failed / total, 4)
+
+    def calculate_avg_cpu_percent(self, since: Optional[datetime] = None) -> float:
+        """Average CPU usage (%) from resource snapshots.
+
+        Returns 0.0 if no snapshots exist.
+        """
+        events = self._load_events(since)
+        snapshots = [e for e in events if e["event"] == "resource_snapshot"]
+        if not snapshots:
+            return 0.0
+
+        total_cpu = sum(s.get("cpu_percent", 0.0) for s in snapshots)
+        return round(total_cpu / len(snapshots), 2)
+
+    def calculate_avg_memory_mb(self, since: Optional[datetime] = None) -> float:
+        """Average memory usage (MB) from resource snapshots.
+
+        Returns 0.0 if no snapshots exist.
+        """
+        events = self._load_events(since)
+        snapshots = [e for e in events if e["event"] == "resource_snapshot"]
+        if not snapshots:
+            return 0.0
+
+        total_memory = sum(s.get("memory_mb", 0.0) for s in snapshots)
+        return round(total_memory / len(snapshots), 2)
+
+    def get_peak_memory_mb(self, since: Optional[datetime] = None) -> float:
+        """Peak memory usage (MB) from resource snapshots.
+
+        Returns 0.0 if no snapshots exist.
+        """
+        events = self._load_events(since)
+        snapshots = [e for e in events if e["event"] == "resource_snapshot"]
+        if not snapshots:
+            return 0.0
+
+        return max(s.get("memory_mb", 0.0) for s in snapshots)
 
     # ------------------------------------------------------------------
     # Internals
