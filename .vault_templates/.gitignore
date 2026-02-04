@@ -1,0 +1,25 @@
+# Obsidian workspace (user-specific, not synced)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+
+# Obsidian cache
+.obsidian/cache
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+~$*
+
+# Private/sensitive files (if any)
+.env
+secrets/
+*.key
+*.pem
+
+# Build artifacts (if using any publishing tools)
+dist/
+build/
