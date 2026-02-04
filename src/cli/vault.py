@@ -8,6 +8,8 @@ status checking, and approval workflow management.
 import hashlib
 import re
 import shutil
+import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Optional
@@ -619,6 +621,97 @@ def vault_reject_command(
         display_info(f"Audit: Rejected at {datetime.now(timezone.utc).isoformat()}Z")
 
     except (ApprovalNotFoundError, ApprovalInvalidNonceError, ApprovalIntegrityError) as e:
+        display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
+        ctx.exit(1)
+    except Exception as e:
+        display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
+        ctx.exit(1)
+
+
+def _find_validation_script(name: str) -> Path:
+    """Locate a validation script relative to the repo root."""
+    candidate = Path(__file__).resolve().parent
+    for _ in range(5):
+        candidate = candidate.parent
+        script = candidate / ".vault_schema" / "validation_scripts" / name
+        if script.exists():
+            return script
+    raise FileNotFoundError(f"Validation script '{name}' not found")
+
+
+@vault_group.command(name="validate")
+@click.option(
+    "--vault-path",
+    type=click.Path(path_type=Path),
+    help="Path to vault (overrides config)",
+)
+@click.option(
+    "--state-only",
+    is_flag=True,
+    help="Run only state-transition validation",
+)
+@click.pass_context
+def vault_validate_command(
+    ctx: click.Context,
+    vault_path: Optional[Path],
+    state_only: bool,
+):
+    """
+    Validate vault structure and state transitions.
+
+    Runs the full vault validator and the state-transition validator
+    against the vault at the given path.
+
+    \b
+    Examples:
+      fte vault validate                        # Full validation
+      fte vault validate --vault-path ~/vault   # Custom path
+      fte vault validate --state-only           # State transitions only
+    """
+    try:
+        if vault_path is None:
+            vault_path = resolve_vault_path()
+        else:
+            vault_path = expand_path(str(vault_path))
+
+        if not vault_path.is_dir():
+            raise VaultNotFoundError(f"Vault path does not exist: {vault_path}")
+
+        exit_code = 0
+
+        if not state_only:
+            display_info("Running full vault validation...")
+            vault_script = _find_validation_script("validate_vault.py")
+            result = subprocess.run(
+                [sys.executable, str(vault_script), str(vault_path)],
+                capture_output=True,
+                text=True,
+            )
+            console.print(result.stdout)
+            if result.returncode != 0:
+                exit_code = 1
+
+        display_info("Running state-transition validation...")
+        state_script = _find_validation_script("validate_state.py")
+        result = subprocess.run(
+            [sys.executable, str(state_script), str(vault_path)],
+            capture_output=True,
+            text=True,
+        )
+        console.print(result.stdout)
+        if result.returncode != 0:
+            exit_code = 1
+
+        if exit_code == 0:
+            display_success("\nAll validations passed.")
+        else:
+            display_warning("\nValidation completed with errors.")
+            ctx.exit(1)
+
+    except VaultNotFoundError as e:
+        display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
+        ctx.exit(1)
+    except FileNotFoundError as e:
         display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
         ctx.exit(1)
     except Exception as e:
