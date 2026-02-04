@@ -6,3 +6,11 @@ briefing:
   template_dir: templates/briefing
   default_template: executive_summary.md.j2
   lookback_days: 7             # how far back to aggregate tasks
+
+smtp:
+  server: null                 # set to SMTP hostname  –or–  export FTE_SMTP_SERVER
+  port: 587
+  username: null               # or FTE_SMTP_USERNAME
+  password: null               # NEVER commit secrets; use FTE_SMTP_PASSWORD
+  from: "AI Employee <fte@localhost>"
+  use_tls: true

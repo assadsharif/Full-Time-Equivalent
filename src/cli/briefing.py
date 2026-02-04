@@ -407,12 +407,19 @@ def briefing_group():
     is_flag=True,
     help="Generate PDF in addition to Markdown",
 )
+@click.option(
+    "--email",
+    type=str,
+    default=None,
+    help="Email the briefing to this address after generation",
+)
 @click.pass_context
 def briefing_generate_command(
     ctx: click.Context,
     vault_path: Optional[Path],
     days: int,
-    pdf: bool
+    pdf: bool,
+    email: Optional[str],
 ):
     """
     Generate CEO briefing report.
@@ -424,6 +431,7 @@ def briefing_generate_command(
         fte briefing generate
         fte briefing generate --days 14
         fte briefing generate --pdf
+        fte briefing generate --pdf --email ceo@company.com
     """
     try:
         # Resolve vault path
@@ -476,6 +484,25 @@ def briefing_generate_command(
                     progress.stop()
                     display_warning("wkhtmltopdf not installed. Skipping PDF generation.")
                     display_info("Install with: apt-get install wkhtmltopdf")
+
+        # Email delivery (optional)
+        if email:
+            from briefing.email_delivery import EmailDeliveryService
+
+            email_svc = EmailDeliveryService()
+            highlights = [
+                f"{len(tasks)} tasks completed",
+                f"Period: {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}",
+            ]
+            attachment = briefing_path
+            if pdf:
+                pdf_candidate = briefing_path.with_suffix(".pdf")
+                if pdf_candidate.exists():
+                    attachment = pdf_candidate
+            if email_svc.send_briefing_email(email, attachment, start_date, end_date, highlights):
+                display_success(f"Briefing emailed to: {email}")
+            else:
+                display_warning("Email delivery failed or SMTP not configured")
 
         # Update checkpoint
         checkpoint_manager = get_checkpoint_manager()
