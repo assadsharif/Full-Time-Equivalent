@@ -65,7 +65,7 @@ def render_template(template_path: Path, name: str, category: str) -> str:
     replacements = {
         "<namespace>.<category>.<action>": name,
         "/<namespace>.<category>.<action>": f"/{name}",
-        "<task|query|config|diagnostic|workflow|git>": category,
+        "<task|query|config|diagnostic|workflow|git|vault|briefing|watcher|orchestrator|security|approval>": category,
         "YYYY-MM-DD": today,
         # Leave section placeholders as-is so the developer fills them
     }
