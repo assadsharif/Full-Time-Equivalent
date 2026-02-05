@@ -16,7 +16,7 @@ from typing import Callable, TypeVar
 from src.security.audit_logger import SecurityAuditLogger
 from src.security.models import RiskLevel
 from src.security.rate_limiter import RateLimiter, RateLimitExceededError
-from src.watchers.circuit_breaker import CircuitBreaker, CircuitBreakerError
+from src.security.circuit_breaker import CircuitBreaker, CircuitBreakerError
 
 T = TypeVar("T")
 
