@@ -143,7 +143,7 @@ def validate_vault_states(vault_path: Path) -> Tuple[List[StateValidationError],
 
     Returns (errors, files_checked).
     """
-    task_folders = ["Inbox", "Needs_Action", "In_Progress", "Done", "Approvals"]
+    task_folders = ["Inbox", "Needs_Action", "In_Progress", "Done"]
     all_errors: List[StateValidationError] = []
     checked = 0
 
