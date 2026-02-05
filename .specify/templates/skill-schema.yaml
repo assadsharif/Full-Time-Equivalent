@@ -1,0 +1,173 @@
+# Skill YAML Frontmatter Schema
+# Every SKILL.md frontmatter MUST conform to this schema.
+# validate_skill.py reads this file to drive its checks.
+
+# --- Identity (all required) ---
+name:
+  type: string
+  required: true
+  description: "Dot-separated skill identifier (namespace.category.action)"
+  pattern: "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*){1,3}$"
+  examples: ["sp.git.commit_pr", "fte.vault.init", "fte.briefing.generate"]
+
+version:
+  type: string
+  required: true
+  description: "Semver version string"
+  pattern: "^\\d+\\.\\d+\\.\\d+$"
+  default: "1.0.0"
+
+description:
+  type: string
+  required: true
+  description: "One-to-two sentence summary of what the skill does"
+  max_length: 300
+
+# --- Invocation ---
+triggers:
+  type: array
+  required: true
+  description: "Natural-language phrases that should route to this skill"
+  items:
+    type: string
+  min_items: 2
+
+command:
+  type: string
+  required: true
+  description: "Slash-command invocation (e.g. /fte.vault.init)"
+  pattern: "^/[a-z][a-z0-9.]*$"
+
+aliases:
+  type: array
+  required: false
+  description: "Short alternative slash-commands"
+  items:
+    type: string
+
+# --- Categorisation ---
+category:
+  type: string
+  required: true
+  description: "Primary skill category"
+  enum:
+    # --- Abstract ---
+    - task          # Executes a concrete action
+    - query         # Retrieves information
+    - config        # Manages configuration
+    - diagnostic    # Diagnoses issues
+    - workflow      # Multi-step orchestrated workflow
+    - git           # Version-control operations
+    # --- FTE domain ---
+    - vault         # Obsidian vault operations
+    - briefing      # CEO briefing lifecycle
+    - watcher       # Email / WhatsApp watchers
+    - orchestrator  # Task orchestration
+    - security      # Security scanning and audit
+    - approval      # HITL approval workflows
+
+tags:
+  type: array
+  required: true
+  description: "Searchable keywords"
+  items:
+    type: string
+  min_items: 1
+
+# --- Dependencies ---
+requires:
+  type: object
+  required: false
+  description: "External requirements"
+  properties:
+    tools:
+      type: array        # CLI tools needed (git, gh, python3, …)
+      items:
+        type: string
+    skills:
+      type: array        # Other skills this one invokes
+      items:
+        type: string
+    env:
+      type: array        # Environment variables needed
+      items:
+        type: string
+
+# --- Parameters ---
+parameters:
+  type: array
+  required: false
+  description: "Configurable inputs the skill accepts"
+  items:
+    type: object
+    properties:
+      name:
+        type: string
+        required: true
+      type:
+        type: string
+        required: true
+        enum: [string, boolean, integer, array]
+      required:
+        type: boolean
+        default: false
+      default:
+        description: "Default value if not required"
+      description:
+        type: string
+        required: true
+      options:
+        type: array      # Enumerated allowed values (optional)
+        items:
+          type: string
+
+# --- Safety ---
+safety_level:
+  type: string
+  required: true
+  description: "Risk classification"
+  enum: [low, medium, high]
+  # low    = read-only, no side effects
+  # medium = writes data, non-destructive
+  # high   = destructive or externally visible
+
+approval_required:
+  type: boolean
+  required: true
+  default: false
+  description: "Must a human approve before execution?"
+
+destructive:
+  type: boolean
+  required: true
+  default: false
+  description: "Can this skill delete or permanently modify data?"
+
+# --- Constitutional Compliance ---
+constitutional_compliance:
+  type: array
+  required: false
+  description: "Constitution sections this skill addresses"
+  items:
+    type: integer
+  # Section 2  = Source of Truth
+  # Section 4  = Frozen Control Plane
+  # Section 5  = HITL for dangerous actions
+  # Section 8  = Auditability
+  # Section 9  = Error recovery
+  # Section 11 = No Spec Drift
+
+# --- Authorship ---
+author:
+  type: string
+  required: true
+
+created:
+  type: string
+  required: true
+  format: date   # YYYY-MM-DD
+
+last_updated:
+  type: string
+  required: true
+  format: date

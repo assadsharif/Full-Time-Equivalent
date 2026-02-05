@@ -161,6 +161,10 @@ cli.add_command(security_group)
 from cli.orchestrator import orchestrator_group
 cli.add_command(orchestrator_group)
 
+# Import skill command group from cli.skill module
+from cli.skill import skill_group
+cli.add_command(skill_group)
+
 
 def main():
     """Main entry point for CLI"""
