@@ -51,12 +51,20 @@ category:
   required: true
   description: "Primary skill category"
   enum:
+    # --- Abstract ---
     - task          # Executes a concrete action
     - query         # Retrieves information
     - config        # Manages configuration
     - diagnostic    # Diagnoses issues
     - workflow      # Multi-step orchestrated workflow
     - git           # Version-control operations
+    # --- FTE domain ---
+    - vault         # Obsidian vault operations
+    - briefing      # CEO briefing lifecycle
+    - watcher       # Email / WhatsApp watchers
+    - orchestrator  # Task orchestration
+    - security      # Security scanning and audit
+    - approval      # HITL approval workflows
 
 tags:
   type: array

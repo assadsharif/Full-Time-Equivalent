@@ -13,7 +13,7 @@ triggers:
 command: /<namespace>.<category>.<action>
 aliases: []
 
-category: <task|query|config|diagnostic|workflow|git>
+category: <task|query|config|diagnostic|workflow|git|vault|briefing|watcher|orchestrator|security|approval>
 tags: [tag1, tag2]
 
 requires:
