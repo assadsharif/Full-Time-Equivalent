@@ -1,0 +1,226 @@
+# YAML Frontmatter Schema: Briefing
+# Used for CEO briefing files in Briefings folder
+
+# Briefing metadata
+briefing_id:
+  type: string
+  required: true
+  description: "Unique briefing identifier (e.g., BRIEF-20260205)"
+  pattern: "^BRIEF-\\d{8}$"
+
+title:
+  type: string
+  required: true
+  description: "Briefing title"
+  max_length: 200
+
+# Timeframe
+week_start:
+  type: string
+  required: true
+  format: date
+  description: "Start date of the week (Monday)"
+
+week_end:
+  type: string
+  required: true
+  format: date
+  description: "End date of the week (Sunday)"
+
+# Generation metadata
+generated_at:
+  type: string
+  required: true
+  format: date-time
+  description: "When briefing was generated"
+
+generated_by:
+  type: string
+  required: true
+  description: "Component that generated briefing"
+  default: "briefing-generator"
+
+# Summary statistics
+total_tasks:
+  type: integer
+  required: true
+  description: "Total tasks processed this week"
+  minimum: 0
+
+completed_tasks:
+  type: integer
+  required: true
+  description: "Tasks completed successfully"
+  minimum: 0
+
+failed_tasks:
+  type: integer
+  required: false
+  description: "Tasks that failed"
+  minimum: 0
+  default: 0
+
+avg_response_time:
+  type: string
+  required: false
+  description: "Average response time (e.g., '2.3h')"
+
+# Performance metrics
+performance:
+  type: object
+  required: false
+  properties:
+    uptime_percentage:
+      type: number
+      minimum: 0
+      maximum: 100
+    tasks_per_day:
+      type: number
+      minimum: 0
+    error_rate:
+      type: number
+      minimum: 0
+      maximum: 100
+
+# Highlights
+key_accomplishments:
+  type: array
+  required: false
+  description: "Major accomplishments this week"
+  items:
+    type: string
+
+notable_issues:
+  type: array
+  required: false
+  description: "Issues that required attention"
+  items:
+    type: string
+
+# Task breakdown
+tasks_by_source:
+  type: object
+  required: false
+  properties:
+    gmail:
+      type: integer
+      minimum: 0
+    whatsapp:
+      type: integer
+      minimum: 0
+    file:
+      type: integer
+      minimum: 0
+    manual:
+      type: integer
+      minimum: 0
+
+tasks_by_priority:
+  type: object
+  required: false
+  properties:
+    urgent:
+      type: integer
+      minimum: 0
+    high:
+      type: integer
+      minimum: 0
+    medium:
+      type: integer
+      minimum: 0
+    low:
+      type: integer
+      minimum: 0
+
+# Client/project summary
+top_clients:
+  type: array
+  required: false
+  description: "Most active clients this week"
+  items:
+    type: object
+    properties:
+      name:
+        type: string
+      task_count:
+        type: integer
+
+top_projects:
+  type: array
+  required: false
+  description: "Most active projects this week"
+  items:
+    type: object
+    properties:
+      name:
+        type: string
+      task_count:
+        type: integer
+
+# Approvals
+approvals_requested:
+  type: integer
+  required: false
+  description: "Number of approvals requested"
+  minimum: 0
+  default: 0
+
+approvals_granted:
+  type: integer
+  required: false
+  description: "Number of approvals granted"
+  minimum: 0
+  default: 0
+
+approvals_rejected:
+  type: integer
+  required: false
+  description: "Number of approvals rejected"
+  minimum: 0
+  default: 0
+
+# System health
+system_health:
+  type: object
+  required: false
+  properties:
+    watchers_status:
+      type: string
+      enum: ["healthy", "degraded", "down"]
+    orchestrator_status:
+      type: string
+      enum: ["healthy", "degraded", "down"]
+    mcp_servers_status:
+      type: string
+      enum: ["healthy", "degraded", "down"]
+
+# Next week outlook
+upcoming_deadlines:
+  type: array
+  required: false
+  description: "Upcoming deadlines in next week"
+  items:
+    type: object
+    properties:
+      task:
+        type: string
+      deadline:
+        type: string
+        format: date
+      priority:
+        type: string
+
+recommendations:
+  type: array
+  required: false
+  description: "Recommendations for next week"
+  items:
+    type: string
+
+# Attachments
+charts:
+  type: array
+  required: false
+  description: "Paths to generated charts/graphs"
+  items:
+    type: string

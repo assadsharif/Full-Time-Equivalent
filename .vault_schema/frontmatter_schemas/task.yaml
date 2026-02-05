@@ -1,0 +1,180 @@
+# YAML Frontmatter Schema: Task
+# Used for task files in Inbox, Needs_Action, In_Progress, Done folders
+
+# Task metadata
+task_id:
+  type: string
+  required: true
+  description: "Unique task identifier (e.g., TASK-20260205-001)"
+  pattern: "^TASK-\\d{8}-\\d{3}$"
+
+title:
+  type: string
+  required: true
+  description: "Task title/subject line"
+  max_length: 200
+
+# Source tracking
+source:
+  type: string
+  required: true
+  description: "Source of the task"
+  enum: ["gmail", "whatsapp", "file", "manual", "scheduled"]
+
+sender:
+  type: string
+  required: false
+  description: "Email address or identifier of sender"
+
+# State tracking
+state:
+  type: string
+  required: true
+  description: "Current state of the task"
+  enum: ["inbox", "needs_action", "in_progress", "pending_approval", "done", "rejected", "error_queue", "failed"]
+
+state_history:
+  type: array
+  required: false
+  description: "History of state transitions"
+  items:
+    type: object
+    properties:
+      state:
+        type: string
+        enum: ["inbox", "needs_action", "in_progress", "pending_approval", "done", "rejected", "error_queue", "failed"]
+      timestamp:
+        type: string
+        format: date-time
+      moved_by:
+        type: string
+        description: "Component that moved the task (e.g., watcher-gmail, orchestrator)"
+
+# Priority and classification
+priority:
+  type: string
+  required: false
+  description: "Task priority level"
+  enum: ["urgent", "high", "medium", "low"]
+  default: "medium"
+
+urgency:
+  type: string
+  required: false
+  description: "Urgency indicator from sender"
+  enum: ["ASAP", "urgent", "normal", "low"]
+
+tags:
+  type: array
+  required: false
+  description: "Categorization tags"
+  items:
+    type: string
+
+# Approval requirements
+requires_approval:
+  type: boolean
+  required: false
+  default: false
+  description: "Whether this task requires human approval"
+
+approval_keywords:
+  type: array
+  required: false
+  description: "Keywords that triggered approval requirement"
+  items:
+    type: string
+
+approval_status:
+  type: string
+  required: false
+  description: "Approval status if required"
+  enum: ["pending", "approved", "rejected"]
+
+# Timestamps
+created_at:
+  type: string
+  required: true
+  format: date-time
+  description: "When task was created (ISO 8601)"
+
+started_at:
+  type: string
+  required: false
+  format: date-time
+  description: "When task processing started"
+
+completed_at:
+  type: string
+  required: false
+  format: date-time
+  description: "When task was completed"
+
+# Execution tracking
+status:
+  type: string
+  required: false
+  description: "Execution status"
+  enum: ["pending", "processing", "waiting_approval", "success", "failed"]
+
+error:
+  type: string
+  required: false
+  description: "Error message if task failed"
+  max_length: 500
+
+retry_count:
+  type: integer
+  required: false
+  default: 0
+  description: "Number of retry attempts"
+  minimum: 0
+
+# Metadata
+deadline:
+  type: string
+  required: false
+  format: date-time
+  description: "Task deadline if specified"
+
+estimated_duration:
+  type: string
+  required: false
+  description: "Estimated time to complete (e.g., '30m', '2h')"
+
+actual_duration:
+  type: string
+  required: false
+  description: "Actual time taken to complete"
+
+assigned_to:
+  type: string
+  required: false
+  description: "AI agent or human assigned"
+  default: "orchestrator"
+
+# Links and references
+related_tasks:
+  type: array
+  required: false
+  description: "Links to related task files"
+  items:
+    type: string
+
+attachments:
+  type: array
+  required: false
+  description: "Paths to attached files"
+  items:
+    type: string
+
+# Company context
+client:
+  type: string
+  required: false
+  description: "Client name if applicable"
+
+project:
+  type: string
+  required: false
+  description: "Project name if applicable"

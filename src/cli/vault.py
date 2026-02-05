@@ -7,6 +7,9 @@ status checking, and approval workflow management.
 
 import hashlib
 import re
+import shutil
+import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Optional
@@ -39,131 +42,81 @@ from cli.utils import (
 console = Console()
 
 
-# Vault Templates
+def get_templates_dir() -> Path:
+    """
+    Resolve the .vault_templates directory relative to the repo root.
 
-DASHBOARD_TEMPLATE = """# AI Employee Dashboard
+    Walks up from this file's location (src/cli/) to find the repo root
+    containing .vault_templates/.
 
-**Last Updated**: {date}
+    Returns:
+        Absolute path to .vault_templates/
 
-## Quick Stats
-- **Inbox**: {inbox_count} new tasks
-- **Needs Action**: {needs_action_count} tasks
-- **In Progress**: {in_progress_count} tasks
-- **Done**: {done_count} completed
-- **Pending Approvals**: {approvals_count} awaiting review
-
-## Recent Activity
-<!-- Automatically updated by watchers -->
-
-## Alerts
-<!-- System alerts and warnings -->
-
-## Next Steps
-1. Review pending approvals: `fte approval pending`
-2. Check system status: `fte status`
-3. Start watchers: `fte watcher start <name>`
-
----
-*This dashboard is automatically maintained by the Digital FTE system.*
-"""
-
-COMPANY_HANDBOOK_TEMPLATE = """# Company Handbook
-
-**Last Updated**: {date}
-
-## Company Information
-- **Company Name**: [Your Company]
-- **Industry**: [Industry]
-- **Founded**: [Year]
-
-## Mission & Values
-<!-- Add your company mission and core values here -->
-
-## Key Contacts
-- **CEO**: [Name] <email>
-- **CTO**: [Name] <email>
-
-## Operational Guidelines
-
-### Communication
-- Email response time: 24 hours
-- Urgent issues: Flag with [URGENT] in subject
-- Weekly briefing: Every Monday 9am
-
-### Decision Authority
-- Payments >$1000: Requires CEO approval
-- Client communications: Review by account manager
-- Code deployments: CTO approval required
-
-### Tools & Systems
-- Email: [Email platform]
-- Project Management: [PM tool]
-- Code Repository: [Git platform]
-
-## AI Employee Instructions
-
-### Task Prioritization
-1. URGENT: Immediate attention required
-2. HIGH: Complete within 24 hours
-3. MEDIUM: Complete within 1 week
-4. LOW: Complete when time permits
-
-### Approval Requirements
-- **Payments**: Always require approval
-- **External emails**: Require approval for first-time contacts
-- **File deletions**: Always require approval for permanent deletions
-
-### Autonomy Boundaries
-The AI Employee can autonomously:
-- Draft responses (not send without approval)
-- Organize and categorize tasks
-- Research and compile information
-- Generate reports and summaries
-
-The AI Employee CANNOT autonomously:
-- Send emails to external contacts
-- Make payments or financial commitments
-- Delete files permanently
-- Make commitments on behalf of the company
-
----
-*Update this handbook to customize AI Employee behavior for your organization.*
-"""
+    Raises:
+        FileNotFoundError: If .vault_templates/ cannot be located
+    """
+    candidate = Path(__file__).resolve().parent
+    for _ in range(5):
+        candidate = candidate.parent
+        if (candidate / ".vault_templates").is_dir():
+            return candidate / ".vault_templates"
+    raise FileNotFoundError(
+        ".vault_templates/ not found. Ensure the repo root contains this directory."
+    )
 
 
 def create_vault_structure(vault_path: Path) -> None:
     """
-    Create vault folder structure.
+    Create vault folder structure from .vault_templates/.
+
+    Copies the canonical folder layout, Obsidian config, .gitignore,
+    and Templates/ from the repo's .vault_templates/ directory, then
+    generates Dashboard.md and Company_Handbook.md with live timestamps.
 
     Args:
         vault_path: Path to vault root
-
-    Creates:
-        - Core folders (Inbox, Needs_Action, In_Progress, Done, etc.)
-        - Dashboard.md
-        - Company_Handbook.md
     """
-    # Create core folders
-    folders = [
-        "Inbox",
-        "Needs_Action",
-        "In_Progress",
-        "Done",
-        "Approvals",
-        "Briefings",
-        "Attachments",
-    ]
-
+    templates_dir = get_templates_dir()
     vault_path.mkdir(parents=True, exist_ok=True)
 
-    for folder in folders:
-        folder_path = vault_path / folder
-        folder_path.mkdir(exist_ok=True)
-        display_success(f"Created folder: {folder}")
+    # Copy core folders (each contains a .gitkeep)
+    folders_src = templates_dir / "folders"
+    for folder in folders_src.iterdir():
+        if folder.is_dir():
+            dest = vault_path / folder.name
+            dest.mkdir(exist_ok=True)
+            # Copy .gitkeep if present
+            gitkeep = folder / ".gitkeep"
+            if gitkeep.exists():
+                shutil.copy2(gitkeep, dest / ".gitkeep")
+            display_success(f"Created folder: {folder.name}")
 
-    # Create Dashboard.md
-    dashboard_path = vault_path / "Dashboard.md"
-    dashboard_content = DASHBOARD_TEMPLATE.format(
+    # Copy .obsidian/ config
+    obsidian_src = templates_dir / ".obsidian"
+    if obsidian_src.is_dir():
+        obsidian_dest = vault_path / ".obsidian"
+        shutil.copytree(obsidian_src, obsidian_dest, dirs_exist_ok=True)
+        display_success("Created: .obsidian/ config")
+
+    # Copy .gitignore
+    gitignore_src = templates_dir / ".gitignore"
+    if gitignore_src.exists():
+        shutil.copy2(gitignore_src, vault_path / ".gitignore")
+        display_success("Created: .gitignore")
+
+    # Copy Templates/ (task_template.md, approval_template.md)
+    templates_content_src = templates_dir / "Templates"
+    if templates_content_src.is_dir():
+        templates_dest = vault_path / "Templates"
+        templates_dest.mkdir(exist_ok=True)
+        for tmpl in templates_content_src.iterdir():
+            if tmpl.is_file() and tmpl.name != ".gitkeep":
+                shutil.copy2(tmpl, templates_dest / tmpl.name)
+        display_success("Created: Templates/")
+
+    # Generate Dashboard.md with live date
+    dashboard_template = (templates_dir / "Dashboard.md").read_text()
+    dashboard_content = dashboard_template.format(
         date=datetime.now().strftime("%Y-%m-%d"),
         inbox_count=0,
         needs_action_count=0,
@@ -171,16 +124,14 @@ def create_vault_structure(vault_path: Path) -> None:
         done_count=0,
         approvals_count=0,
     )
-    dashboard_path.write_text(dashboard_content)
-    display_success(f"Created: Dashboard.md")
+    (vault_path / "Dashboard.md").write_text(dashboard_content)
+    display_success("Created: Dashboard.md")
 
-    # Create Company_Handbook.md
-    handbook_path = vault_path / "Company_Handbook.md"
-    handbook_content = COMPANY_HANDBOOK_TEMPLATE.format(
-        date=datetime.now().strftime("%Y-%m-%d")
-    )
-    handbook_path.write_text(handbook_content)
-    display_success(f"Created: Company_Handbook.md")
+    # Generate Company_Handbook.md with live date
+    handbook_template = (templates_dir / "Company_Handbook.md").read_text()
+    handbook_content = handbook_template.format(date=datetime.now().strftime("%Y-%m-%d"))
+    (vault_path / "Company_Handbook.md").write_text(handbook_content)
+    display_success("Created: Company_Handbook.md")
 
 
 def get_vault_statistics(vault_path: Path) -> Dict[str, int]:
@@ -670,6 +621,108 @@ def vault_reject_command(
         display_info(f"Audit: Rejected at {datetime.now(timezone.utc).isoformat()}Z")
 
     except (ApprovalNotFoundError, ApprovalInvalidNonceError, ApprovalIntegrityError) as e:
+        display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
+        ctx.exit(1)
+    except Exception as e:
+        display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
+        ctx.exit(1)
+
+
+def _find_validation_script(name: str) -> Path:
+    """Locate a validation script relative to the repo root."""
+    candidate = Path(__file__).resolve().parent
+    for _ in range(5):
+        candidate = candidate.parent
+        script = candidate / ".vault_schema" / "validation_scripts" / name
+        if script.exists():
+            return script
+    raise FileNotFoundError(f"Validation script '{name}' not found")
+
+
+@vault_group.command(name="validate")
+@click.option(
+    "--vault-path",
+    type=click.Path(path_type=Path),
+    help="Path to vault (overrides config)",
+)
+@click.option(
+    "--state-only",
+    is_flag=True,
+    help="Run only state-transition validation",
+)
+@click.pass_context
+def vault_validate_command(
+    ctx: click.Context,
+    vault_path: Optional[Path],
+    state_only: bool,
+):
+    """
+    Validate vault structure and state transitions.
+
+    Runs the full vault validator and the state-transition validator
+    against the vault at the given path.
+
+    \b
+    Examples:
+      fte vault validate                        # Full validation
+      fte vault validate --vault-path ~/vault   # Custom path
+      fte vault validate --state-only           # State transitions only
+    """
+    try:
+        if vault_path is None:
+            vault_path = resolve_vault_path()
+        else:
+            vault_path = expand_path(str(vault_path))
+
+        if not vault_path.is_dir():
+            raise VaultNotFoundError(f"Vault path does not exist: {vault_path}")
+
+        exit_code = 0
+
+        if not state_only:
+            display_info("Running full vault validation...")
+            vault_script = _find_validation_script("validate_vault.py")
+            result = subprocess.run(
+                [sys.executable, str(vault_script), str(vault_path)],
+                capture_output=True,
+                text=True,
+            )
+            console.print(result.stdout)
+            if result.returncode != 0:
+                exit_code = 1
+
+        display_info("Running state-transition validation...")
+        state_script = _find_validation_script("validate_state.py")
+        result = subprocess.run(
+            [sys.executable, str(state_script), str(vault_path)],
+            capture_output=True,
+            text=True,
+        )
+        console.print(result.stdout)
+        if result.returncode != 0:
+            exit_code = 1
+
+        display_info("Running filename validation...")
+        filename_script = _find_validation_script("validate_filename.py")
+        result = subprocess.run(
+            [sys.executable, str(filename_script), str(vault_path)],
+            capture_output=True,
+            text=True,
+        )
+        console.print(result.stdout)
+        if result.returncode != 0:
+            exit_code = 1
+
+        if exit_code == 0:
+            display_success("\nAll validations passed.")
+        else:
+            display_warning("\nValidation completed with errors.")
+            ctx.exit(1)
+
+    except VaultNotFoundError as e:
+        display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
+        ctx.exit(1)
+    except FileNotFoundError as e:
         display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
         ctx.exit(1)
     except Exception as e:
