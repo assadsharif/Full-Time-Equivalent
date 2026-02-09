@@ -38,61 +38,118 @@ ASPECT_RATIOS = ["16:9", "4:3", "16:10"]
 
 # Web-safe fonts for PowerPoint
 WEB_SAFE_FONTS = [
-    "Arial", "Helvetica", "Times New Roman", "Georgia",
-    "Courier New", "Verdana", "Tahoma", "Trebuchet MS", "Impact"
+    "Arial",
+    "Helvetica",
+    "Times New Roman",
+    "Georgia",
+    "Courier New",
+    "Verdana",
+    "Tahoma",
+    "Trebuchet MS",
+    "Impact",
 ]
 
 # Color palettes from skill documentation
 COLOR_PALETTES = {
     "classic_blue": {
         "name": "Classic Blue",
-        "colors": {"primary": "#1C2833", "secondary": "#2E4053", "accent": "#AAB7B8", "background": "#F4F6F6"},
-        "mood": "professional, corporate, trustworthy"
+        "colors": {
+            "primary": "#1C2833",
+            "secondary": "#2E4053",
+            "accent": "#AAB7B8",
+            "background": "#F4F6F6",
+        },
+        "mood": "professional, corporate, trustworthy",
     },
     "teal_coral": {
         "name": "Teal & Coral",
-        "colors": {"primary": "#5EA8A7", "secondary": "#277884", "accent": "#FE4447", "background": "#FFFFFF"},
-        "mood": "modern, vibrant, creative"
+        "colors": {
+            "primary": "#5EA8A7",
+            "secondary": "#277884",
+            "accent": "#FE4447",
+            "background": "#FFFFFF",
+        },
+        "mood": "modern, vibrant, creative",
     },
     "bold_red": {
         "name": "Bold Red",
-        "colors": {"primary": "#C0392B", "secondary": "#E74C3C", "accent": "#F39C12", "background": "#FFFFFF"},
-        "mood": "energetic, urgent, passionate"
+        "colors": {
+            "primary": "#C0392B",
+            "secondary": "#E74C3C",
+            "accent": "#F39C12",
+            "background": "#FFFFFF",
+        },
+        "mood": "energetic, urgent, passionate",
     },
     "warm_blush": {
         "name": "Warm Blush",
-        "colors": {"primary": "#A49393", "secondary": "#EED6D3", "accent": "#E8B4B8", "background": "#FAF7F2"},
-        "mood": "elegant, feminine, soft"
+        "colors": {
+            "primary": "#A49393",
+            "secondary": "#EED6D3",
+            "accent": "#E8B4B8",
+            "background": "#FAF7F2",
+        },
+        "mood": "elegant, feminine, soft",
     },
     "burgundy_luxury": {
         "name": "Burgundy Luxury",
-        "colors": {"primary": "#5D1D2E", "secondary": "#951233", "accent": "#997929", "background": "#FFFFFF"},
-        "mood": "luxurious, sophisticated, premium"
+        "colors": {
+            "primary": "#5D1D2E",
+            "secondary": "#951233",
+            "accent": "#997929",
+            "background": "#FFFFFF",
+        },
+        "mood": "luxurious, sophisticated, premium",
     },
     "deep_purple": {
         "name": "Deep Purple & Emerald",
-        "colors": {"primary": "#B165FB", "secondary": "#181B24", "accent": "#40695B", "background": "#FFFFFF"},
-        "mood": "creative, bold, modern"
+        "colors": {
+            "primary": "#B165FB",
+            "secondary": "#181B24",
+            "accent": "#40695B",
+            "background": "#FFFFFF",
+        },
+        "mood": "creative, bold, modern",
     },
     "forest_cream": {
         "name": "Cream & Forest Green",
-        "colors": {"primary": "#40695B", "secondary": "#FFE1C7", "accent": "#40695B", "background": "#FCFCFC"},
-        "mood": "natural, calm, organic"
+        "colors": {
+            "primary": "#40695B",
+            "secondary": "#FFE1C7",
+            "accent": "#40695B",
+            "background": "#FCFCFC",
+        },
+        "mood": "natural, calm, organic",
     },
     "black_gold": {
         "name": "Black & Gold",
-        "colors": {"primary": "#000000", "secondary": "#BF9A4A", "accent": "#BF9A4A", "background": "#F4F6F6"},
-        "mood": "premium, elegant, powerful"
+        "colors": {
+            "primary": "#000000",
+            "secondary": "#BF9A4A",
+            "accent": "#BF9A4A",
+            "background": "#F4F6F6",
+        },
+        "mood": "premium, elegant, powerful",
     },
     "sage_terracotta": {
         "name": "Sage & Terracotta",
-        "colors": {"primary": "#87A96B", "secondary": "#E07A5F", "accent": "#2C2C2C", "background": "#F4F1DE"},
-        "mood": "earthy, warm, natural"
+        "colors": {
+            "primary": "#87A96B",
+            "secondary": "#E07A5F",
+            "accent": "#2C2C2C",
+            "background": "#F4F1DE",
+        },
+        "mood": "earthy, warm, natural",
     },
     "charcoal_red": {
         "name": "Charcoal & Red",
-        "colors": {"primary": "#292929", "secondary": "#E33737", "accent": "#CCCBCB", "background": "#FFFFFF"},
-        "mood": "bold, modern, high-contrast"
+        "colors": {
+            "primary": "#292929",
+            "secondary": "#E33737",
+            "accent": "#CCCBCB",
+            "background": "#FFFFFF",
+        },
+        "mood": "bold, modern, high-contrast",
     },
 }
 
@@ -223,7 +280,7 @@ const htmlFiles = ['slide1.html', 'slide2.html', 'slide3.html'];
 createPresentation(htmlFiles, 'output.pptx');
 '''
 
-SLIDE_HTML_TEMPLATE = '''<!DOCTYPE html>
+SLIDE_HTML_TEMPLATE = """<!DOCTYPE html>
 <html>
 <head>
 <style>
@@ -244,7 +301,7 @@ body {{
 {content}
 </body>
 </html>
-'''
+"""
 
 TEMPLATE_WORKFLOW_CODE = '''"""Template-based PowerPoint workflow."""
 import subprocess
@@ -442,13 +499,41 @@ def pdf_to_images(pdf_path: str, output_prefix: str, dpi: int = 150) -> list[str
 
 # Anti-patterns
 ANTIPATTERNS = [
-    {"pattern": r"<div>[^<]*text[^<]*</div>", "issue": "Text directly in div", "fix": "Wrap text in <p>, <h1>-<h6>, <ul>, or <ol> tags"},
-    {"pattern": r"linear-gradient|radial-gradient", "issue": "CSS gradients won't convert", "fix": "Rasterize gradients to PNG with Sharp first"},
-    {"pattern": r"font-family:\s*['\"]?(?!Arial|Helvetica|Times|Georgia|Courier|Verdana|Tahoma|Trebuchet|Impact)", "issue": "Non-web-safe font", "fix": "Use web-safe fonts: Arial, Helvetica, Times New Roman, Georgia, Courier New, Verdana, Tahoma, Trebuchet MS, Impact"},
-    {"pattern": r"[•\-\*]\s+\w", "issue": "Manual bullet symbols", "fix": "Use <ul> or <ol> lists instead of manual bullet characters"},
-    {"pattern": r"<span>[^<]+</span>(?!</p>)", "issue": "Text in span without parent", "fix": "Wrap in <p> tag: <p><span>text</span></p>"},
-    {"pattern": r"slide\d+\.xml.*slide\d+\.xml", "issue": "Multiple slide edits without validation", "fix": "Validate after each edit with validate.py"},
-    {"pattern": r"writeFile.*without.*validation", "issue": "Saving without visual validation", "fix": "Generate thumbnails and inspect before finalizing"},
+    {
+        "pattern": r"<div>[^<]*text[^<]*</div>",
+        "issue": "Text directly in div",
+        "fix": "Wrap text in <p>, <h1>-<h6>, <ul>, or <ol> tags",
+    },
+    {
+        "pattern": r"linear-gradient|radial-gradient",
+        "issue": "CSS gradients won't convert",
+        "fix": "Rasterize gradients to PNG with Sharp first",
+    },
+    {
+        "pattern": r"font-family:\s*['\"]?(?!Arial|Helvetica|Times|Georgia|Courier|Verdana|Tahoma|Trebuchet|Impact)",
+        "issue": "Non-web-safe font",
+        "fix": "Use web-safe fonts: Arial, Helvetica, Times New Roman, Georgia, Courier New, Verdana, Tahoma, Trebuchet MS, Impact",
+    },
+    {
+        "pattern": r"[•\-\*]\s+\w",
+        "issue": "Manual bullet symbols",
+        "fix": "Use <ul> or <ol> lists instead of manual bullet characters",
+    },
+    {
+        "pattern": r"<span>[^<]+</span>(?!</p>)",
+        "issue": "Text in span without parent",
+        "fix": "Wrap in <p> tag: <p><span>text</span></p>",
+    },
+    {
+        "pattern": r"slide\d+\.xml.*slide\d+\.xml",
+        "issue": "Multiple slide edits without validation",
+        "fix": "Validate after each edit with validate.py",
+    },
+    {
+        "pattern": r"writeFile.*without.*validation",
+        "issue": "Saving without visual validation",
+        "fix": "Generate thumbnails and inspect before finalizing",
+    },
 ]
 
 # ---------------------------------------------------------------------------
@@ -473,7 +558,9 @@ class ExtractionInput(BaseModel):
 class CreationInput(BaseModel):
     model_config = _CFG
     creation_type: str = Field(..., description="Type: basic, html2pptx, pptxgenjs")
-    aspect_ratio: str = Field(default="16:9", description="Aspect ratio: 16:9, 4:3, 16:10")
+    aspect_ratio: str = Field(
+        default="16:9", description="Aspect ratio: 16:9, 4:3, 16:10"
+    )
     title: str = Field(default="Presentation", description="Presentation title")
     author: str = Field(default="", description="Author name")
 
@@ -494,7 +581,9 @@ class CreationInput(BaseModel):
 
 class SlideHtmlInput(BaseModel):
     model_config = _CFG
-    layout_type: str = Field(..., description="Type: title, content, two_column, image_text, quote, section")
+    layout_type: str = Field(
+        ..., description="Type: title, content, two_column, image_text, quote, section"
+    )
     aspect_ratio: str = Field(default="16:9", description="Aspect ratio")
     title: str = Field(default="", description="Slide title")
     content: str = Field(default="", description="Main content")
@@ -510,13 +599,17 @@ class SlideHtmlInput(BaseModel):
 
 class TemplateInput(BaseModel):
     model_config = _CFG
-    workflow_step: str = Field(..., description="Step: analyze, rearrange, inventory, replace")
+    workflow_step: str = Field(
+        ..., description="Step: analyze, rearrange, inventory, replace"
+    )
 
     @field_validator("workflow_step")
     @classmethod
     def _check_step(cls, v: str) -> str:
         if v not in ("analyze", "rearrange", "inventory", "replace", "full"):
-            raise ValueError("workflow_step must be analyze, rearrange, inventory, replace, or full")
+            raise ValueError(
+                "workflow_step must be analyze, rearrange, inventory, replace, or full"
+            )
         return v
 
 
@@ -553,24 +646,34 @@ class LayoutInput(BaseModel):
 
 class ThumbnailInput(BaseModel):
     model_config = _CFG
-    include_pdf_conversion: bool = Field(default=False, description="Include PDF conversion code")
+    include_pdf_conversion: bool = Field(
+        default=False, description="Include PDF conversion code"
+    )
 
 
 class AntipatternInput(BaseModel):
     model_config = _CFG
-    code: str = Field(..., min_length=10, max_length=50000, description="Code to analyze")
+    code: str = Field(
+        ..., min_length=10, max_length=50000, description="Code to analyze"
+    )
 
 
 class ScaffoldInput(BaseModel):
     model_config = _CFG
-    project_name: str = Field(..., min_length=1, max_length=100, description="Project name")
-    workflow: str = Field(default="html2pptx", description="Workflow: html2pptx, template, ooxml")
+    project_name: str = Field(
+        ..., min_length=1, max_length=100, description="Project name"
+    )
+    workflow: str = Field(
+        default="html2pptx", description="Workflow: html2pptx, template, ooxml"
+    )
 
     @field_validator("project_name")
     @classmethod
     def _check_name(cls, v: str) -> str:
         if not re.match(r"^[a-zA-Z][a-zA-Z0-9_-]*$", v):
-            raise ValueError("project_name must start with letter, contain only alphanumeric, underscore, hyphen")
+            raise ValueError(
+                "project_name must start with letter, contain only alphanumeric, underscore, hyphen"
+            )
         return v
 
 
@@ -594,31 +697,35 @@ def _detect_antipatterns(code: str) -> list[dict]:
     findings = []
     for ap in ANTIPATTERNS:
         if re.search(ap["pattern"], code, re.IGNORECASE):
-            findings.append({
-                "issue": ap["issue"],
-                "fix": ap["fix"],
-                "pattern": ap["pattern"],
-            })
+            findings.append(
+                {
+                    "issue": ap["issue"],
+                    "fix": ap["fix"],
+                    "pattern": ap["pattern"],
+                }
+            )
     return findings
 
 
-def _generate_slide_html(layout_type: str, aspect_ratio: str, title: str, content: str, palette: dict) -> str:
+def _generate_slide_html(
+    layout_type: str, aspect_ratio: str, title: str, content: str, palette: dict
+) -> str:
     """Generate HTML for a slide."""
     width, height = _get_dimensions(aspect_ratio)
     colors = palette["colors"]
 
     if layout_type == "title":
-        html_content = f'''<div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40pt;">
+        html_content = f"""<div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40pt;">
     <h1 style="font-size: 48pt; color: {colors['primary']}; margin: 0; text-align: center;">{title}</h1>
     <p style="font-size: 24pt; color: {colors['secondary']}; margin-top: 20pt; text-align: center;">{content}</p>
-</div>'''
+</div>"""
     elif layout_type == "content":
-        html_content = f'''<div style="padding: 30pt;">
+        html_content = f"""<div style="padding: 30pt;">
     <h2 style="font-size: 36pt; color: {colors['primary']}; margin: 0 0 20pt 0;">{title}</h2>
     <p style="font-size: 18pt; color: {colors['secondary']}; line-height: 1.5;">{content}</p>
-</div>'''
+</div>"""
     elif layout_type == "two_column":
-        html_content = f'''<div style="padding: 30pt;">
+        html_content = f"""<div style="padding: 30pt;">
     <h2 style="font-size: 32pt; color: {colors['primary']}; margin: 0 0 20pt 0;">{title}</h2>
     <div style="display: flex; gap: 30pt;">
         <div style="flex: 1;">
@@ -628,18 +735,18 @@ def _generate_slide_html(layout_type: str, aspect_ratio: str, title: str, conten
             <!-- Chart/image placeholder -->
         </div>
     </div>
-</div>'''
+</div>"""
     elif layout_type == "quote":
-        html_content = f'''<div style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 60pt; background: {colors['primary']};">
+        html_content = f"""<div style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 60pt; background: {colors['primary']};">
     <p style="font-size: 28pt; color: {colors['background']}; font-style: italic; text-align: center;">"{content}"</p>
     <p style="font-size: 18pt; color: {colors['accent']}; text-align: center; margin-top: 20pt;">— {title}</p>
-</div>'''
+</div>"""
     elif layout_type == "section":
-        html_content = f'''<div style="flex: 1; display: flex; align-items: center; justify-content: center; background: {colors['primary']};">
+        html_content = f"""<div style="flex: 1; display: flex; align-items: center; justify-content: center; background: {colors['primary']};">
     <h1 style="font-size: 56pt; color: {colors['background']}; text-align: center;">{title}</h1>
-</div>'''
+</div>"""
     else:  # image_text
-        html_content = f'''<div style="display: flex; height: 100%;">
+        html_content = f"""<div style="display: flex; height: 100%;">
     <div style="flex: 1; padding: 30pt; display: flex; flex-direction: column; justify-content: center;">
         <h2 style="font-size: 32pt; color: {colors['primary']}; margin: 0 0 20pt 0;">{title}</h2>
         <p style="font-size: 16pt; color: {colors['secondary']}; line-height: 1.5;">{content}</p>
@@ -647,7 +754,7 @@ def _generate_slide_html(layout_type: str, aspect_ratio: str, title: str, conten
     <div style="flex: 1;" class="placeholder">
         <!-- Image placeholder -->
     </div>
-</div>'''
+</div>"""
 
     return SLIDE_HTML_TEMPLATE.format(
         width=width,
@@ -759,7 +866,7 @@ async def pptx_generate_creation_code(
                 author=inp.author,
             )
         elif inp.creation_type == "pptxgenjs":
-            code = f'''/**
+            code = f"""/**
  * Create PowerPoint using PptxGenJS directly.
  */
 const PptxGenJS = require('pptxgenjs');
@@ -810,7 +917,7 @@ async function createPresentation() {{
 }}
 
 createPresentation();
-'''
+"""
         else:  # basic
             code = '''"""Create basic PowerPoint using python-pptx."""
 from pptx import Presentation
@@ -844,7 +951,9 @@ def create_presentation(output_path: str, title: str, slides: list[dict]) -> Non
     prs.save(output_path)
 '''
 
-        return json.dumps({"code": code, "type": inp.creation_type, "aspect_ratio": inp.aspect_ratio})
+        return json.dumps(
+            {"code": code, "type": inp.creation_type, "aspect_ratio": inp.aspect_ratio}
+        )
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -868,14 +977,18 @@ async def pptx_generate_slide_html(
         )
 
         palette = COLOR_PALETTES.get(inp.palette_name, COLOR_PALETTES["classic_blue"])
-        html = _generate_slide_html(inp.layout_type, inp.aspect_ratio, inp.title, inp.content, palette)
+        html = _generate_slide_html(
+            inp.layout_type, inp.aspect_ratio, inp.title, inp.content, palette
+        )
 
-        return json.dumps({
-            "html": html,
-            "layout": inp.layout_type,
-            "palette": palette["name"],
-            "dimensions": _get_dimensions(inp.aspect_ratio),
-        })
+        return json.dumps(
+            {
+                "html": html,
+                "layout": inp.layout_type,
+                "palette": palette["name"],
+                "dimensions": _get_dimensions(inp.aspect_ratio),
+            }
+        )
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -1131,19 +1244,23 @@ async def pptx_generate_color_palette(
         # Return top 5 recommendations
         recommendations = []
         for score, name, palette in scored[:5]:
-            recommendations.append({
-                "name": palette["name"],
-                "id": name,
-                "colors": palette["colors"],
-                "mood": palette["mood"],
-                "match_score": score,
-            })
+            recommendations.append(
+                {
+                    "name": palette["name"],
+                    "id": name,
+                    "colors": palette["colors"],
+                    "mood": palette["mood"],
+                    "match_score": score,
+                }
+            )
 
-        return json.dumps({
-            "recommendations": recommendations,
-            "search_terms": search_terms.strip(),
-            "web_safe_fonts": WEB_SAFE_FONTS,
-        })
+        return json.dumps(
+            {
+                "recommendations": recommendations,
+                "search_terms": search_terms.strip(),
+                "web_safe_fonts": WEB_SAFE_FONTS,
+            }
+        )
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -1162,54 +1279,142 @@ async def pptx_generate_layout(
             "title": {
                 "name": "Title Slide",
                 "regions": [
-                    {"name": "title", "x": 50, "y": height * 0.35, "w": width - 100, "h": 80, "font_size": 48},
-                    {"name": "subtitle", "x": 50, "y": height * 0.55, "w": width - 100, "h": 40, "font_size": 24},
+                    {
+                        "name": "title",
+                        "x": 50,
+                        "y": height * 0.35,
+                        "w": width - 100,
+                        "h": 80,
+                        "font_size": 48,
+                    },
+                    {
+                        "name": "subtitle",
+                        "x": 50,
+                        "y": height * 0.55,
+                        "w": width - 100,
+                        "h": 40,
+                        "font_size": 24,
+                    },
                 ],
             },
             "content": {
                 "name": "Content Slide",
                 "regions": [
-                    {"name": "header", "x": 30, "y": 20, "w": width - 60, "h": 50, "font_size": 32},
-                    {"name": "body", "x": 30, "y": 80, "w": width - 60, "h": height - 110, "font_size": 18},
+                    {
+                        "name": "header",
+                        "x": 30,
+                        "y": 20,
+                        "w": width - 60,
+                        "h": 50,
+                        "font_size": 32,
+                    },
+                    {
+                        "name": "body",
+                        "x": 30,
+                        "y": 80,
+                        "w": width - 60,
+                        "h": height - 110,
+                        "font_size": 18,
+                    },
                 ],
             },
             "two_column": {
                 "name": "Two Column",
                 "regions": [
-                    {"name": "header", "x": 30, "y": 20, "w": width - 60, "h": 50, "font_size": 32},
-                    {"name": "left", "x": 30, "y": 80, "w": (width - 90) * 0.4, "h": height - 110, "font_size": 16},
-                    {"name": "right", "x": 30 + (width - 90) * 0.45, "y": 80, "w": (width - 90) * 0.55, "h": height - 110, "font_size": 16},
+                    {
+                        "name": "header",
+                        "x": 30,
+                        "y": 20,
+                        "w": width - 60,
+                        "h": 50,
+                        "font_size": 32,
+                    },
+                    {
+                        "name": "left",
+                        "x": 30,
+                        "y": 80,
+                        "w": (width - 90) * 0.4,
+                        "h": height - 110,
+                        "font_size": 16,
+                    },
+                    {
+                        "name": "right",
+                        "x": 30 + (width - 90) * 0.45,
+                        "y": 80,
+                        "w": (width - 90) * 0.55,
+                        "h": height - 110,
+                        "font_size": 16,
+                    },
                 ],
             },
             "image_text": {
                 "name": "Image + Text",
                 "regions": [
-                    {"name": "text", "x": 30, "y": 20, "w": (width - 60) * 0.5, "h": height - 40, "font_size": 18},
-                    {"name": "image", "x": (width + 30) * 0.5, "y": 20, "w": (width - 60) * 0.5, "h": height - 40, "type": "placeholder"},
+                    {
+                        "name": "text",
+                        "x": 30,
+                        "y": 20,
+                        "w": (width - 60) * 0.5,
+                        "h": height - 40,
+                        "font_size": 18,
+                    },
+                    {
+                        "name": "image",
+                        "x": (width + 30) * 0.5,
+                        "y": 20,
+                        "w": (width - 60) * 0.5,
+                        "h": height - 40,
+                        "type": "placeholder",
+                    },
                 ],
             },
             "quote": {
                 "name": "Quote Slide",
                 "regions": [
-                    {"name": "quote", "x": 60, "y": height * 0.3, "w": width - 120, "h": 100, "font_size": 28, "style": "italic"},
-                    {"name": "attribution", "x": 60, "y": height * 0.65, "w": width - 120, "h": 30, "font_size": 18},
+                    {
+                        "name": "quote",
+                        "x": 60,
+                        "y": height * 0.3,
+                        "w": width - 120,
+                        "h": 100,
+                        "font_size": 28,
+                        "style": "italic",
+                    },
+                    {
+                        "name": "attribution",
+                        "x": 60,
+                        "y": height * 0.65,
+                        "w": width - 120,
+                        "h": 30,
+                        "font_size": 18,
+                    },
                 ],
             },
             "section": {
                 "name": "Section Divider",
                 "regions": [
-                    {"name": "title", "x": 50, "y": height * 0.4, "w": width - 100, "h": 80, "font_size": 56, "align": "center"},
+                    {
+                        "name": "title",
+                        "x": 50,
+                        "y": height * 0.4,
+                        "w": width - 100,
+                        "h": 80,
+                        "font_size": 56,
+                        "align": "center",
+                    },
                 ],
             },
         }
 
         layout = layouts.get(inp.layout_type, layouts["content"])
 
-        return json.dumps({
-            "layout": layout,
-            "dimensions": {"width": width, "height": height, "unit": "pt"},
-            "aspect_ratio": inp.aspect_ratio,
-        })
+        return json.dumps(
+            {
+                "layout": layout,
+                "dimensions": {"width": width, "height": height, "unit": "pt"},
+                "aspect_ratio": inp.aspect_ratio,
+            }
+        )
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -1254,11 +1459,13 @@ async def pptx_detect_antipatterns(
         inp = AntipatternInput(code=code)
         findings = _detect_antipatterns(inp.code)
 
-        return json.dumps({
-            "findings": findings,
-            "count": len(findings),
-            "clean": len(findings) == 0,
-        })
+        return json.dumps(
+            {
+                "findings": findings,
+                "count": len(findings),
+                "clean": len(findings) == 0,
+            }
+        )
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -1273,7 +1480,7 @@ async def pptx_generate_scaffold(
         inp = ScaffoldInput(project_name=project_name, workflow=workflow)
 
         files = {
-            f"{inp.project_name}/README.md": f'''# {inp.project_name}
+            f"{inp.project_name}/README.md": f"""# {inp.project_name}
 
 PowerPoint presentation project using {inp.workflow} workflow.
 
@@ -1287,18 +1494,23 @@ pip install markitdown defusedxml
 ## Usage
 
 See `create_presentation.js` for the main workflow.
-''',
+""",
         }
 
         if inp.workflow == "html2pptx":
-            files[f"{inp.project_name}/create_presentation.js"] = HTML2PPTX_TEMPLATE.format(
-                aspect_ratio="16_9",
-                title=inp.project_name,
-                author="",
+            files[f"{inp.project_name}/create_presentation.js"] = (
+                HTML2PPTX_TEMPLATE.format(
+                    aspect_ratio="16_9",
+                    title=inp.project_name,
+                    author="",
+                )
             )
             files[f"{inp.project_name}/slides/slide1.html"] = _generate_slide_html(
-                "title", "16:9", "Presentation Title", "Subtitle goes here",
-                COLOR_PALETTES["classic_blue"]
+                "title",
+                "16:9",
+                "Presentation Title",
+                "Subtitle goes here",
+                COLOR_PALETTES["classic_blue"],
             )
         elif inp.workflow == "template":
             files[f"{inp.project_name}/workflow.py"] = TEMPLATE_WORKFLOW_CODE
@@ -1307,11 +1519,13 @@ See `create_presentation.js` for the main workflow.
 
         files[f"{inp.project_name}/validate.py"] = THUMBNAIL_CODE
 
-        return json.dumps({
-            "project": inp.project_name,
-            "workflow": inp.workflow,
-            "files": files,
-        })
+        return json.dumps(
+            {
+                "project": inp.project_name,
+                "workflow": inp.workflow,
+                "files": files,
+            }
+        )
     except Exception as e:
         return json.dumps({"error": str(e)})
 

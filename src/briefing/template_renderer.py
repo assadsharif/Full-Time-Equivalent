@@ -18,7 +18,7 @@ class TemplateRenderer:
     def __init__(self, template_dir: Path):
         self._env = Environment(
             loader=FileSystemLoader(str(template_dir)),
-            autoescape=False,           # Markdown output — no HTML escaping
+            autoescape=False,  # Markdown output — no HTML escaping
             keep_trailing_newline=True,
         )
 

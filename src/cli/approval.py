@@ -76,7 +76,9 @@ def scan_pending_approvals(vault_path: Path) -> List[Dict]:
                 try:
                     # Handle both string and datetime objects (YAML may parse dates automatically)
                     if isinstance(expires_at, str):
-                        expiry_time = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+                        expiry_time = datetime.fromisoformat(
+                            expires_at.replace("Z", "+00:00")
+                        )
                     elif isinstance(expires_at, datetime):
                         expiry_time = expires_at
                         if expiry_time.tzinfo is None:
@@ -93,17 +95,19 @@ def scan_pending_approvals(vault_path: Path) -> List[Dict]:
                     pass
 
             # Add to list
-            pending_approvals.append({
-                "file": approval_file,
-                "approval_id": frontmatter.get("approval_id", approval_file.stem),
-                "action_type": frontmatter.get("action_type", "unknown"),
-                "risk_level": frontmatter.get("risk_level", "unknown"),
-                "created_at": frontmatter.get("created_at", ""),
-                "expires_at": expires_at,
-                "task_id": frontmatter.get("task_id", ""),
-                "frontmatter": frontmatter,
-                "body": approval_data.get("body", ""),
-            })
+            pending_approvals.append(
+                {
+                    "file": approval_file,
+                    "approval_id": frontmatter.get("approval_id", approval_file.stem),
+                    "action_type": frontmatter.get("action_type", "unknown"),
+                    "risk_level": frontmatter.get("risk_level", "unknown"),
+                    "created_at": frontmatter.get("created_at", ""),
+                    "expires_at": expires_at,
+                    "task_id": frontmatter.get("task_id", ""),
+                    "frontmatter": frontmatter,
+                    "body": approval_data.get("body", ""),
+                }
+            )
 
         except Exception:
             # Skip files that can't be parsed
@@ -145,7 +149,11 @@ def display_pending_approvals(approvals: List[Dict]) -> None:
         risk_level = approval["risk_level"]
         created_at = approval["created_at"]
         expires_at = approval["expires_at"] or "-"
-        task_id = approval["task_id"][:30] + "..." if len(approval["task_id"]) > 30 else approval["task_id"]
+        task_id = (
+            approval["task_id"][:30] + "..."
+            if len(approval["task_id"]) > 30
+            else approval["task_id"]
+        )
 
         # Color code risk level
         if risk_level.lower() == "high":
@@ -158,7 +166,7 @@ def display_pending_approvals(approvals: List[Dict]) -> None:
         # Format dates
         try:
             if isinstance(created_at, str):
-                created_dt = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
+                created_dt = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
             elif isinstance(created_at, datetime):
                 created_dt = created_at
             else:
@@ -174,7 +182,9 @@ def display_pending_approvals(approvals: List[Dict]) -> None:
         try:
             if expires_at != "-":
                 if isinstance(expires_at, str):
-                    expires_dt = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+                    expires_dt = datetime.fromisoformat(
+                        expires_at.replace("Z", "+00:00")
+                    )
                 elif isinstance(expires_at, datetime):
                     expires_dt = expires_at
                 else:
@@ -266,11 +276,7 @@ def prompt_approval_decision() -> str:
     console.print("  [yellow]3.[/yellow] Skip (review later)")
 
     while True:
-        choice = Prompt.ask(
-            "\nEnter your choice",
-            choices=["1", "2", "3"],
-            default="3"
-        )
+        choice = Prompt.ask("\nEnter your choice", choices=["1", "2", "3"], default="3")
 
         if choice == "1":
             confirm = Confirm.ask("[yellow]Are you sure you want to approve?[/yellow]")
@@ -284,7 +290,9 @@ def prompt_approval_decision() -> str:
             return "skip"
 
 
-def log_approval_decision(approval_id: str, decision: str, reason: Optional[str] = None) -> None:
+def log_approval_decision(
+    approval_id: str, decision: str, reason: Optional[str] = None
+) -> None:
     """
     Log approval decision to audit trail.
 
@@ -304,6 +312,7 @@ def log_approval_decision(approval_id: str, decision: str, reason: Optional[str]
 
 
 # CLI Commands
+
 
 @click.group(name="approval")
 def approval_group():
@@ -359,9 +368,7 @@ def approval_pending_command(ctx: click.Context, vault_path: Optional[Path]):
 )
 @click.pass_context
 def approval_review_command(
-    ctx: click.Context,
-    approval_id: str,
-    vault_path: Optional[Path]
+    ctx: click.Context, approval_id: str, vault_path: Optional[Path]
 ):
     """
     Review and decide on approval.
@@ -403,7 +410,9 @@ def approval_review_command(
             try:
                 # Handle both string and datetime objects (YAML may parse dates automatically)
                 if isinstance(expires_at, str):
-                    expiry_time = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+                    expiry_time = datetime.fromisoformat(
+                        expires_at.replace("Z", "+00:00")
+                    )
                     expires_at_str = expires_at
                 elif isinstance(expires_at, datetime):
                     expiry_time = expires_at
@@ -471,7 +480,7 @@ def approval_review_command(
         ApprovalNotFoundError,
         ApprovalExpiredError,
         ApprovalInvalidNonceError,
-        ApprovalIntegrityError
+        ApprovalIntegrityError,
     ) as e:
         display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
         ctx.exit(1)
@@ -498,7 +507,9 @@ def _display_audit_events(events: List[Dict]) -> None:
         console.print("[yellow]No audit events found[/yellow]")
         return
 
-    table = Table(title="Approval Audit Trail", show_header=True, header_style="bold cyan")
+    table = Table(
+        title="Approval Audit Trail", show_header=True, header_style="bold cyan"
+    )
     table.add_column("Timestamp", style="dim")
     table.add_column("Event", style="bold")
     table.add_column("Approval ID", overflow="fold")
@@ -604,7 +615,9 @@ def approval_audit_command(
             _display_audit_stats(stats)
         else:
             events = query_svc.query_approval_events(
-                task_id=task_id, approval_id=approval_id, status=status,
+                task_id=task_id,
+                approval_id=approval_id,
+                status=status,
             )
             _display_audit_events(events)
 

@@ -19,25 +19,24 @@ from pathlib import Path
 
 from src.orchestrator.models import TaskState
 
-
 # Adjacency map: state → set of valid next states
 _TRANSITIONS: dict[TaskState, set[TaskState]] = {
-    TaskState.NEEDS_ACTION:      {TaskState.PLANNING},
-    TaskState.PLANNING:          {TaskState.PENDING_APPROVAL, TaskState.EXECUTING},
-    TaskState.PENDING_APPROVAL:  {TaskState.EXECUTING, TaskState.REJECTED},
-    TaskState.EXECUTING:         {TaskState.DONE, TaskState.REJECTED},
-    TaskState.DONE:              set(),       # terminal
-    TaskState.REJECTED:          set(),       # terminal
+    TaskState.NEEDS_ACTION: {TaskState.PLANNING},
+    TaskState.PLANNING: {TaskState.PENDING_APPROVAL, TaskState.EXECUTING},
+    TaskState.PENDING_APPROVAL: {TaskState.EXECUTING, TaskState.REJECTED},
+    TaskState.EXECUTING: {TaskState.DONE, TaskState.REJECTED},
+    TaskState.DONE: set(),  # terminal
+    TaskState.REJECTED: set(),  # terminal
 }
 
 # Logical state → vault folder name
 _STATE_FOLDERS: dict[TaskState, str] = {
-    TaskState.NEEDS_ACTION:     "Needs_Action",
-    TaskState.PLANNING:         "In_Progress",
+    TaskState.NEEDS_ACTION: "Needs_Action",
+    TaskState.PLANNING: "In_Progress",
     TaskState.PENDING_APPROVAL: "Approvals",
-    TaskState.EXECUTING:        "In_Progress",
-    TaskState.DONE:             "Done",
-    TaskState.REJECTED:         "Needs_Action",  # rejected tasks go back for review
+    TaskState.EXECUTING: "In_Progress",
+    TaskState.DONE: "Done",
+    TaskState.REJECTED: "Needs_Action",  # rejected tasks go back for review
 }
 
 
@@ -69,7 +68,9 @@ class StateMachine:
     # Execution
     # ------------------------------------------------------------------
 
-    def transition(self, task_path: Path, current: TaskState, target: TaskState) -> Path:
+    def transition(
+        self, task_path: Path, current: TaskState, target: TaskState
+    ) -> Path:
         """
         Validate current → target, move the file, return new path.
 

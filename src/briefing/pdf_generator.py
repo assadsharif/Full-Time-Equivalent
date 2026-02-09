@@ -16,20 +16,20 @@ from src.briefing.models import BriefingData
 # Layout constants
 # ---------------------------------------------------------------------------
 
-_PAGE_W = 210          # A4 mm
+_PAGE_W = 210  # A4 mm
 _MARGIN = 15
 _TITLE_H = 12
 _SECTION_GAP = 6
 _ROW_H = 7
-_HEADER_BG = (41, 65, 122)   # dark navy
+_HEADER_BG = (41, 65, 122)  # dark navy
 _HEADER_FG = (255, 255, 255)
 _ALT_ROW_BG = (240, 243, 250)
 _PRIORITY_COLOURS = {
-    "urgent":  (220, 53,  69),
-    "high":    (253, 126, 4),
-    "medium":  (40,  167, 69),
-    "low":     (108, 117, 125),
-    "normal":  (108, 117, 125),
+    "urgent": (220, 53, 69),
+    "high": (253, 126, 4),
+    "medium": (40, 167, 69),
+    "low": (108, 117, 125),
+    "normal": (108, 117, 125),
 }
 
 
@@ -40,7 +40,15 @@ class _BriefingPDF(FPDF):
         self.set_font("Helvetica", "B", 9)
         self.set_text_color(*_HEADER_FG)
         self.set_fill_color(*_HEADER_BG)
-        self.cell(_PAGE_W - 2 * _MARGIN, 8, "AI Employee - Executive Briefing", new_x="LMARGIN", new_y="NEXT", fill=True, align="C")
+        self.cell(
+            _PAGE_W - 2 * _MARGIN,
+            8,
+            "AI Employee - Executive Briefing",
+            new_x="LMARGIN",
+            new_y="NEXT",
+            fill=True,
+            align="C",
+        )
         self.ln(3)
 
     def footer(self):
@@ -95,12 +103,26 @@ def _build(data: BriefingData) -> _BriefingPDF:
 def _title_block(pdf: _BriefingPDF, data: BriefingData) -> None:
     pdf.set_font("Helvetica", "B", 16)
     pdf.set_text_color(41, 65, 122)
-    pdf.cell(0, _TITLE_H, "Weekly Executive Briefing", new_x="LMARGIN", new_y="NEXT", align="C")
+    pdf.cell(
+        0,
+        _TITLE_H,
+        "Weekly Executive Briefing",
+        new_x="LMARGIN",
+        new_y="NEXT",
+        align="C",
+    )
     pdf.set_font("Helvetica", "", 9)
     pdf.set_text_color(80)
     period = f"{data.period_start.strftime('%Y-%m-%d')}  to  {data.period_end.strftime('%Y-%m-%d')}"
     pdf.cell(0, 5, period, new_x="LMARGIN", new_y="NEXT", align="C")
-    pdf.cell(0, 5, f"Generated: {data.generated_at.strftime('%Y-%m-%d %H:%M')}", new_x="LMARGIN", new_y="NEXT", align="C")
+    pdf.cell(
+        0,
+        5,
+        f"Generated: {data.generated_at.strftime('%Y-%m-%d %H:%M')}",
+        new_x="LMARGIN",
+        new_y="NEXT",
+        align="C",
+    )
     pdf.ln(_SECTION_GAP)
 
 
@@ -108,8 +130,20 @@ def _summary_stats(pdf: _BriefingPDF, data: BriefingData) -> None:
     _section_header(pdf, "Summary")
     pdf.set_font("Helvetica", "", 10)
     pdf.set_text_color(0)
-    pdf.cell(0, _ROW_H, f"Total tasks completed: {data.total_tasks}", new_x="LMARGIN", new_y="NEXT")
-    pdf.cell(0, _ROW_H, f"Average persistence iterations: {data.avg_iterations:.1f}", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(
+        0,
+        _ROW_H,
+        f"Total tasks completed: {data.total_tasks}",
+        new_x="LMARGIN",
+        new_y="NEXT",
+    )
+    pdf.cell(
+        0,
+        _ROW_H,
+        f"Average persistence iterations: {data.avg_iterations:.1f}",
+        new_x="LMARGIN",
+        new_y="NEXT",
+    )
     pdf.ln(_SECTION_GAP)
 
 
@@ -122,8 +156,12 @@ def _priority_breakdown(pdf: _BriefingPDF, data: BriefingData) -> None:
     pdf.set_fill_color(*_HEADER_BG)
     pdf.set_text_color(*_HEADER_FG)
     pdf.set_font("Helvetica", "B", 9)
-    pdf.cell(col_w, _ROW_H, "Priority", new_x="RIGHT", new_y="TOP", fill=True, align="C")
-    pdf.cell(col_w, _ROW_H, "Count", new_x="LMARGIN", new_y="NEXT", fill=True, align="C")
+    pdf.cell(
+        col_w, _ROW_H, "Priority", new_x="RIGHT", new_y="TOP", fill=True, align="C"
+    )
+    pdf.cell(
+        col_w, _ROW_H, "Count", new_x="LMARGIN", new_y="NEXT", fill=True, align="C"
+    )
     # data rows
     pdf.set_text_color(0)
     pdf.set_font("Helvetica", "", 9)
@@ -132,8 +170,24 @@ def _priority_breakdown(pdf: _BriefingPDF, data: BriefingData) -> None:
             pdf.set_fill_color(*_ALT_ROW_BG)
         else:
             pdf.set_fill_color(255)
-        pdf.cell(col_w, _ROW_H, pri.capitalize(), new_x="RIGHT", new_y="TOP", fill=True, align="L")
-        pdf.cell(col_w, _ROW_H, str(count), new_x="LMARGIN", new_y="NEXT", fill=True, align="C")
+        pdf.cell(
+            col_w,
+            _ROW_H,
+            pri.capitalize(),
+            new_x="RIGHT",
+            new_y="TOP",
+            fill=True,
+            align="L",
+        )
+        pdf.cell(
+            col_w,
+            _ROW_H,
+            str(count),
+            new_x="LMARGIN",
+            new_y="NEXT",
+            fill=True,
+            align="C",
+        )
     pdf.ln(_SECTION_GAP)
 
 
@@ -146,7 +200,9 @@ def _top_senders(pdf: _BriefingPDF, data: BriefingData) -> None:
     pdf.set_text_color(*_HEADER_FG)
     pdf.set_font("Helvetica", "B", 9)
     pdf.cell(col_w, _ROW_H, "Sender", new_x="RIGHT", new_y="TOP", fill=True, align="C")
-    pdf.cell(col_w, _ROW_H, "Tasks", new_x="LMARGIN", new_y="NEXT", fill=True, align="C")
+    pdf.cell(
+        col_w, _ROW_H, "Tasks", new_x="LMARGIN", new_y="NEXT", fill=True, align="C"
+    )
     pdf.set_text_color(0)
     pdf.set_font("Helvetica", "", 9)
     for i, (sender, count) in enumerate(data.top_senders):
@@ -154,8 +210,18 @@ def _top_senders(pdf: _BriefingPDF, data: BriefingData) -> None:
             pdf.set_fill_color(*_ALT_ROW_BG)
         else:
             pdf.set_fill_color(255)
-        pdf.cell(col_w, _ROW_H, sender, new_x="RIGHT", new_y="TOP", fill=True, align="L")
-        pdf.cell(col_w, _ROW_H, str(count), new_x="LMARGIN", new_y="NEXT", fill=True, align="C")
+        pdf.cell(
+            col_w, _ROW_H, sender, new_x="RIGHT", new_y="TOP", fill=True, align="L"
+        )
+        pdf.cell(
+            col_w,
+            _ROW_H,
+            str(count),
+            new_x="LMARGIN",
+            new_y="NEXT",
+            fill=True,
+            align="C",
+        )
     pdf.ln(_SECTION_GAP)
 
 
@@ -185,9 +251,27 @@ def _task_table(pdf: _BriefingPDF, data: BriefingData) -> None:
             pdf.set_fill_color(255)
         # truncate long names
         name = task.name[:38] + "..." if len(task.name) > 38 else task.name
-        pdf.cell(widths[0], _ROW_H, name, new_x="RIGHT", new_y="TOP", fill=True, align="L")
-        pdf.cell(widths[1], _ROW_H, task.priority.capitalize(), new_x="RIGHT", new_y="TOP", fill=True, align="C")
-        pdf.cell(widths[2], _ROW_H, task.sender, new_x="LMARGIN", new_y="NEXT", fill=True, align="L")
+        pdf.cell(
+            widths[0], _ROW_H, name, new_x="RIGHT", new_y="TOP", fill=True, align="L"
+        )
+        pdf.cell(
+            widths[1],
+            _ROW_H,
+            task.priority.capitalize(),
+            new_x="RIGHT",
+            new_y="TOP",
+            fill=True,
+            align="C",
+        )
+        pdf.cell(
+            widths[2],
+            _ROW_H,
+            task.sender,
+            new_x="LMARGIN",
+            new_y="NEXT",
+            fill=True,
+            align="L",
+        )
 
 
 def _section_header(pdf: _BriefingPDF, title: str) -> None:

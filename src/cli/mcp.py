@@ -74,7 +74,7 @@ def load_mcp_registry() -> Dict:
         return {"servers": {}}
 
     try:
-        with open(registry_path, 'r') as f:
+        with open(registry_path, "r") as f:
             data = yaml.safe_load(f)
             return data if data else {"servers": {}}
     except yaml.YAMLError as e:
@@ -96,7 +96,7 @@ def save_mcp_registry(registry: Dict) -> None:
     registry_path = get_mcp_registry_path()
 
     try:
-        with open(registry_path, 'w') as f:
+        with open(registry_path, "w") as f:
             yaml.dump(registry, f, default_flow_style=False, sort_keys=False)
     except Exception as e:
         raise MCPRegistryError(f"Failed to save registry: {e}")
@@ -119,7 +119,7 @@ def validate_url(url: str) -> bool:
         parsed = urlparse(url)
 
         # Check scheme
-        if parsed.scheme not in ['http', 'https']:
+        if parsed.scheme not in ["http", "https"]:
             raise MCPInvalidURLError(
                 f"Invalid URL scheme: {parsed.scheme}. Must be http or https."
             )
@@ -165,33 +165,26 @@ def health_check_server(name: str, url: str, timeout: int = 5) -> Dict:
             return {
                 "status": "healthy",
                 "code": response.status_code,
-                "message": "Server responding"
+                "message": "Server responding",
             }
         else:
             return {
                 "status": "unhealthy",
                 "code": response.status_code,
-                "message": f"HTTP {response.status_code}"
+                "message": f"HTTP {response.status_code}",
             }
 
     except requests.exceptions.Timeout:
-        return {
-            "status": "unhealthy",
-            "message": "Connection timeout"
-        }
+        return {"status": "unhealthy", "message": "Connection timeout"}
     except requests.exceptions.ConnectionError:
-        return {
-            "status": "unhealthy",
-            "message": "Connection refused"
-        }
+        return {"status": "unhealthy", "message": "Connection refused"}
     except Exception as e:
-        return {
-            "status": "unhealthy",
-            "message": str(e)
-        }
+        return {"status": "unhealthy", "message": str(e)}
 
 
-def get_server_tools(name: str, url: str, timeout: int = 5, use_cache: bool = True) -> List[Dict]:
+def get_server_tools(
+    name: str, url: str, timeout: int = 5, use_cache: bool = True
+) -> List[Dict]:
     """
     Get available tools from MCP server with caching.
 
@@ -222,9 +215,7 @@ def get_server_tools(name: str, url: str, timeout: int = 5, use_cache: bool = Tr
         response = requests.get(tools_url, timeout=timeout)
 
         if response.status_code != 200:
-            raise MCPError(
-                f"Failed to get tools (HTTP {response.status_code})"
-            )
+            raise MCPError(f"Failed to get tools (HTTP {response.status_code})")
 
         data = response.json()
 
@@ -238,10 +229,7 @@ def get_server_tools(name: str, url: str, timeout: int = 5, use_cache: bool = Tr
 
         # Store in cache
         if use_cache:
-            _TOOL_CACHE[name] = {
-                "tools": tools,
-                "timestamp": time.time()
-            }
+            _TOOL_CACHE[name] = {"tools": tools, "timestamp": time.time()}
 
         return tools
 
@@ -273,7 +261,7 @@ def store_credentials(name: str, auth_file: Path) -> None:
             raise MCPError(f"Auth file not found: {auth_file}")
 
         # Read auth file
-        with open(auth_file, 'r') as f:
+        with open(auth_file, "r") as f:
             auth_data = f.read()
 
         # Validate it's JSON or YAML
@@ -448,6 +436,7 @@ def display_server_tools(name: str, tools: List[Dict]) -> None:
 
 # CLI Commands
 
+
 @click.group(name="mcp")
 def mcp_group():
     """MCP server management commands"""
@@ -491,12 +480,7 @@ def mcp_list_command(ctx: click.Context):
     help="Path to authentication credentials file (JSON or YAML)",
 )
 @click.pass_context
-def mcp_add_command(
-    ctx: click.Context,
-    name: str,
-    url: str,
-    auth_file: Optional[Path]
-):
+def mcp_add_command(ctx: click.Context, name: str, url: str, auth_file: Optional[Path]):
     """
     Add new MCP server.
 
@@ -533,7 +517,9 @@ def mcp_add_command(
         registry["servers"][name] = {
             "url": url,
             "auth": has_auth,
-            "added_at": click.get_current_context().obj.get("timestamp") if ctx.obj else None,
+            "added_at": (
+                click.get_current_context().obj.get("timestamp") if ctx.obj else None
+            ),
         }
 
         # Save registry
@@ -605,7 +591,7 @@ def mcp_test_command(ctx: click.Context, name: str, timeout: int):
                 MCPHealthCheckError(
                     f"Server '{name}' is unhealthy: {health.get('message', 'Unknown error')}"
                 ),
-                verbose=False
+                verbose=False,
             )
             ctx.exit(1)
 

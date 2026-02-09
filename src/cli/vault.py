@@ -38,7 +38,6 @@ from cli.utils import (
     resolve_vault_path,
 )
 
-
 console = Console()
 
 
@@ -129,7 +128,9 @@ def create_vault_structure(vault_path: Path) -> None:
 
     # Generate Company_Handbook.md with live date
     handbook_template = (templates_dir / "Company_Handbook.md").read_text()
-    handbook_content = handbook_template.format(date=datetime.now().strftime("%Y-%m-%d"))
+    handbook_content = handbook_template.format(
+        date=datetime.now().strftime("%Y-%m-%d")
+    )
     (vault_path / "Company_Handbook.md").write_text(handbook_content)
     display_success("Created: Company_Handbook.md")
 
@@ -187,7 +188,7 @@ def parse_approval_file(approval_path: Path) -> Dict:
     content = approval_path.read_text()
 
     # Extract YAML frontmatter
-    match = re.match(r'^---\s*\n(.*?)\n---\s*\n(.*)$', content, re.DOTALL)
+    match = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL)
     if not match:
         raise ValueError(f"Invalid approval file format: {approval_path.name}")
 
@@ -227,7 +228,7 @@ def validate_nonce(approval_data: Dict) -> bool:
         raise ApprovalInvalidNonceError(approval_data["path"].name)
 
     # Basic UUID format validation
-    uuid_pattern = r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+    uuid_pattern = r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
     if not re.match(uuid_pattern, str(nonce).lower()):
         raise ApprovalInvalidNonceError(approval_data["path"].name)
 
@@ -244,7 +245,7 @@ def compute_file_hash(content: str) -> str:
     Returns:
         Hex digest of SHA256 hash
     """
-    return hashlib.sha256(content.encode('utf-8')).hexdigest()
+    return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 
 def verify_integrity(approval_data: Dict) -> bool:
@@ -264,7 +265,13 @@ def verify_integrity(approval_data: Dict) -> bool:
     body_text = approval_data.get("body", "")
 
     # Check required fields exist
-    required_fields = ["task_id", "approval_id", "nonce", "action_type", "approval_status"]
+    required_fields = [
+        "task_id",
+        "approval_id",
+        "nonce",
+        "action_type",
+        "approval_status",
+    ]
     for field in required_fields:
         if field not in frontmatter:
             raise ApprovalIntegrityError(approval_data["path"].name)
@@ -279,7 +286,7 @@ def verify_integrity(approval_data: Dict) -> bool:
         if stored_hash != current_hash:
             raise ApprovalIntegrityError(
                 approval_data["path"].name,
-                details=f"Hash mismatch: file has been modified"
+                details=f"Hash mismatch: file has been modified",
             )
     else:
         # No hash stored - warn but don't fail for backward compatibility
@@ -301,7 +308,7 @@ def add_integrity_hash(file_path: Path) -> None:
     content = file_path.read_text()
 
     # Extract frontmatter and body
-    match = re.match(r'^---\s*\n(.*?)\n---\s*\n(.*)$', content, re.DOTALL)
+    match = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL)
     if not match:
         raise ValueError(f"Invalid file format: {file_path.name}")
 
@@ -316,14 +323,14 @@ def add_integrity_hash(file_path: Path) -> None:
     frontmatter["integrity_hash"] = body_hash
 
     # Write updated content
-    updated_content = f"---\n{yaml.dump(frontmatter, default_flow_style=False)}---\n{body_text}"
+    updated_content = (
+        f"---\n{yaml.dump(frontmatter, default_flow_style=False)}---\n{body_text}"
+    )
     file_path.write_text(updated_content)
 
 
 def update_approval_status(
-    approval_path: Path,
-    status: str,
-    reason: Optional[str] = None
+    approval_path: Path, status: str, reason: Optional[str] = None
 ) -> None:
     """
     Update approval file status.
@@ -336,7 +343,7 @@ def update_approval_status(
     content = approval_path.read_text()
 
     # Extract and update frontmatter
-    match = re.match(r'^---\s*\n(.*?)\n---\s*\n(.*)$', content, re.DOTALL)
+    match = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL)
     if not match:
         raise ValueError(f"Invalid approval file format")
 
@@ -351,11 +358,14 @@ def update_approval_status(
         frontmatter["rejection_reason"] = reason
 
     # Write updated content
-    updated_content = f"---\n{yaml.dump(frontmatter, default_flow_style=False)}---\n{body_text}"
+    updated_content = (
+        f"---\n{yaml.dump(frontmatter, default_flow_style=False)}---\n{body_text}"
+    )
     approval_path.write_text(updated_content)
 
 
 # CLI Commands
+
 
 @click.group(name="vault")
 def vault_group():
@@ -375,11 +385,7 @@ def vault_group():
     help="Overwrite existing vault structure",
 )
 @click.pass_context
-def vault_init_command(
-    ctx: click.Context,
-    vault_path: Optional[Path],
-    force: bool
-):
+def vault_init_command(ctx: click.Context, vault_path: Optional[Path], force: bool):
     """
     Initialize vault folder structure.
 
@@ -412,10 +418,7 @@ def vault_init_command(
 
         # Update checkpoint
         checkpoint_manager = get_checkpoint_manager()
-        checkpoint_manager.update_vault(
-            path=str(vault_path),
-            initialized=True
-        )
+        checkpoint_manager.update_vault(path=str(vault_path), initialized=True)
 
         display_success(f"\nVault initialized successfully at: {vault_path}")
         display_info("\nNext steps:")
@@ -435,10 +438,7 @@ def vault_init_command(
     help="Path to vault (overrides config)",
 )
 @click.pass_context
-def vault_status_command(
-    ctx: click.Context,
-    vault_path: Optional[Path]
-):
+def vault_status_command(ctx: click.Context, vault_path: Optional[Path]):
     """
     Show detailed vault statistics.
 
@@ -469,7 +469,9 @@ def vault_status_command(
         stats = get_vault_statistics(vault_path)
 
         # Create status table
-        table = Table(title="Vault Statistics", show_header=True, header_style="bold cyan")
+        table = Table(
+            title="Vault Statistics", show_header=True, header_style="bold cyan"
+        )
         table.add_column("Folder", style="cyan", width=20)
         table.add_column("Task Count", style="white", justify="right")
         table.add_column("Status", style="white")
@@ -491,10 +493,14 @@ def vault_status_command(
 
         # Alerts
         if stats.get("Approvals", 0) > 0:
-            display_warning(f"\n⚠ {stats['Approvals']} pending approvals - run 'fte approval pending'")
+            display_warning(
+                f"\n⚠ {stats['Approvals']} pending approvals - run 'fte approval pending'"
+            )
 
         if stats.get("Needs_Action", 0) > 10:
-            display_warning(f"\n⚠ {stats['Needs_Action']} tasks in Needs_Action - consider prioritizing")
+            display_warning(
+                f"\n⚠ {stats['Needs_Action']} tasks in Needs_Action - consider prioritizing"
+            )
 
     except VaultNotFoundError as e:
         display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
@@ -513,9 +519,7 @@ def vault_status_command(
 )
 @click.pass_context
 def vault_approve_command(
-    ctx: click.Context,
-    approval_id: str,
-    vault_path: Optional[Path]
+    ctx: click.Context, approval_id: str, vault_path: Optional[Path]
 ):
     """
     Approve a pending action.
@@ -576,7 +580,11 @@ def vault_approve_command(
         # Log to audit trail (basic console output for now)
         display_info(f"Audit: Approved at {datetime.now(timezone.utc).isoformat()}Z")
 
-    except (ApprovalNotFoundError, ApprovalInvalidNonceError, ApprovalIntegrityError) as e:
+    except (
+        ApprovalNotFoundError,
+        ApprovalInvalidNonceError,
+        ApprovalIntegrityError,
+    ) as e:
         display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
         ctx.exit(1)
     except Exception as e:
@@ -601,7 +609,7 @@ def vault_reject_command(
     ctx: click.Context,
     approval_id: str,
     vault_path: Optional[Path],
-    reason: Optional[str]
+    reason: Optional[str],
 ):
     """
     Reject a pending action.
@@ -667,7 +675,11 @@ def vault_reject_command(
         # Log to audit trail
         display_info(f"Audit: Rejected at {datetime.now(timezone.utc).isoformat()}Z")
 
-    except (ApprovalNotFoundError, ApprovalInvalidNonceError, ApprovalIntegrityError) as e:
+    except (
+        ApprovalNotFoundError,
+        ApprovalInvalidNonceError,
+        ApprovalIntegrityError,
+    ) as e:
         display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
         ctx.exit(1)
     except Exception as e:

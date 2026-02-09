@@ -12,6 +12,7 @@ class ControlPlaneError(Exception):
 
     Constitutional requirement (Section 9): Errors must never be hidden.
     """
+
     pass
 
 
@@ -21,6 +22,7 @@ class InvalidTransitionError(ControlPlaneError):
 
     Example: Attempting to move from Plans → Approved (skipping approval requirement)
     """
+
     pass
 
 
@@ -30,6 +32,7 @@ class ApprovalRequiredError(ControlPlaneError):
 
     Constitutional requirement (Section 6-7): Sensitive actions require approval.
     """
+
     pass
 
 
@@ -39,6 +42,7 @@ class StateInconsistencyError(ControlPlaneError):
 
     Constitutional requirement (Section 2): File system is source of truth.
     """
+
     pass
 
 
@@ -48,6 +52,7 @@ class LogWriteError(ControlPlaneError):
 
     Constitutional requirement (Section 8): Every action must be logged.
     """
+
     pass
 
 
@@ -57,4 +62,5 @@ class FileOperationError(ControlPlaneError):
 
     Constitutional requirement (Section 4): File moves must be atomic.
     """
+
     pass

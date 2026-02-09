@@ -19,7 +19,6 @@ from src.security.anomaly_detector import AnomalyDetector
 from src.security.incident_response import IncidentResponse
 from src.security.credential_vault import CredentialVault
 
-
 console = Console()
 
 
@@ -72,6 +71,7 @@ def alerts_command(limit: int, json_output: bool):
 
         if json_output:
             import json
+
             console.print(json.dumps(alerts, indent=2))
             return
 
@@ -90,6 +90,7 @@ def alerts_command(limit: int, json_output: bool):
         for alert in reversed(alerts):  # Most recent first
             # Parse timestamp
             from datetime import datetime
+
             ts = datetime.fromisoformat(alert["timestamp"].replace("Z", "+00:00"))
             time_str = ts.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -171,8 +172,12 @@ def scan_command(server: str):
         console.print(f"\n[yellow]⚠ Found {len(alerts)} anomalies:[/yellow]\n")
 
         for alert in alerts:
-            severity_icon = "🔴" if alert.severity.value in ["critical", "high"] else "🟡"
-            console.print(f"{severity_icon} [{alert.severity.value.upper()}] {alert.description}")
+            severity_icon = (
+                "🔴" if alert.severity.value in ["critical", "high"] else "🟡"
+            )
+            console.print(
+                f"{severity_icon} [{alert.severity.value.upper()}] {alert.description}"
+            )
             console.print(f"   Server: {alert.mcp_server}")
             console.print(f"   Type: {alert.anomaly_type}")
             console.print(
@@ -297,6 +302,7 @@ def incident_report_command(since: str, json_output: bool):
 
         if json_output:
             import json
+
             output = {
                 "report_id": report.report_id,
                 "timestamp": report.timestamp.isoformat(),
@@ -314,7 +320,9 @@ def incident_report_command(since: str, json_output: bool):
 
         # Display report
         console.print(f"[bold]Incident Report: {report.report_id}[/bold]\n")
-        console.print(f"[dim]Generated: {report.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')}[/dim]")
+        console.print(
+            f"[dim]Generated: {report.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')}[/dim]"
+        )
         console.print(f"[dim]Time Window: {report.time_window_hours} hours[/dim]\n")
 
         # Summary
@@ -337,14 +345,18 @@ def incident_report_command(since: str, json_output: bool):
             console.print("[bold yellow]Suspicious Activity[/bold yellow]")
             for action in report.suspicious_actions:
                 severity_icon = "🔴" if action.get("severity") == "high" else "🟡"
-                console.print(f"  {severity_icon} {action['type']}: {action.get('count', 'N/A')} occurrences")
+                console.print(
+                    f"  {severity_icon} {action['type']}: {action.get('count', 'N/A')} occurrences"
+                )
             console.print()
 
         # Failed operations
         if report.failed_operations:
             console.print("[bold red]Recent Failures[/bold red]")
             for fail in report.failed_operations[:5]:
-                console.print(f"  • {fail.get('server', 'unknown')}: {fail.get('result', 'error')}")
+                console.print(
+                    f"  • {fail.get('server', 'unknown')}: {fail.get('result', 'error')}"
+                )
             console.print()
 
         # Recommendations
@@ -386,7 +398,9 @@ def isolate_command(mcp_server: str, reason: str, confirm: bool):
     """
     try:
         if not confirm:
-            console.print(f"\n[bold red]⚠️  WARNING: This will isolate {mcp_server}[/bold red]")
+            console.print(
+                f"\n[bold red]⚠️  WARNING: This will isolate {mcp_server}[/bold red]"
+            )
             console.print("All requests to this server will be blocked.\n")
 
             if not click.confirm("Proceed with isolation?", default=False):
@@ -413,7 +427,9 @@ def isolate_command(mcp_server: str, reason: str, confirm: bool):
         console.print(f"\n  Server: {record.mcp_server}")
         console.print(f"  Reason: {record.reason}")
         console.print(f"  Isolation ID: {record.isolation_id}")
-        console.print(f"  Timestamp: {record.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+        console.print(
+            f"  Timestamp: {record.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')}"
+        )
 
         console.print(
             f"\n[yellow]⚠️  To restore: fte security restore {mcp_server}[/yellow]"
@@ -468,7 +484,9 @@ def restore_command(mcp_server: str, confirm: bool):
 
         console.print(f"\n[green]✓ Server restored successfully[/green]")
         console.print(f"\n  Server: {record.mcp_server}")
-        console.print(f"  Timestamp: {record.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+        console.print(
+            f"  Timestamp: {record.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')}"
+        )
 
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
@@ -501,7 +519,9 @@ def rotate_all_command(reason: str, confirm: bool):
     """
     try:
         if not confirm:
-            console.print("\n[bold red]⚠️  CRITICAL ACTION: MASS CREDENTIAL ROTATION[/bold red]")
+            console.print(
+                "\n[bold red]⚠️  CRITICAL ACTION: MASS CREDENTIAL ROTATION[/bold red]"
+            )
             console.print("This will invalidate ALL stored credentials.")
             console.print("Service interruption is expected.\n")
 
@@ -639,23 +659,40 @@ def dashboard_command(watch: bool, json_output: bool):
         if json_output:
             import json as _json
             from dataclasses import asdict
+
             console.print(_json.dumps(asdict(snap), indent=2, default=str))
             return
 
         console.clear() if watch else None
 
-        console.print("[bold cyan]╔══════════════════════════════════════════╗[/bold cyan]")
-        console.print("[bold cyan]║       FTE  Security  Dashboard           ║[/bold cyan]")
-        console.print("[bold cyan]╚══════════════════════════════════════════╝[/bold cyan]")
-        console.print(f"[dim]{snap.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')}[/dim]\n")
+        console.print(
+            "[bold cyan]╔══════════════════════════════════════════╗[/bold cyan]"
+        )
+        console.print(
+            "[bold cyan]║       FTE  Security  Dashboard           ║[/bold cyan]"
+        )
+        console.print(
+            "[bold cyan]╚══════════════════════════════════════════╝[/bold cyan]"
+        )
+        console.print(
+            f"[dim]{snap.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')}[/dim]\n"
+        )
 
         # ── Credentials ──
-        cred_icon = "[green]●[/green]" if snap.credentials.count > 0 else "[yellow]○[/yellow]"
+        cred_icon = (
+            "[green]●[/green]" if snap.credentials.count > 0 else "[yellow]○[/yellow]"
+        )
         backend = "keyring" if snap.credentials.keyring_backed else "encrypted-file"
-        console.print(f"  {cred_icon} Credentials: {snap.credentials.count} services  [{backend}]")
+        console.print(
+            f"  {cred_icon} Credentials: {snap.credentials.count} services  [{backend}]"
+        )
 
         # ── Verified MCPs ──
-        ver_icon = "[green]●[/green]" if snap.verification.trusted_count > 0 else "[yellow]○[/yellow]"
+        ver_icon = (
+            "[green]●[/green]"
+            if snap.verification.trusted_count > 0
+            else "[yellow]○[/yellow]"
+        )
         console.print(f"  {ver_icon} Verified MCPs: {snap.verification.trusted_count}")
 
         # ── Rate Limits ──
@@ -665,7 +702,9 @@ def dashboard_command(watch: bool, json_output: bool):
         else:
             rl_icon = "[green]●[/green]"
             throttle_msg = ""
-        console.print(f"  {rl_icon} Rate Limits: {len(snap.rate_limits.buckets)} buckets{throttle_msg}")
+        console.print(
+            f"  {rl_icon} Rate Limits: {len(snap.rate_limits.buckets)} buckets{throttle_msg}"
+        )
 
         # ── Circuit Breakers ──
         if snap.circuit_breakers.open_count > 0:
@@ -682,7 +721,9 @@ def dashboard_command(watch: bool, json_output: bool):
 
         # ── Isolated Servers ──
         if snap.isolated_servers:
-            console.print(f"  [red]⛓[/red] Isolated: {', '.join(snap.isolated_servers)}")
+            console.print(
+                f"  [red]⛓[/red] Isolated: {', '.join(snap.isolated_servers)}"
+            )
 
         console.print()
 
@@ -691,7 +732,11 @@ def dashboard_command(watch: bool, json_output: bool):
             console.print("  [bold yellow]Recent Alerts[/bold yellow]")
             for a in snap.recent_alerts[-5:]:
                 sev = a.severity.upper()
-                icon = "[red]🔴[/red]" if sev in ("HIGH", "CRITICAL") else "[yellow]🟡[/yellow]"
+                icon = (
+                    "[red]🔴[/red]"
+                    if sev in ("HIGH", "CRITICAL")
+                    else "[yellow]🟡[/yellow]"
+                )
                 console.print(f"    {icon} [{sev}] {a.description}")
             console.print()
         else:
@@ -756,6 +801,7 @@ def health_command(json_output: bool, verbose: bool):
 
     # ── Gather data ──
     from datetime import datetime, timezone
+
     since_1h = datetime.now(timezone.utc) - timedelta(hours=1)
 
     snap = dashboard.snapshot()
@@ -766,11 +812,17 @@ def health_command(json_output: bool, verbose: bool):
     if error_rate > MAX_ERROR_RATE:
         warnings_list.append(f"Error rate {error_rate:.1%} > {MAX_ERROR_RATE:.0%}")
     if snap.rate_limits.throttled_count > MAX_THROTTLED:
-        warnings_list.append(f"{snap.rate_limits.throttled_count} throttled buckets > {MAX_THROTTLED}")
+        warnings_list.append(
+            f"{snap.rate_limits.throttled_count} throttled buckets > {MAX_THROTTLED}"
+        )
     if snap.circuit_breakers.open_count > MAX_OPEN_CIRCUITS:
-        warnings_list.append(f"{snap.circuit_breakers.open_count} open circuits > {MAX_OPEN_CIRCUITS}")
+        warnings_list.append(
+            f"{snap.circuit_breakers.open_count} open circuits > {MAX_OPEN_CIRCUITS}"
+        )
     if len(snap.recent_alerts) > MAX_ALERTS:
-        warnings_list.append(f"{len(snap.recent_alerts)} unresolved alerts > {MAX_ALERTS}")
+        warnings_list.append(
+            f"{len(snap.recent_alerts)} unresolved alerts > {MAX_ALERTS}"
+        )
 
     if len(warnings_list) == 0:
         status, exit_code = "HEALTHY", 0
@@ -785,16 +837,24 @@ def health_command(json_output: bool, verbose: bool):
     # ── Output ──
     if json_output:
         import json
-        console.print(json.dumps({
-            "status": status,
-            "error_rate": round(error_rate, 4),
-            "throttled_buckets": snap.rate_limits.throttled_count,
-            "open_circuits": snap.circuit_breakers.open_count,
-            "alert_count": len(snap.recent_alerts),
-            "warnings": warnings_list,
-        }, indent=2))
+
+        console.print(
+            json.dumps(
+                {
+                    "status": status,
+                    "error_rate": round(error_rate, 4),
+                    "throttled_buckets": snap.rate_limits.throttled_count,
+                    "open_circuits": snap.circuit_breakers.open_count,
+                    "alert_count": len(snap.recent_alerts),
+                    "warnings": warnings_list,
+                },
+                indent=2,
+            )
+        )
     else:
-        console.print(f"\n{status_style}[bold]{status}[/bold][/{status_style.strip('[]')}]")
+        console.print(
+            f"\n{status_style}[bold]{status}[/bold][/{status_style.strip('[]')}]"
+        )
 
         if verbose:
             console.print(f"\n  Error rate:        {error_rate:.2%}")
@@ -851,20 +911,25 @@ def metrics_command(since: str, json_output: bool):
 
     if json_output:
         import json
+
         console.print(json.dumps(summary, indent=2))
         return
 
     console.print(f"\n[bold cyan]Security Metrics  (last {since})[/bold cyan]\n")
     console.print(f"  Credential accesses:      {summary['credential_access_count']}")
     console.print(f"  MCP actions:              {summary['mcp_action_count']}")
-    console.print(f"  Verification failures:    {summary['verification_failure_count']}")
+    console.print(
+        f"  Verification failures:    {summary['verification_failure_count']}"
+    )
     console.print(f"  Rate-limit hits:          {summary['rate_limit_hit_count']}")
     console.print(f"  Circuit trips:            {summary['circuit_open_count']}")
     console.print(f"  Error rate:               {summary['error_rate']:.2%}")
 
     if summary["per_server_actions"]:
         console.print("\n  [bold]Per-Server Actions[/bold]")
-        for srv, count in sorted(summary["per_server_actions"].items(), key=lambda x: -x[1]):
+        for srv, count in sorted(
+            summary["per_server_actions"].items(), key=lambda x: -x[1]
+        ):
             errs = summary["per_server_errors"].get(srv, 0)
             err_label = f"  [red]({errs} errors)[/red]" if errs else ""
             console.print(f"    {srv}: {count}{err_label}")

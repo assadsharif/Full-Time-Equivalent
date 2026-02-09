@@ -30,7 +30,9 @@ class HealthCheck:
                 will instantiate one at default path.
         """
         self._vault_path = vault_path
-        self._checkpoint_path = vault_path.parent / ".fte" / "orchestrator.checkpoint.json"
+        self._checkpoint_path = (
+            vault_path.parent / ".fte" / "orchestrator.checkpoint.json"
+        )
         if metrics_collector:
             self._metrics = metrics_collector
         else:
@@ -51,12 +53,18 @@ class HealthCheck:
             (is_healthy, message)
         """
         if not self._checkpoint_path.exists():
-            return False, "Checkpoint file not found — orchestrator may not have run yet"
+            return (
+                False,
+                "Checkpoint file not found — orchestrator may not have run yet",
+            )
 
         mtime = self._checkpoint_path.stat().st_mtime
         age = time.time() - mtime
         if age > max_stale_seconds:
-            return False, f"Checkpoint stale ({int(age)}s old, threshold {max_stale_seconds}s)"
+            return (
+                False,
+                f"Checkpoint stale ({int(age)}s old, threshold {max_stale_seconds}s)",
+            )
         return True, f"Checkpoint fresh ({int(age)}s old)"
 
     def check_task_backlog(self, threshold: int = 20) -> tuple[bool, str]:
@@ -75,10 +83,15 @@ class HealthCheck:
         pending = list(needs_action.glob("*.md"))
         count = len(pending)
         if count > threshold:
-            return False, f"Task backlog high: {count} tasks pending (threshold {threshold})"
+            return (
+                False,
+                f"Task backlog high: {count} tasks pending (threshold {threshold})",
+            )
         return True, f"Task backlog OK: {count} tasks pending"
 
-    def check_error_rate(self, threshold: float = 0.10, window_hours: int = 24) -> tuple[bool, str]:
+    def check_error_rate(
+        self, threshold: float = 0.10, window_hours: int = 24
+    ) -> tuple[bool, str]:
         """Check recent error rate from metrics.
 
         Args:
@@ -92,10 +105,15 @@ class HealthCheck:
         error_rate = self._metrics.calculate_error_rate(since=since)
 
         if error_rate > threshold:
-            return False, f"Error rate high: {error_rate * 100:.1f}% (threshold {threshold * 100:.1f}%)"
+            return (
+                False,
+                f"Error rate high: {error_rate * 100:.1f}% (threshold {threshold * 100:.1f}%)",
+            )
         return True, f"Error rate OK: {error_rate * 100:.1f}%"
 
-    def check_last_completion_time(self, max_idle_seconds: int = 3600) -> tuple[bool, str]:
+    def check_last_completion_time(
+        self, max_idle_seconds: int = 3600
+    ) -> tuple[bool, str]:
         """Check time since last task completion.
 
         Args:
@@ -114,7 +132,10 @@ class HealthCheck:
         idle = (datetime.now(timezone.utc) - last_ts).total_seconds()
 
         if idle > max_idle_seconds:
-            return False, f"No completions in {int(idle)}s (threshold {max_idle_seconds}s)"
+            return (
+                False,
+                f"No completions in {int(idle)}s (threshold {max_idle_seconds}s)",
+            )
         return True, f"Last completion {int(idle)}s ago"
 
     # ------------------------------------------------------------------
@@ -155,8 +176,7 @@ class HealthCheck:
         }
 
         checks_formatted = {
-            name: {"ok": ok, "message": msg}
-            for name, (ok, msg) in checks.items()
+            name: {"ok": ok, "message": msg} for name, (ok, msg) in checks.items()
         }
 
         failed_count = sum(1 for ok, _ in checks.values() if not ok)

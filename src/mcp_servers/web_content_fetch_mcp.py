@@ -88,13 +88,17 @@ def _validate_url_safety(url: str) -> list[str]:
     if not parsed.scheme:
         errors.append("Missing URL scheme (must be http:// or https://)")
     elif parsed.scheme.lower() not in ALLOWED_SCHEMES:
-        errors.append(f"Unsupported scheme '{parsed.scheme}' — only http:// and https:// allowed")
+        errors.append(
+            f"Unsupported scheme '{parsed.scheme}' — only http:// and https:// allowed"
+        )
 
     # Host check
     if not parsed.hostname:
         errors.append("Missing hostname in URL")
     elif _is_private_url(url):
-        errors.append(f"Private/internal URL blocked: {parsed.hostname} is not publicly accessible")
+        errors.append(
+            f"Private/internal URL blocked: {parsed.hostname} is not publicly accessible"
+        )
 
     return errors
 
@@ -103,10 +107,12 @@ def _check_url_or_error(url: str) -> str | None:
     """Return JSON error string if URL is unsafe, else None."""
     errors = _validate_url_safety(url)
     if errors:
-        return json.dumps({
-            "status": "error",
-            "message": f"URL blocked: {'; '.join(errors)}",
-        })
+        return json.dumps(
+            {
+                "status": "error",
+                "message": f"URL blocked: {'; '.join(errors)}",
+            }
+        )
     return None
 
 
@@ -209,25 +215,33 @@ def _handle_http_error(e: Exception) -> str:
     """Format HTTP errors into JSON error response."""
     if isinstance(e, httpx.HTTPStatusError):
         code = e.response.status_code
-        return json.dumps({
-            "status": "error",
-            "message": f"HTTP {code} error fetching URL",
-            "status_code": code,
-        })
+        return json.dumps(
+            {
+                "status": "error",
+                "message": f"HTTP {code} error fetching URL",
+                "status_code": code,
+            }
+        )
     if isinstance(e, httpx.TimeoutException):
-        return json.dumps({
-            "status": "error",
-            "message": "Request timed out. The server did not respond within the timeout period.",
-        })
+        return json.dumps(
+            {
+                "status": "error",
+                "message": "Request timed out. The server did not respond within the timeout period.",
+            }
+        )
     if isinstance(e, httpx.ConnectError):
-        return json.dumps({
+        return json.dumps(
+            {
+                "status": "error",
+                "message": "Connection failed. The server may be unreachable or the hostname cannot be resolved.",
+            }
+        )
+    return json.dumps(
+        {
             "status": "error",
-            "message": "Connection failed. The server may be unreachable or the hostname cannot be resolved.",
-        })
-    return json.dumps({
-        "status": "error",
-        "message": f"Unexpected error: {type(e).__name__}: {str(e)}",
-    })
+            "message": f"Unexpected error: {type(e).__name__}: {str(e)}",
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -250,13 +264,19 @@ class FetchUrlInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    url: str = Field(..., min_length=1, description="URL to fetch (http:// or https://)")
+    url: str = Field(
+        ..., min_length=1, description="URL to fetch (http:// or https://)"
+    )
     max_length: Optional[int] = Field(
-        None, ge=1, le=MAX_CONTENT_LENGTH,
+        None,
+        ge=1,
+        le=MAX_CONTENT_LENGTH,
         description="Max content length to return (truncates if exceeded)",
     )
     timeout: Optional[float] = Field(
-        None, ge=1.0, le=120.0,
+        None,
+        ge=1.0,
+        le=120.0,
         description="Request timeout in seconds (default 30)",
     )
 
@@ -329,7 +349,9 @@ class FetchExtractLinksInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    url: str = Field(..., min_length=1, description="URL of HTML page to extract links from")
+    url: str = Field(
+        ..., min_length=1, description="URL of HTML page to extract links from"
+    )
     timeout: Optional[float] = Field(None, ge=1.0, le=120.0)
 
     @field_validator("url")
@@ -392,14 +414,16 @@ async def fetch_url(
         content = content[:max_length]
         truncated = True
 
-    return json.dumps({
-        "status": "success",
-        "url": url,
-        "status_code": resp.status_code,
-        "content_type": resp.headers.get("content-type", "unknown"),
-        "content": content,
-        "truncated": truncated,
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "url": url,
+            "status_code": resp.status_code,
+            "content_type": resp.headers.get("content-type", "unknown"),
+            "content": content,
+            "truncated": truncated,
+        }
+    )
 
 
 @mcp.tool()
@@ -459,17 +483,21 @@ async def fetch_json(
     try:
         data = resp.json()
     except (json.JSONDecodeError, Exception):
-        return json.dumps({
-            "status": "error",
-            "message": "Response is not valid JSON. Use fetch_url or fetch_text for non-JSON content.",
-            "url": url,
-        })
+        return json.dumps(
+            {
+                "status": "error",
+                "message": "Response is not valid JSON. Use fetch_url or fetch_text for non-JSON content.",
+                "url": url,
+            }
+        )
 
-    return json.dumps({
-        "status": "success",
-        "url": url,
-        "data": data,
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "url": url,
+            "data": data,
+        }
+    )
 
 
 @mcp.tool()
@@ -499,12 +527,14 @@ async def fetch_text(
         content = content[:max_length]
         truncated = True
 
-    return json.dumps({
-        "status": "success",
-        "url": url,
-        "content": content,
-        "truncated": truncated,
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "url": url,
+            "content": content,
+            "truncated": truncated,
+        }
+    )
 
 
 @mcp.tool()
@@ -526,12 +556,14 @@ async def fetch_headers(
     except Exception as e:
         return _handle_http_error(e)
 
-    return json.dumps({
-        "status": "success",
-        "url": url,
-        "status_code": resp.status_code,
-        "headers": dict(resp.headers),
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "url": url,
+            "status_code": resp.status_code,
+            "headers": dict(resp.headers),
+        }
+    )
 
 
 @mcp.tool()
@@ -557,12 +589,14 @@ async def fetch_extract_links(
 
     links = _extract_links_from_html(resp.text)
 
-    return json.dumps({
-        "status": "success",
-        "url": url,
-        "links": links,
-        "count": len(links),
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "url": url,
+            "links": links,
+            "count": len(links),
+        }
+    )
 
 
 @mcp.tool()
@@ -577,13 +611,15 @@ async def fetch_validate_url(
     errors = _validate_url_safety(url)
     parsed = urlparse(url)
 
-    return json.dumps({
-        "valid": len(errors) == 0,
-        "url": url,
-        "scheme": parsed.scheme or None,
-        "hostname": parsed.hostname or None,
-        "errors": errors,
-    })
+    return json.dumps(
+        {
+            "valid": len(errors) == 0,
+            "url": url,
+            "scheme": parsed.scheme or None,
+            "hostname": parsed.hostname or None,
+            "errors": errors,
+        }
+    )
 
 
 @mcp.tool()
@@ -603,29 +639,35 @@ async def fetch_check_availability(
     try:
         resp = await _http_head(url, timeout=timeout or 10.0)
     except httpx.TimeoutException:
-        return json.dumps({
-            "status": "success",
-            "url": url,
-            "reachable": False,
-            "message": "Timeout — server did not respond within the timeout period",
-        })
+        return json.dumps(
+            {
+                "status": "success",
+                "url": url,
+                "reachable": False,
+                "message": "Timeout — server did not respond within the timeout period",
+            }
+        )
     except Exception as e:
-        return json.dumps({
-            "status": "success",
-            "url": url,
-            "reachable": False,
-            "message": f"Connection failed: {type(e).__name__}",
-        })
+        return json.dumps(
+            {
+                "status": "success",
+                "url": url,
+                "reachable": False,
+                "message": f"Connection failed: {type(e).__name__}",
+            }
+        )
 
     reachable = resp.status_code < 400
 
-    return json.dumps({
-        "status": "success",
-        "url": url,
-        "reachable": reachable,
-        "status_code": resp.status_code,
-        "content_type": resp.headers.get("content-type", "unknown"),
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "url": url,
+            "reachable": reachable,
+            "status_code": resp.status_code,
+            "content_type": resp.headers.get("content-type", "unknown"),
+        }
+    )
 
 
 # ---------------------------------------------------------------------------

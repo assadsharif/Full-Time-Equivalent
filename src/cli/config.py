@@ -15,12 +15,14 @@ from pydantic import BaseModel, Field, ValidationError
 
 class VaultConfig(BaseModel):
     """Vault settings configuration"""
+
     default_path: str = Field(default="~/AI_Employee_Vault")
     auto_detect: bool = Field(default=True)
 
 
 class LoggingConfig(BaseModel):
     """Logging settings configuration"""
+
     level: str = Field(default="INFO")
     colored: bool = Field(default=True)
     file: Optional[str] = Field(default=None)
@@ -28,6 +30,7 @@ class LoggingConfig(BaseModel):
 
 class WatcherConfig(BaseModel):
     """Watcher settings configuration"""
+
     process_manager: str = Field(default="pm2")
     poll_interval: int = Field(default=30)
     log_tail_lines: int = Field(default=50)
@@ -35,6 +38,7 @@ class WatcherConfig(BaseModel):
 
 class MCPConfig(BaseModel):
     """MCP settings configuration"""
+
     registry_file: str = Field(default="config/mcp_servers.yaml")
     health_check_timeout: int = Field(default=5)
     tool_cache_ttl: int = Field(default=300)
@@ -42,12 +46,14 @@ class MCPConfig(BaseModel):
 
 class ApprovalConfig(BaseModel):
     """Approval settings configuration"""
+
     timeout: int = Field(default=43200)  # 12 hours
     auto_display_pending: bool = Field(default=True)
 
 
 class BriefingConfig(BaseModel):
     """Briefing settings configuration"""
+
     default_range_days: int = Field(default=7)
     pdf_enabled: bool = Field(default=True)
     viewer: str = Field(default="auto")
@@ -55,6 +61,7 @@ class BriefingConfig(BaseModel):
 
 class OutputConfig(BaseModel):
     """Output settings configuration"""
+
     format: str = Field(default="table")
     show_progress: bool = Field(default=True)
     pager: str = Field(default="less")
@@ -62,6 +69,7 @@ class OutputConfig(BaseModel):
 
 class PerformanceConfig(BaseModel):
     """Performance settings configuration"""
+
     parallel_checks: bool = Field(default=True)
     max_concurrent_checks: int = Field(default=5)
     startup_time_target: int = Field(default=100)
@@ -69,18 +77,21 @@ class PerformanceConfig(BaseModel):
 
 class TelemetryConfig(BaseModel):
     """Telemetry settings configuration"""
+
     enabled: bool = Field(default=False)
     endpoint: Optional[str] = Field(default=None)
 
 
 class FeaturesConfig(BaseModel):
     """Feature flags configuration"""
+
     experimental: bool = Field(default=False)
     debug: bool = Field(default=False)
 
 
 class CLIConfig(BaseModel):
     """Complete CLI configuration"""
+
     vault: VaultConfig = Field(default_factory=VaultConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     watcher: WatcherConfig = Field(default_factory=WatcherConfig)
@@ -128,7 +139,7 @@ class ConfigLoader:
             return CLIConfig()
 
         try:
-            with open(self.config_path, 'r') as f:
+            with open(self.config_path, "r") as f:
                 config_data = yaml.safe_load(f)
 
             if config_data is None:

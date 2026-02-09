@@ -41,7 +41,9 @@ class VaultNotFoundError(CLIError):
 class VaultNotInitializedError(CLIError):
     """Vault not initialized"""
 
-    def __init__(self, message: str = "Vault not initialized. Run 'fte vault init' first."):
+    def __init__(
+        self, message: str = "Vault not initialized. Run 'fte vault init' first."
+    ):
         super().__init__(message, exit_code=1)
 
 
@@ -105,9 +107,7 @@ class PM2NotInstalledError(ProcessManagerError):
     """PM2 not installed"""
 
     def __init__(self):
-        super().__init__(
-            "PM2 not installed. Install with: npm install -g pm2"
-        )
+        super().__init__("PM2 not installed. Install with: npm install -g pm2")
 
 
 class MCPError(CLIError):
@@ -194,7 +194,9 @@ class BriefingNotFoundError(BriefingError):
     """Briefing not found"""
 
     def __init__(self):
-        super().__init__("No briefings found. Generate one with 'fte briefing generate'")
+        super().__init__(
+            "No briefings found. Generate one with 'fte briefing generate'"
+        )
 
 
 class BriefingGenerationError(BriefingError):
@@ -342,6 +344,7 @@ def with_error_handling(func: Callable) -> Callable:
         - Shows contextual error messages
         - Handles KeyboardInterrupt gracefully
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         ctx = click.get_current_context(silent=True)
@@ -352,6 +355,7 @@ def with_error_handling(func: Callable) -> Callable:
 
         except KeyboardInterrupt:
             from rich.console import Console
+
             console = Console()
             console.print("\n[yellow]⚠ Operation cancelled by user[/yellow]")
             logger.info("Command cancelled by user (KeyboardInterrupt)")
@@ -371,7 +375,9 @@ def with_error_handling(func: Callable) -> Callable:
 
         except Exception as e:
             # Unexpected errors
-            logger.error(f"Unexpected error in {func.__name__}: {str(e)}", exc_info=True)
+            logger.error(
+                f"Unexpected error in {func.__name__}: {str(e)}", exc_info=True
+            )
             exit_code = handle_cli_error(e, verbose=verbose)
             sys.exit(exit_code)
 
@@ -395,6 +401,7 @@ def error_context(operation: str, verbose: bool = False):
         yield
     except KeyboardInterrupt:
         from rich.console import Console
+
         console = Console()
         console.print(f"\n[yellow]⚠ {operation} cancelled by user[/yellow]")
         logger.info(f"{operation} cancelled by user")
@@ -495,12 +502,14 @@ class ErrorMetrics:
         """Record an error occurrence."""
         error_type = type(error).__name__
 
-        self.errors.append({
-            "type": error_type,
-            "message": str(error),
-            "command": command,
-            "timestamp": __import__("datetime").datetime.now().isoformat(),
-        })
+        self.errors.append(
+            {
+                "type": error_type,
+                "message": str(error),
+                "command": command,
+                "timestamp": __import__("datetime").datetime.now().isoformat(),
+            }
+        )
 
         self.error_counts[error_type] = self.error_counts.get(error_type, 0) + 1
 

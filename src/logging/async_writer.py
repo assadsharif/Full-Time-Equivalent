@@ -161,10 +161,7 @@ class AsyncWriter:
 
         try:
             # Non-blocking put with timeout
-            await asyncio.wait_for(
-                self._queue.put(entry),
-                timeout=0.01  # 10ms timeout
-            )
+            await asyncio.wait_for(self._queue.put(entry), timeout=0.01)  # 10ms timeout
         except asyncio.TimeoutError:
             # Queue full - fallback to stderr
             self._write_to_stderr(entry, "Queue full")
@@ -207,8 +204,7 @@ class AsyncWriter:
                 # Wait for entry with timeout (for periodic flush)
                 try:
                     entry = await asyncio.wait_for(
-                        self._queue.get(),
-                        timeout=self.flush_interval_s
+                        self._queue.get(), timeout=self.flush_interval_s
                     )
                     self._buffer.append(entry)
                     self._queue.task_done()
@@ -222,8 +218,8 @@ class AsyncWriter:
                 # 1. Buffer full
                 # 2. Flush interval elapsed
                 should_flush = (
-                    len(self._buffer) >= self.buffer_size or
-                    (current_time - last_flush_time) >= self.flush_interval_s
+                    len(self._buffer) >= self.buffer_size
+                    or (current_time - last_flush_time) >= self.flush_interval_s
                 )
 
                 if should_flush and self._buffer:
@@ -363,7 +359,7 @@ class AsyncWriter:
                     "file": frame.file,
                     "line": frame.line,
                     "function": frame.function,
-                    **({"code": frame.code} if frame.code else {})
+                    **({"code": frame.code} if frame.code else {}),
                 }
                 for frame in exc.stack_trace
             ],

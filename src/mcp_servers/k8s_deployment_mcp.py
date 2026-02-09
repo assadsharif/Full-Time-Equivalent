@@ -43,7 +43,9 @@ VALID_SERVICE_TYPES = ("ClusterIP", "NodePort", "LoadBalancer")
 
 def _validate_dns1123(label: str, v: str) -> str:
     if not _DNS_1123_RE.match(v):
-        raise ValueError(f"{label} must be a DNS-1123 subdomain (lowercase, alphanumeric, hyphens)")
+        raise ValueError(
+            f"{label} must be a DNS-1123 subdomain (lowercase, alphanumeric, hyphens)"
+        )
     if len(v) > 63:
         raise ValueError(f"{label} must be 63 characters or fewer")
     return v
@@ -59,15 +61,21 @@ class PortConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    name: str = Field(..., min_length=1, max_length=15, description="Port name — DNS-1123 label")
-    container_port: int = Field(..., ge=1, le=65535, description="Container port number")
+    name: str = Field(
+        ..., min_length=1, max_length=15, description="Port name — DNS-1123 label"
+    )
+    container_port: int = Field(
+        ..., ge=1, le=65535, description="Container port number"
+    )
     protocol: str = Field("TCP", description="TCP or UDP")
 
     @field_validator("name")
     @classmethod
     def _validate_name(cls, v: str) -> str:
         if not _DNS_1123_RE.match(v):
-            raise ValueError("Port name must be DNS-1123: lowercase alphanumeric, hyphens, 1-15 chars")
+            raise ValueError(
+                "Port name must be DNS-1123: lowercase alphanumeric, hyphens, 1-15 chars"
+            )
         return v
 
     @field_validator("protocol")
@@ -100,15 +108,21 @@ class ResourceRequirements(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     requests_cpu: Optional[str] = Field(None, description="CPU request (e.g. '100m')")
-    requests_memory: Optional[str] = Field(None, description="Memory request (e.g. '128Mi')")
+    requests_memory: Optional[str] = Field(
+        None, description="Memory request (e.g. '128Mi')"
+    )
     limits_cpu: Optional[str] = Field(None, description="CPU limit (e.g. '200m')")
-    limits_memory: Optional[str] = Field(None, description="Memory limit (e.g. '256Mi')")
+    limits_memory: Optional[str] = Field(
+        None, description="Memory limit (e.g. '256Mi')"
+    )
 
     @field_validator("requests_cpu", "limits_cpu")
     @classmethod
     def _validate_cpu(cls, v: Optional[str]) -> Optional[str]:
         if v is not None and not _CPU_RE.match(v):
-            raise ValueError("CPU must be millicores (e.g. '100m') or decimal cores (e.g. '0.5')")
+            raise ValueError(
+                "CPU must be millicores (e.g. '100m') or decimal cores (e.g. '0.5')"
+            )
         return v
 
     @field_validator("requests_memory", "limits_memory")
@@ -270,44 +284,65 @@ def _gen_deployment(
     if res:
         container["resources"] = res
 
-    return _to_yaml({
-        "apiVersion": "apps/v1",
-        "kind": "Deployment",
-        "metadata": {"name": app_name, "namespace": namespace, "labels": labels},
-        "spec": {
-            "replicas": replicas,
-            "selector": {"matchLabels": {"app": app_name}},
-            "template": {
-                "metadata": {"labels": labels},
-                "spec": {"containers": [container]},
+    return _to_yaml(
+        {
+            "apiVersion": "apps/v1",
+            "kind": "Deployment",
+            "metadata": {"name": app_name, "namespace": namespace, "labels": labels},
+            "spec": {
+                "replicas": replicas,
+                "selector": {"matchLabels": {"app": app_name}},
+                "template": {
+                    "metadata": {"labels": labels},
+                    "spec": {"containers": [container]},
+                },
             },
-        },
-    })
+        }
+    )
 
 
-def _gen_service(app_name: str, namespace: str, svc_type: str, ports: list[ServicePort]) -> str:
-    return _to_yaml({
-        "apiVersion": "v1",
-        "kind": "Service",
-        "metadata": {"name": f"{app_name}-svc", "namespace": namespace, "labels": _base_labels(app_name)},
-        "spec": {
-            "type": svc_type,
-            "selector": {"app": app_name},
-            "ports": [
-                {"name": p.name, "port": p.port, "targetPort": p.target_port, "protocol": p.protocol}
-                for p in ports
-            ],
-        },
-    })
+def _gen_service(
+    app_name: str, namespace: str, svc_type: str, ports: list[ServicePort]
+) -> str:
+    return _to_yaml(
+        {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "name": f"{app_name}-svc",
+                "namespace": namespace,
+                "labels": _base_labels(app_name),
+            },
+            "spec": {
+                "type": svc_type,
+                "selector": {"app": app_name},
+                "ports": [
+                    {
+                        "name": p.name,
+                        "port": p.port,
+                        "targetPort": p.target_port,
+                        "protocol": p.protocol,
+                    }
+                    for p in ports
+                ],
+            },
+        }
+    )
 
 
 def _gen_configmap(app_name: str, namespace: str, data: dict[str, str]) -> str:
-    return _to_yaml({
-        "apiVersion": "v1",
-        "kind": "ConfigMap",
-        "metadata": {"name": f"{app_name}-config", "namespace": namespace, "labels": _base_labels(app_name)},
-        "data": data,
-    })
+    return _to_yaml(
+        {
+            "apiVersion": "v1",
+            "kind": "ConfigMap",
+            "metadata": {
+                "name": f"{app_name}-config",
+                "namespace": namespace,
+                "labels": _base_labels(app_name),
+            },
+            "data": data,
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -325,10 +360,22 @@ def _run_validation(yaml_str: str) -> dict:
     try:
         doc = yaml.safe_load(yaml_str)
     except yaml.YAMLError as e:
-        return {"valid": False, "kind": "Unknown", "name": "", "errors": [f"YAML parse error: {e}"], "warnings": []}
+        return {
+            "valid": False,
+            "kind": "Unknown",
+            "name": "",
+            "errors": [f"YAML parse error: {e}"],
+            "warnings": [],
+        }
 
     if not isinstance(doc, dict):
-        return {"valid": False, "kind": "Unknown", "name": "", "errors": ["Manifest must be a YAML mapping"], "warnings": []}
+        return {
+            "valid": False,
+            "kind": "Unknown",
+            "name": "",
+            "errors": ["Manifest must be a YAML mapping"],
+            "warnings": [],
+        }
 
     for field in ("apiVersion", "kind", "metadata"):
         if field not in doc:
@@ -350,12 +397,20 @@ def _run_validation(yaml_str: str) -> dict:
     else:
         warnings.append(f"Unknown kind '{kind}' — kind-specific checks skipped")
 
-    return {"valid": len(errors) == 0, "kind": kind, "name": name, "errors": errors, "warnings": warnings}
+    return {
+        "valid": len(errors) == 0,
+        "kind": kind,
+        "name": name,
+        "errors": errors,
+        "warnings": warnings,
+    }
 
 
 def _check_deployment(doc: dict, errors: list[str], warnings: list[str]) -> None:
     if doc.get("apiVersion") != "apps/v1":
-        errors.append(f"Deployment requires apiVersion 'apps/v1', got '{doc.get('apiVersion')}'")
+        errors.append(
+            f"Deployment requires apiVersion 'apps/v1', got '{doc.get('apiVersion')}'"
+        )
     spec = doc.get("spec", {})
     if not isinstance(spec, dict):
         errors.append("spec must be a mapping")
@@ -366,9 +421,13 @@ def _check_deployment(doc: dict, errors: list[str], warnings: list[str]) -> None
         errors.append("spec.template is required")
     else:
         tmpl = spec["template"]
-        containers = (tmpl.get("spec", {}) if isinstance(tmpl, dict) else {}).get("containers", [])
+        containers = (tmpl.get("spec", {}) if isinstance(tmpl, dict) else {}).get(
+            "containers", []
+        )
         if not containers:
-            errors.append("spec.template.spec.containers must contain at least one container")
+            errors.append(
+                "spec.template.spec.containers must contain at least one container"
+            )
         else:
             for i, c in enumerate(containers):
                 if "name" not in c:
@@ -387,12 +446,16 @@ def _check_deployment(doc: dict, errors: list[str], warnings: list[str]) -> None
             else {}
         )
         if sel and not all(tmpl_labels.get(k) == v for k, v in sel.items()):
-            errors.append("spec.selector.matchLabels must be a subset of spec.template.metadata.labels")
+            errors.append(
+                "spec.selector.matchLabels must be a subset of spec.template.metadata.labels"
+            )
 
 
 def _check_service(doc: dict, errors: list[str], warnings: list[str]) -> None:
     if doc.get("apiVersion") != "v1":
-        errors.append(f"Service requires apiVersion 'v1', got '{doc.get('apiVersion')}'")
+        errors.append(
+            f"Service requires apiVersion 'v1', got '{doc.get('apiVersion')}'"
+        )
     spec = doc.get("spec", {})
     if not isinstance(spec, dict):
         errors.append("spec must be a mapping")
@@ -408,7 +471,9 @@ def _check_service(doc: dict, errors: list[str], warnings: list[str]) -> None:
 
 def _check_configmap(doc: dict, errors: list[str], warnings: list[str]) -> None:
     if doc.get("apiVersion") != "v1":
-        errors.append(f"ConfigMap requires apiVersion 'v1', got '{doc.get('apiVersion')}'")
+        errors.append(
+            f"ConfigMap requires apiVersion 'v1', got '{doc.get('apiVersion')}'"
+        )
     if "data" not in doc and "binaryData" not in doc:
         warnings.append("ConfigMap has no data or binaryData field")
 
@@ -435,28 +500,38 @@ async def k8s_generate_deployment(
     Deterministic — identical input always produces identical YAML.
     All identifiers are DNS-1123 validated before generation.
     """
-    parsed = DeploymentToolInput(app_name=app_name, image=image, replicas=replicas, namespace=namespace)
+    parsed = DeploymentToolInput(
+        app_name=app_name, image=image, replicas=replicas, namespace=namespace
+    )
     parsed_ports = [PortConfig(**p) for p in (ports or [])]
     parsed_env = [EnvVar(**e) for e in (env_vars or [])]
     parsed_res = ResourceRequirements(**resources) if resources else None
 
     manifest_yaml = _gen_deployment(
-        parsed.app_name, parsed.image, parsed.replicas, parsed.namespace,
-        parsed_ports, parsed_env, parsed_res, labels or {},
+        parsed.app_name,
+        parsed.image,
+        parsed.replicas,
+        parsed.namespace,
+        parsed_ports,
+        parsed_env,
+        parsed_res,
+        labels or {},
     )
 
-    return json.dumps({
-        "status": "success",
-        "kind": "Deployment",
-        "name": parsed.app_name,
-        "namespace": parsed.namespace,
-        "manifest_yaml": manifest_yaml,
-        "notes": [
-            "Deterministic: same input → same YAML",
-            "Labels: app, app.kubernetes.io/name, app.kubernetes.io/managed-by applied",
-            "Selector anchored on 'app' label",
-        ],
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "kind": "Deployment",
+            "name": parsed.app_name,
+            "namespace": parsed.namespace,
+            "manifest_yaml": manifest_yaml,
+            "notes": [
+                "Deterministic: same input → same YAML",
+                "Labels: app, app.kubernetes.io/name, app.kubernetes.io/managed-by applied",
+                "Selector anchored on 'app' label",
+            ],
+        }
+    )
 
 
 @mcp.tool()
@@ -473,24 +548,32 @@ async def k8s_generate_service(
     Ports require: name, port, target_port. service_type: ClusterIP | NodePort | LoadBalancer.
     """
     if not ports:
-        return json.dumps({"status": "error", "error": "At least one port mapping is required"})
+        return json.dumps(
+            {"status": "error", "error": "At least one port mapping is required"}
+        )
 
-    parsed = ServiceToolInput(app_name=app_name, namespace=namespace, service_type=service_type)
+    parsed = ServiceToolInput(
+        app_name=app_name, namespace=namespace, service_type=service_type
+    )
     parsed_ports = [ServicePort(**p) for p in ports]
 
-    manifest_yaml = _gen_service(parsed.app_name, parsed.namespace, parsed.service_type, parsed_ports)
+    manifest_yaml = _gen_service(
+        parsed.app_name, parsed.namespace, parsed.service_type, parsed_ports
+    )
 
-    return json.dumps({
-        "status": "success",
-        "kind": "Service",
-        "name": f"{parsed.app_name}-svc",
-        "namespace": parsed.namespace,
-        "manifest_yaml": manifest_yaml,
-        "notes": [
-            f"Selector targets Deployment with app={parsed.app_name}",
-            f"Service type: {parsed.service_type}",
-        ],
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "kind": "Service",
+            "name": f"{parsed.app_name}-svc",
+            "namespace": parsed.namespace,
+            "manifest_yaml": manifest_yaml,
+            "notes": [
+                f"Selector targets Deployment with app={parsed.app_name}",
+                f"Service type: {parsed.service_type}",
+            ],
+        }
+    )
 
 
 @mcp.tool()
@@ -506,19 +589,26 @@ async def k8s_generate_configmap(
     WARNING: Do NOT place secrets in data — use Kubernetes Secrets instead.
     """
     if not data:
-        return json.dumps({"status": "error", "error": "data must contain at least one key-value pair"})
+        return json.dumps(
+            {
+                "status": "error",
+                "error": "data must contain at least one key-value pair",
+            }
+        )
 
     parsed = ConfigMapToolInput(app_name=app_name, namespace=namespace)
     manifest_yaml = _gen_configmap(parsed.app_name, parsed.namespace, data)
 
-    return json.dumps({
-        "status": "success",
-        "kind": "ConfigMap",
-        "name": f"{parsed.app_name}-config",
-        "namespace": parsed.namespace,
-        "manifest_yaml": manifest_yaml,
-        "notes": ["Non-sensitive config only — never store secrets here"],
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "kind": "ConfigMap",
+            "name": f"{parsed.app_name}-config",
+            "namespace": parsed.namespace,
+            "manifest_yaml": manifest_yaml,
+            "notes": ["Non-sensitive config only — never store secrets here"],
+        }
+    )
 
 
 @mcp.tool()
@@ -541,9 +631,16 @@ async def k8s_generate_stack(
     - ConfigMap: created from env_vars when provided; configmap_data overrides env_var-derived data.
     Returns JSON: {status, manifests: [{kind, name, manifest_yaml}], notes}.
     """
-    parsed = DeploymentToolInput(app_name=app_name, image=image, replicas=replicas, namespace=namespace)
+    parsed = DeploymentToolInput(
+        app_name=app_name, image=image, replicas=replicas, namespace=namespace
+    )
     if service_type not in VALID_SERVICE_TYPES:
-        return json.dumps({"status": "error", "error": f"service_type must be one of {VALID_SERVICE_TYPES}"})
+        return json.dumps(
+            {
+                "status": "error",
+                "error": f"service_type must be one of {VALID_SERVICE_TYPES}",
+            }
+        )
 
     parsed_ports = [PortConfig(**p) for p in (ports or [])]
     parsed_env = [EnvVar(**e) for e in (env_vars or [])]
@@ -553,19 +650,40 @@ async def k8s_generate_stack(
 
     # Deployment — always generated
     dep_yaml = _gen_deployment(
-        parsed.app_name, parsed.image, parsed.replicas, parsed.namespace,
-        parsed_ports, parsed_env, parsed_res, labels or {},
+        parsed.app_name,
+        parsed.image,
+        parsed.replicas,
+        parsed.namespace,
+        parsed_ports,
+        parsed_env,
+        parsed_res,
+        labels or {},
     )
-    manifests.append({"kind": "Deployment", "name": parsed.app_name, "manifest_yaml": dep_yaml})
+    manifests.append(
+        {"kind": "Deployment", "name": parsed.app_name, "manifest_yaml": dep_yaml}
+    )
 
     # Service — auto-derived from ports
     if parsed_ports:
         svc_ports = [
-            ServicePort(name=p.name, port=p.container_port, target_port=p.container_port, protocol=p.protocol)
+            ServicePort(
+                name=p.name,
+                port=p.container_port,
+                target_port=p.container_port,
+                protocol=p.protocol,
+            )
             for p in parsed_ports
         ]
-        svc_yaml = _gen_service(parsed.app_name, parsed.namespace, service_type, svc_ports)
-        manifests.append({"kind": "Service", "name": f"{parsed.app_name}-svc", "manifest_yaml": svc_yaml})
+        svc_yaml = _gen_service(
+            parsed.app_name, parsed.namespace, service_type, svc_ports
+        )
+        manifests.append(
+            {
+                "kind": "Service",
+                "name": f"{parsed.app_name}-svc",
+                "manifest_yaml": svc_yaml,
+            }
+        )
 
     # ConfigMap — explicit data overrides env-derived
     cm_data = configmap_data
@@ -573,21 +691,37 @@ async def k8s_generate_stack(
         cm_data = {e.name: e.value for e in parsed_env}
     if cm_data:
         cm_yaml = _gen_configmap(parsed.app_name, parsed.namespace, cm_data)
-        manifests.append({"kind": "ConfigMap", "name": f"{parsed.app_name}-config", "manifest_yaml": cm_yaml})
+        manifests.append(
+            {
+                "kind": "ConfigMap",
+                "name": f"{parsed.app_name}-config",
+                "manifest_yaml": cm_yaml,
+            }
+        )
 
-    return json.dumps({
-        "status": "success",
-        "manifests": manifests,
-        "notes": [
-            f"Generated {len(manifests)} manifest(s): {', '.join(m['kind'] for m in manifests)}",
-            "Service auto-derived from ports" if parsed_ports else "No Service — no ports provided",
-            (
-                "ConfigMap from explicit configmap_data"
-                if configmap_data
-                else ("ConfigMap auto-derived from env_vars" if cm_data else "No ConfigMap")
-            ),
-        ],
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "manifests": manifests,
+            "notes": [
+                f"Generated {len(manifests)} manifest(s): {', '.join(m['kind'] for m in manifests)}",
+                (
+                    "Service auto-derived from ports"
+                    if parsed_ports
+                    else "No Service — no ports provided"
+                ),
+                (
+                    "ConfigMap from explicit configmap_data"
+                    if configmap_data
+                    else (
+                        "ConfigMap auto-derived from env_vars"
+                        if cm_data
+                        else "No ConfigMap"
+                    )
+                ),
+            ],
+        }
+    )
 
 
 @mcp.tool()

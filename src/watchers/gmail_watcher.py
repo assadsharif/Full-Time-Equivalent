@@ -226,7 +226,9 @@ class GmailWatcher(BaseWatcher):
             List of message metadata dictionaries
         """
         if not self._service:
-            raise GmailAuthenticationError("Not authenticated. Call authenticate() first.")
+            raise GmailAuthenticationError(
+                "Not authenticated. Call authenticate() first."
+            )
 
         try:
             # Build query for unread emails in inbox
@@ -399,7 +401,9 @@ class GmailWatcher(BaseWatcher):
                         {
                             "filename": filename,
                             "attachment_id": part["body"]["attachmentId"],
-                            "mime_type": part.get("mimeType", "application/octet-stream"),
+                            "mime_type": part.get(
+                                "mimeType", "application/octet-stream"
+                            ),
                             "size": part.get("body", {}).get("size", 0),
                         }
                     )

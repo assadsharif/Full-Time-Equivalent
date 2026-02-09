@@ -34,7 +34,9 @@ class BucketState:
 
     @classmethod
     def from_dict(cls, data: dict) -> "BucketState":
-        obj = cls(max_tokens=data["max_tokens"], refill_per_minute=data["refill_per_minute"])
+        obj = cls(
+            max_tokens=data["max_tokens"], refill_per_minute=data["refill_per_minute"]
+        )
         obj.tokens = data["tokens"]
         obj.last_refill = data["last_refill"]
         return obj
@@ -122,7 +124,9 @@ class RateLimiter:
 
     def _get_or_create(self, key: str, action_type: str) -> BucketState:
         if key not in self._buckets:
-            limits = self._default_limits.get(action_type, {"per_minute": 60, "per_hour": 3600})
+            limits = self._default_limits.get(
+                action_type, {"per_minute": 60, "per_hour": 3600}
+            )
             self._buckets[key] = BucketState(
                 max_tokens=limits["per_hour"],
                 refill_per_minute=limits["per_minute"],

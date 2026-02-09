@@ -95,7 +95,7 @@ class BriefingAggregator:
                 fm = yaml.safe_load(fm_raw) or {}
                 pl = fm.get("persistence_loop", {})
                 persistence_iterations = pl.get("iteration", 0)
-                body_text = text[end + 3:]
+                body_text = text[end + 3 :]
 
         # --- extract structured fields from markdown body ---
         priority_m = _PRIORITY_RE.search(body_text)
@@ -106,7 +106,9 @@ class BriefingAggregator:
 
         # --- body: everything after the first ``---`` horizontal rule ---
         hr_idx = body_text.find("\n---\n")
-        human_body = body_text[hr_idx + 5:].strip() if hr_idx != -1 else body_text.strip()
+        human_body = (
+            body_text[hr_idx + 5 :].strip() if hr_idx != -1 else body_text.strip()
+        )
 
         return TaskSummary(
             name=path.stem,

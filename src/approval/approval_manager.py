@@ -39,7 +39,9 @@ class ApprovalManager:
     ):
         self.approvals_path = approvals_path
         self.approvals_path.mkdir(parents=True, exist_ok=True)
-        audit_path = audit_path or approvals_path.parent / ".fte" / "approval_nonces.txt"
+        audit_path = (
+            audit_path or approvals_path.parent / ".fte" / "approval_nonces.txt"
+        )
         self._nonces = NonceGenerator(audit_path)
         approval_audit_log_path = (
             approval_audit_log_path
@@ -102,8 +104,10 @@ class ApprovalManager:
         file_path.write_text(f"---\n{fm_yaml}\n---\n\n{body}")
 
         self._audit_logger.log_created(
-            request.approval_id, request.task_id,
-            request.action_type, request.risk_level,
+            request.approval_id,
+            request.task_id,
+            request.action_type,
+            request.risk_level,
         )
         return request
 
@@ -148,8 +152,10 @@ class ApprovalManager:
         self._update_status(request)
         self._nonces.record_used(request.nonce)
         self._audit_logger.log_approved(
-            request.approval_id, request.task_id,
-            request.action_type, request.risk_level,
+            request.approval_id,
+            request.task_id,
+            request.action_type,
+            request.risk_level,
         )
         return request
 
@@ -166,8 +172,10 @@ class ApprovalManager:
         request.status = ApprovalStatus.REJECTED
         self._update_status(request, reason=reason)
         self._audit_logger.log_rejected(
-            request.approval_id, request.task_id,
-            request.action_type, request.risk_level,
+            request.approval_id,
+            request.task_id,
+            request.action_type,
+            request.risk_level,
             reason=reason,
         )
         return request
@@ -193,8 +201,10 @@ class ApprovalManager:
                 req.status = ApprovalStatus.TIMEOUT
                 self._update_status(req)
                 self._audit_logger.log_timeout(
-                    req.approval_id, req.task_id,
-                    req.action_type, req.risk_level,
+                    req.approval_id,
+                    req.task_id,
+                    req.action_type,
+                    req.risk_level,
                 )
                 expired.append(req)
         return expired
@@ -244,9 +254,11 @@ class ApprovalManager:
             return
         lines = file_path.read_text().splitlines(keepends=True)
         new_lines = [
-            f"approval_status: {request.status.value}\n"
-            if line.startswith("approval_status:")
-            else line
+            (
+                f"approval_status: {request.status.value}\n"
+                if line.startswith("approval_status:")
+                else line
+            )
             for line in lines
         ]
         updated = "".join(new_lines)

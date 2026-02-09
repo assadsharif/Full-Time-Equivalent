@@ -12,6 +12,7 @@ from typing import Optional
 
 try:
     import requests
+
     REQUESTS_AVAILABLE = True
 except ImportError:
     REQUESTS_AVAILABLE = False
@@ -138,9 +139,7 @@ class WebhookNotifier:
                     "title": f"Orchestrator Event: {event.replace('_', ' ').title()}",
                     "fields": [],
                     "footer": "AI Employee Orchestrator",
-                    "ts": int(
-                        datetime.fromisoformat(payload["timestamp"]).timestamp()
-                    ),
+                    "ts": int(datetime.fromisoformat(payload["timestamp"]).timestamp()),
                 }
             ]
         }
@@ -149,7 +148,11 @@ class WebhookNotifier:
         for key, value in payload.items():
             if key not in ["event", "timestamp"]:
                 slack_payload["attachments"][0]["fields"].append(
-                    {"title": key.replace("_", " ").title(), "value": str(value), "short": True}
+                    {
+                        "title": key.replace("_", " ").title(),
+                        "value": str(value),
+                        "short": True,
+                    }
                 )
 
         return slack_payload

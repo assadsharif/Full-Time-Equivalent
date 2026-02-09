@@ -26,7 +26,9 @@ class OrchestratorDashboard:
             config: Optional OrchestratorConfig for priority scoring
         """
         self._vault_path = vault_path
-        self._checkpoint_path = vault_path.parent / ".fte" / "orchestrator.checkpoint.json"
+        self._checkpoint_path = (
+            vault_path.parent / ".fte" / "orchestrator.checkpoint.json"
+        )
         self._config = config or OrchestratorConfig(vault_path=vault_path)
         self._scorer = PriorityScorer(self._config)
 
@@ -108,11 +110,13 @@ class OrchestratorDashboard:
         for md in needs_action.glob("*.md"):
             try:
                 score = self._scorer.score(md)
-                tasks.append({
-                    "name": md.name,
-                    "priority": round(score, 2),
-                    "path": str(md),
-                })
+                tasks.append(
+                    {
+                        "name": md.name,
+                        "priority": round(score, 2),
+                        "path": str(md),
+                    }
+                )
             except Exception:
                 # Skip files that can't be scored
                 continue

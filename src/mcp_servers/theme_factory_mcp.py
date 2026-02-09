@@ -39,21 +39,42 @@ THEMES = {
         "description": "Professional and calming maritime theme",
         "colors": {
             "primary": {"hex": "#1a5276", "name": "Deep Sea", "desc": "Rich navy base"},
-            "secondary": {"hex": "#2e86ab", "name": "Ocean Blue", "desc": "Bright mid-tone"},
+            "secondary": {
+                "hex": "#2e86ab",
+                "name": "Ocean Blue",
+                "desc": "Bright mid-tone",
+            },
             "accent": {"hex": "#5dade2", "name": "Sky Wave", "desc": "Light accent"},
-            "surface": {"hex": "#d6eaf8", "name": "Sea Foam", "desc": "Light backgrounds"},
+            "surface": {
+                "hex": "#d6eaf8",
+                "name": "Sea Foam",
+                "desc": "Light backgrounds",
+            },
         },
         "typography": {"headers": "FreeSans Bold", "body": "FreeSans"},
-        "use_cases": ["Corporate presentations", "Financial reports", "Professional services", "Healthcare"],
+        "use_cases": [
+            "Corporate presentations",
+            "Financial reports",
+            "Professional services",
+            "Healthcare",
+        ],
     },
     "sunset_boulevard": {
         "name": "Sunset Boulevard",
         "description": "Warm and vibrant sunset colors",
         "colors": {
             "primary": {"hex": "#c0392b", "name": "Crimson", "desc": "Bold red base"},
-            "secondary": {"hex": "#e74c3c", "name": "Sunset Red", "desc": "Vibrant mid-tone"},
+            "secondary": {
+                "hex": "#e74c3c",
+                "name": "Sunset Red",
+                "desc": "Vibrant mid-tone",
+            },
             "accent": {"hex": "#f39c12", "name": "Golden", "desc": "Warm accent"},
-            "surface": {"hex": "#fdebd0", "name": "Peach Cream", "desc": "Warm backgrounds"},
+            "surface": {
+                "hex": "#fdebd0",
+                "name": "Peach Cream",
+                "desc": "Warm backgrounds",
+            },
         },
         "typography": {"headers": "DejaVu Sans Bold", "body": "DejaVu Sans"},
         "use_cases": ["Entertainment", "Food & beverage", "Travel", "Lifestyle brands"],
@@ -62,10 +83,22 @@ THEMES = {
         "name": "Forest Canopy",
         "description": "Natural and grounded earth tones",
         "colors": {
-            "primary": {"hex": "#1e8449", "name": "Forest Green", "desc": "Deep green base"},
-            "secondary": {"hex": "#27ae60", "name": "Leaf Green", "desc": "Fresh mid-tone"},
+            "primary": {
+                "hex": "#1e8449",
+                "name": "Forest Green",
+                "desc": "Deep green base",
+            },
+            "secondary": {
+                "hex": "#27ae60",
+                "name": "Leaf Green",
+                "desc": "Fresh mid-tone",
+            },
             "accent": {"hex": "#82e0aa", "name": "Mint", "desc": "Light accent"},
-            "surface": {"hex": "#e9f7ef", "name": "Morning Dew", "desc": "Natural backgrounds"},
+            "surface": {
+                "hex": "#e9f7ef",
+                "name": "Morning Dew",
+                "desc": "Natural backgrounds",
+            },
         },
         "typography": {"headers": "FreeSans Bold", "body": "FreeSans"},
         "use_cases": ["Environmental", "Sustainability", "Agriculture", "Wellness"],
@@ -92,14 +125,23 @@ THEMES = {
             "surface": {"hex": "#fef9e7", "name": "Cream", "desc": "Warm backgrounds"},
         },
         "typography": {"headers": "FreeSans Bold", "body": "FreeSans"},
-        "use_cases": ["Autumn events", "Harvest themes", "Luxury goods", "Financial services"],
+        "use_cases": [
+            "Autumn events",
+            "Harvest themes",
+            "Luxury goods",
+            "Financial services",
+        ],
     },
     "arctic_frost": {
         "name": "Arctic Frost",
         "description": "Cool and crisp winter-inspired theme",
         "colors": {
             "primary": {"hex": "#1b4f72", "name": "Ice Blue", "desc": "Deep cool base"},
-            "secondary": {"hex": "#2980b9", "name": "Glacier", "desc": "Bright mid-tone"},
+            "secondary": {
+                "hex": "#2980b9",
+                "name": "Glacier",
+                "desc": "Bright mid-tone",
+            },
             "accent": {"hex": "#85c1e9", "name": "Frost", "desc": "Light accent"},
             "surface": {"hex": "#ebf5fb", "name": "Snow", "desc": "Crisp backgrounds"},
         },
@@ -122,52 +164,194 @@ THEMES = {
         "name": "Tech Innovation",
         "description": "Bold and modern tech aesthetic",
         "colors": {
-            "primary": {"hex": "#1e1e1e", "name": "Dark Gray", "desc": "Deep backgrounds"},
-            "secondary": {"hex": "#0066ff", "name": "Electric Blue", "desc": "Vibrant primary"},
-            "accent": {"hex": "#00ffff", "name": "Neon Cyan", "desc": "Bright highlight"},
+            "primary": {
+                "hex": "#1e1e1e",
+                "name": "Dark Gray",
+                "desc": "Deep backgrounds",
+            },
+            "secondary": {
+                "hex": "#0066ff",
+                "name": "Electric Blue",
+                "desc": "Vibrant primary",
+            },
+            "accent": {
+                "hex": "#00ffff",
+                "name": "Neon Cyan",
+                "desc": "Bright highlight",
+            },
             "surface": {"hex": "#ffffff", "name": "White", "desc": "Clean contrast"},
         },
         "typography": {"headers": "DejaVu Sans Bold", "body": "DejaVu Sans"},
-        "use_cases": ["Tech startups", "Software launches", "AI/ML", "Digital transformation"],
+        "use_cases": [
+            "Tech startups",
+            "Software launches",
+            "AI/ML",
+            "Digital transformation",
+        ],
     },
     "botanical_garden": {
         "name": "Botanical Garden",
         "description": "Fresh and organic garden colors",
         "colors": {
-            "primary": {"hex": "#145a32", "name": "Deep Green", "desc": "Rich plant base"},
+            "primary": {
+                "hex": "#145a32",
+                "name": "Deep Green",
+                "desc": "Rich plant base",
+            },
             "secondary": {"hex": "#229954", "name": "Fern", "desc": "Natural mid-tone"},
             "accent": {"hex": "#abebc6", "name": "Spring", "desc": "Fresh accent"},
-            "surface": {"hex": "#e8f8f5", "name": "Dewdrop", "desc": "Organic backgrounds"},
+            "surface": {
+                "hex": "#e8f8f5",
+                "name": "Dewdrop",
+                "desc": "Organic backgrounds",
+            },
         },
         "typography": {"headers": "FreeSans Bold", "body": "FreeSans"},
-        "use_cases": ["Organic brands", "Gardening", "Eco-friendly", "Natural products"],
+        "use_cases": [
+            "Organic brands",
+            "Gardening",
+            "Eco-friendly",
+            "Natural products",
+        ],
     },
     "midnight_galaxy": {
         "name": "Midnight Galaxy",
         "description": "Dramatic and cosmic deep tones",
         "colors": {
-            "primary": {"hex": "#2b1e3e", "name": "Deep Purple", "desc": "Rich dark base"},
-            "secondary": {"hex": "#4a4e8f", "name": "Cosmic Blue", "desc": "Mystical mid-tone"},
+            "primary": {
+                "hex": "#2b1e3e",
+                "name": "Deep Purple",
+                "desc": "Rich dark base",
+            },
+            "secondary": {
+                "hex": "#4a4e8f",
+                "name": "Cosmic Blue",
+                "desc": "Mystical mid-tone",
+            },
             "accent": {"hex": "#a490c2", "name": "Lavender", "desc": "Soft accent"},
             "surface": {"hex": "#e6e6fa", "name": "Silver", "desc": "Light highlights"},
         },
         "typography": {"headers": "FreeSans Bold", "body": "FreeSans"},
-        "use_cases": ["Entertainment", "Gaming", "Nightlife", "Luxury brands", "Creative agencies"],
+        "use_cases": [
+            "Entertainment",
+            "Gaming",
+            "Nightlife",
+            "Luxury brands",
+            "Creative agencies",
+        ],
     },
 }
 
 # Theme keywords for suggestion
 THEME_KEYWORDS = {
-    "ocean_depths": ["ocean", "sea", "marine", "corporate", "professional", "financial", "bank", "healthcare", "calm"],
-    "sunset_boulevard": ["sunset", "warm", "vibrant", "entertainment", "food", "travel", "lifestyle", "restaurant"],
-    "forest_canopy": ["forest", "nature", "green", "eco", "sustainable", "environment", "organic", "wellness", "health"],
-    "modern_minimalist": ["minimal", "modern", "clean", "architecture", "design", "consulting", "luxury", "elegant"],
-    "golden_hour": ["gold", "autumn", "fall", "harvest", "luxury", "premium", "financial", "bronze", "rich"],
-    "arctic_frost": ["winter", "cold", "ice", "snow", "arctic", "tech", "science", "medical", "clean"],
-    "desert_rose": ["rose", "blush", "pink", "beauty", "fashion", "wedding", "feminine", "soft", "elegant"],
-    "tech_innovation": ["tech", "technology", "startup", "software", "ai", "digital", "innovation", "modern", "cyber"],
-    "botanical_garden": ["botanical", "garden", "plant", "organic", "natural", "eco", "green", "fresh", "spring"],
-    "midnight_galaxy": ["galaxy", "cosmic", "space", "night", "dark", "gaming", "entertainment", "creative", "luxury"],
+    "ocean_depths": [
+        "ocean",
+        "sea",
+        "marine",
+        "corporate",
+        "professional",
+        "financial",
+        "bank",
+        "healthcare",
+        "calm",
+    ],
+    "sunset_boulevard": [
+        "sunset",
+        "warm",
+        "vibrant",
+        "entertainment",
+        "food",
+        "travel",
+        "lifestyle",
+        "restaurant",
+    ],
+    "forest_canopy": [
+        "forest",
+        "nature",
+        "green",
+        "eco",
+        "sustainable",
+        "environment",
+        "organic",
+        "wellness",
+        "health",
+    ],
+    "modern_minimalist": [
+        "minimal",
+        "modern",
+        "clean",
+        "architecture",
+        "design",
+        "consulting",
+        "luxury",
+        "elegant",
+    ],
+    "golden_hour": [
+        "gold",
+        "autumn",
+        "fall",
+        "harvest",
+        "luxury",
+        "premium",
+        "financial",
+        "bronze",
+        "rich",
+    ],
+    "arctic_frost": [
+        "winter",
+        "cold",
+        "ice",
+        "snow",
+        "arctic",
+        "tech",
+        "science",
+        "medical",
+        "clean",
+    ],
+    "desert_rose": [
+        "rose",
+        "blush",
+        "pink",
+        "beauty",
+        "fashion",
+        "wedding",
+        "feminine",
+        "soft",
+        "elegant",
+    ],
+    "tech_innovation": [
+        "tech",
+        "technology",
+        "startup",
+        "software",
+        "ai",
+        "digital",
+        "innovation",
+        "modern",
+        "cyber",
+    ],
+    "botanical_garden": [
+        "botanical",
+        "garden",
+        "plant",
+        "organic",
+        "natural",
+        "eco",
+        "green",
+        "fresh",
+        "spring",
+    ],
+    "midnight_galaxy": [
+        "galaxy",
+        "cosmic",
+        "space",
+        "night",
+        "dark",
+        "gaming",
+        "entertainment",
+        "creative",
+        "luxury",
+    ],
 }
 
 # ---------------------------------------------------------------------------
@@ -186,7 +370,9 @@ class GetThemeInput(BaseModel):
     def _validate_theme(cls, v: str) -> str:
         v = v.lower().replace("-", "_").replace(" ", "_")
         if v not in THEMES:
-            raise ValueError(f"Unknown theme: {v}. Use theme_list_themes for available options.")
+            raise ValueError(
+                f"Unknown theme: {v}. Use theme_list_themes for available options."
+            )
         return v
 
 
@@ -194,7 +380,9 @@ class GenerateCssInput(BaseModel):
     model_config = _CFG
     theme_id: str = Field(..., description="Theme identifier")
     prefix: str = Field(default="theme", description="CSS variable prefix")
-    include_typography: bool = Field(default=True, description="Include font-family vars")
+    include_typography: bool = Field(
+        default=True, description="Include font-family vars"
+    )
 
     @field_validator("theme_id")
     @classmethod
@@ -222,7 +410,9 @@ class GenerateTailwindInput(BaseModel):
 class GenerateSassInput(BaseModel):
     model_config = _CFG
     theme_id: str = Field(..., description="Theme identifier")
-    use_maps: bool = Field(default=False, description="Use SASS maps instead of variables")
+    use_maps: bool = Field(
+        default=False, description="Use SASS maps instead of variables"
+    )
 
     @field_validator("theme_id")
     @classmethod
@@ -236,10 +426,18 @@ class GenerateSassInput(BaseModel):
 class CreateCustomInput(BaseModel):
     model_config = _CFG
     name: str = Field(..., min_length=2, max_length=50, description="Theme name")
-    description: str = Field(..., min_length=10, max_length=200, description="Theme description")
-    mood: str = Field(..., description="Mood/feeling (e.g., 'calm', 'energetic', 'professional')")
-    primary_color: Optional[str] = Field(default=None, description="Optional primary color hex")
-    industry: Optional[str] = Field(default=None, description="Optional target industry")
+    description: str = Field(
+        ..., min_length=10, max_length=200, description="Theme description"
+    )
+    mood: str = Field(
+        ..., description="Mood/feeling (e.g., 'calm', 'energetic', 'professional')"
+    )
+    primary_color: Optional[str] = Field(
+        default=None, description="Optional primary color hex"
+    )
+    industry: Optional[str] = Field(
+        default=None, description="Optional target industry"
+    )
 
     @field_validator("primary_color")
     @classmethod
@@ -253,7 +451,9 @@ class CreateCustomInput(BaseModel):
 class ApplyToHtmlInput(BaseModel):
     model_config = _CFG
     theme_id: str = Field(..., description="Theme identifier")
-    html: str = Field(..., min_length=1, max_length=50000, description="HTML content to style")
+    html: str = Field(
+        ..., min_length=1, max_length=50000, description="HTML content to style"
+    )
     inject_fonts: bool = Field(default=True, description="Inject Google Fonts link")
 
     @field_validator("theme_id")
@@ -288,7 +488,9 @@ class GeneratePreviewInput(BaseModel):
 
 class SuggestThemeInput(BaseModel):
     model_config = _CFG
-    context: str = Field(..., min_length=5, max_length=500, description="Description of use case")
+    context: str = Field(
+        ..., min_length=5, max_length=500, description="Description of use case"
+    )
     mood: Optional[str] = Field(default=None, description="Optional mood preference")
 
 
@@ -329,7 +531,9 @@ def _relative_luminance(r: int, g: int, b: int) -> float:
 
     def _adjust(c: int) -> float:
         c_norm = c / 255.0
-        return c_norm / 12.92 if c_norm <= 0.03928 else ((c_norm + 0.055) / 1.055) ** 2.4
+        return (
+            c_norm / 12.92 if c_norm <= 0.03928 else ((c_norm + 0.055) / 1.055) ** 2.4
+        )
 
     return 0.2126 * _adjust(r) + 0.7152 * _adjust(g) + 0.0722 * _adjust(b)
 
@@ -385,9 +589,21 @@ def _mood_to_colors(mood: str, primary: Optional[str] = None) -> dict:
     base = primary or mood_bases.get(mood.lower(), "#2c3e50")
     return {
         "primary": {"hex": base, "name": "Primary", "desc": "Main brand color"},
-        "secondary": {"hex": _lighten(base, 0.2), "name": "Secondary", "desc": "Lighter variation"},
-        "accent": {"hex": _lighten(base, 0.5), "name": "Accent", "desc": "Highlight color"},
-        "surface": {"hex": _lighten(base, 0.85), "name": "Surface", "desc": "Background color"},
+        "secondary": {
+            "hex": _lighten(base, 0.2),
+            "name": "Secondary",
+            "desc": "Lighter variation",
+        },
+        "accent": {
+            "hex": _lighten(base, 0.5),
+            "name": "Accent",
+            "desc": "Highlight color",
+        },
+        "surface": {
+            "hex": _lighten(base, 0.85),
+            "name": "Surface",
+            "desc": "Background color",
+        },
     }
 
 
@@ -431,18 +647,26 @@ async def theme_generate_css(
 ) -> str:
     """Generate CSS custom properties (variables) for a theme."""
     try:
-        inp = GenerateCssInput(theme_id=theme_id, prefix=prefix, include_typography=include_typography)
+        inp = GenerateCssInput(
+            theme_id=theme_id, prefix=prefix, include_typography=include_typography
+        )
         theme = THEMES[inp.theme_id]
         colors = theme["colors"]
 
         lines = [":root {"]
         for key, color in colors.items():
             lines.append(f"  --{inp.prefix}-{key}: {color['hex']};")
-            lines.append(f"  --{inp.prefix}-{key}-rgb: {', '.join(map(str, _hex_to_rgb(color['hex'])))};")
+            lines.append(
+                f"  --{inp.prefix}-{key}-rgb: {', '.join(map(str, _hex_to_rgb(color['hex'])))};"
+            )
 
         if inp.include_typography:
-            lines.append(f"  --{inp.prefix}-font-headers: '{theme['typography']['headers']}', sans-serif;")
-            lines.append(f"  --{inp.prefix}-font-body: '{theme['typography']['body']}', sans-serif;")
+            lines.append(
+                f"  --{inp.prefix}-font-headers: '{theme['typography']['headers']}', sans-serif;"
+            )
+            lines.append(
+                f"  --{inp.prefix}-font-body: '{theme['typography']['body']}', sans-serif;"
+            )
 
         lines.append("}")
 
@@ -525,7 +749,9 @@ async def theme_generate_sass(
             lines.append(f"$theme-font-body: '{theme['typography']['body']}';")
 
         sass = "\n".join(lines)
-        return json.dumps({"theme_id": inp.theme_id, "sass": sass, "use_maps": inp.use_maps})
+        return json.dumps(
+            {"theme_id": inp.theme_id, "sass": sass, "use_maps": inp.use_maps}
+        )
     except ValueError as e:
         return json.dumps({"error": str(e)})
 
@@ -556,7 +782,9 @@ async def theme_create_custom(
         else:
             typography = {"headers": "FreeSans Bold", "body": "FreeSans"}
 
-        use_cases = [inp.industry] if inp.industry else [f"{inp.mood.title()} presentations"]
+        use_cases = (
+            [inp.industry] if inp.industry else [f"{inp.mood.title()} presentations"]
+        )
 
         custom_theme = {
             "name": inp.name,
@@ -588,8 +816,12 @@ async def theme_apply_to_html(
         css_vars = []
         for key, color in colors.items():
             css_vars.append(f"--theme-{key}: {color['hex']};")
-        css_vars.append(f"--theme-font-headers: '{theme['typography']['headers']}', sans-serif;")
-        css_vars.append(f"--theme-font-body: '{theme['typography']['body']}', sans-serif;")
+        css_vars.append(
+            f"--theme-font-headers: '{theme['typography']['headers']}', sans-serif;"
+        )
+        css_vars.append(
+            f"--theme-font-body: '{theme['typography']['body']}', sans-serif;"
+        )
 
         style_block = f"<style>:root {{ {' '.join(css_vars)} }}</style>"
 
@@ -604,7 +836,9 @@ async def theme_apply_to_html(
         if "<head>" in inp.html:
             styled_html = inp.html.replace("<head>", f"<head>{font_link}{style_block}")
         elif "<html>" in inp.html:
-            styled_html = inp.html.replace("<html>", f"<html><head>{font_link}{style_block}</head>")
+            styled_html = inp.html.replace(
+                "<html>", f"<html><head>{font_link}{style_block}</head>"
+            )
         else:
             styled_html = f"{font_link}{style_block}{inp.html}"
 
@@ -635,28 +869,34 @@ async def theme_generate_preview(
                 )
                 x += 85
 
-            svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {x} 100">
+            svg = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {x} 100">
   <text x="{x // 2}" y="-10" text-anchor="middle" font-weight="bold">{theme["name"]}</text>
   {chr(10).join(swatches)}
-</svg>'''
-            return json.dumps({"theme_id": inp.theme_id, "preview": svg, "format": "svg"})
+</svg>"""
+            return json.dumps(
+                {"theme_id": inp.theme_id, "preview": svg, "format": "svg"}
+            )
 
         # HTML format
         swatches = []
         for key, color in colors.items():
-            text_color = "#fff" if _relative_luminance(*_hex_to_rgb(color["hex"])) < 0.5 else "#000"
+            text_color = (
+                "#fff"
+                if _relative_luminance(*_hex_to_rgb(color["hex"])) < 0.5
+                else "#000"
+            )
             swatches.append(
                 f'<div style="background:{color["hex"]};color:{text_color};padding:20px;text-align:center;">'
                 f'<strong>{color["name"]}</strong><br><small>{color["hex"]}</small></div>'
             )
 
-        html = f'''<div style="font-family:sans-serif;">
+        html = f"""<div style="font-family:sans-serif;">
   <h3 style="margin:0 0 10px;">{theme["name"]}</h3>
   <p style="margin:0 0 15px;color:#666;">{theme["description"]}</p>
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">
     {"".join(swatches)}
   </div>
-</div>'''
+</div>"""
         return json.dumps({"theme_id": inp.theme_id, "preview": html, "format": "html"})
     except ValueError as e:
         return json.dumps({"error": str(e)})

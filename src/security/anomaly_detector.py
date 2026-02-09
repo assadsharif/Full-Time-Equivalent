@@ -95,7 +95,8 @@ class AnomalyDetector:
 
         # Count calls in current window
         current_calls = [
-            e for e in events
+            e
+            for e in events
             if e.get("mcp_server") == mcp_server
             and e.get("event_type") == "mcp_action"
             and self._parse_timestamp(e["timestamp"]) >= window_start
@@ -148,7 +149,8 @@ class AnomalyDetector:
 
         # Get recent calls for this server
         recent_calls = [
-            e for e in events
+            e
+            for e in events
             if e.get("mcp_server") == mcp_server
             and e.get("event_type") == "mcp_action"
             and self._parse_timestamp(e["timestamp"]) >= recent_window
@@ -324,12 +326,17 @@ class AnomalyDetector:
 
         while current < now - timedelta(hours=time_window_hours):
             window_end = current + timedelta(hours=time_window_hours)
-            count = len([
-                e for e in events
-                if e.get("mcp_server") == mcp_server
-                and e.get("event_type") == "mcp_action"
-                and baseline_start <= self._parse_timestamp(e["timestamp"]) < window_end
-            ])
+            count = len(
+                [
+                    e
+                    for e in events
+                    if e.get("mcp_server") == mcp_server
+                    and e.get("event_type") == "mcp_action"
+                    and baseline_start
+                    <= self._parse_timestamp(e["timestamp"])
+                    < window_end
+                ]
+            )
             window_counts.append(count)
             current = window_end
 
@@ -338,7 +345,7 @@ class AnomalyDetector:
 
         mean = sum(window_counts) / len(window_counts)
         variance = sum((x - mean) ** 2 for x in window_counts) / len(window_counts)
-        std_dev = variance ** 0.5
+        std_dev = variance**0.5
 
         return BaselineStats(
             mean=mean,
@@ -382,7 +389,7 @@ class AnomalyDetector:
                 variance = sum((x - mean) ** 2 for x in counts) / len(counts)
                 hour_stats[hour] = {
                     "mean": mean,
-                    "std_dev": variance ** 0.5,
+                    "std_dev": variance**0.5,
                 }
 
         return hour_stats if hour_stats else None
@@ -458,4 +465,5 @@ class AnomalyDetector:
     def _generate_alert_id(self) -> str:
         """Generate unique alert ID."""
         import uuid
+
         return f"alert-{uuid.uuid4().hex[:12]}"

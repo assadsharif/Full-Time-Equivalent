@@ -59,10 +59,7 @@ class QueryService:
         self._adapter.register_log_files()
 
     def query(
-        self,
-        query_params: LogQuery,
-        *,
-        format: str = "dict"
+        self, query_params: LogQuery, *, format: str = "dict"
     ) -> Union[List[LogEntry], str]:
         """
         Query logs with structured filters.
@@ -104,10 +101,7 @@ class QueryService:
             raise ValueError(f"Unknown format: {format}")
 
     def query_sql(
-        self,
-        sql: str,
-        *,
-        params: Optional[Dict[str, Any]] = None
+        self, sql: str, *, params: Optional[Dict[str, Any]] = None
     ) -> List[Dict[str, Any]]:
         """
         Execute raw SQL query against log files.
@@ -126,10 +120,7 @@ class QueryService:
         return self._adapter.execute_query(sql, params)
 
     def filter_by_trace(
-        self,
-        trace_id: str,
-        *,
-        order_by: str = "timestamp"
+        self, trace_id: str, *, order_by: str = "timestamp"
     ) -> List[LogEntry]:
         """
         Get all logs for a specific trace ID.
@@ -144,11 +135,7 @@ class QueryService:
         Example:
             >>> logs = service.filter_by_trace("01HQ8Z9X0ABCDEFGHIJKLMNOPQ")
         """
-        params = LogQuery(
-            trace_id=trace_id,
-            order_by=order_by,
-            order_dir="asc"
-        )
+        params = LogQuery(trace_id=trace_id, order_by=order_by, order_dir="asc")
         return self.query(params, format="dict")
 
     def filter_by_time_range(
@@ -157,7 +144,7 @@ class QueryService:
         end_time: datetime,
         *,
         level: Optional[LogLevel] = None,
-        module: Optional[str] = None
+        module: Optional[str] = None,
     ) -> List[LogEntry]:
         """
         Get logs in time range with optional filters.
@@ -181,16 +168,12 @@ class QueryService:
             start_time=start_time,
             end_time=end_time,
             levels=[level] if level else None,
-            modules=[module] if module else None
+            modules=[module] if module else None,
         )
         return self.query(params, format="dict")
 
     def search_text(
-        self,
-        search_term: str,
-        *,
-        case_sensitive: bool = False,
-        limit: int = 100
+        self, search_term: str, *, case_sensitive: bool = False, limit: int = 100
     ) -> List[LogEntry]:
         """
         Full-text search in log messages.
@@ -206,10 +189,7 @@ class QueryService:
         Example:
             >>> logs = service.search_text("disk full", limit=50)
         """
-        params = LogQuery(
-            search_text=search_term,
-            limit=limit
-        )
+        params = LogQuery(search_text=search_term, limit=limit)
 
         # Build custom SQL for case-sensitive search if needed
         if case_sensitive:
@@ -314,18 +294,20 @@ class QueryService:
             stack_frames = []
             if "stack_trace" in exc_data:
                 for frame_data in exc_data["stack_trace"]:
-                    stack_frames.append(StackFrame(
-                        file=frame_data["file"],
-                        line=frame_data["line"],
-                        function=frame_data["function"],
-                        code=frame_data.get("code")
-                    ))
+                    stack_frames.append(
+                        StackFrame(
+                            file=frame_data["file"],
+                            line=frame_data["line"],
+                            function=frame_data["function"],
+                            code=frame_data.get("code"),
+                        )
+                    )
 
             exception = ExceptionInfo(
                 type=exc_data["type"],
                 message=exc_data["message"],
                 stack_trace=stack_frames,
-                cause=None  # Simplified for now
+                cause=None,  # Simplified for now
             )
 
         # Parse context if present
@@ -354,7 +336,7 @@ class QueryService:
             context=context,
             exception=exception,
             duration_ms=row.get("duration_ms"),
-            tags=tags
+            tags=tags,
         )
 
     def _format_as_csv(self, results: List[Dict[str, Any]]) -> str:
@@ -389,8 +371,7 @@ class QueryService:
         rows = []
         for row in results:
             row_str = " | ".join(
-                str(row.get(col, "")).ljust(col_widths[col])
-                for col in columns
+                str(row.get(col, "")).ljust(col_widths[col]) for col in columns
             )
             rows.append(row_str)
 

@@ -15,7 +15,6 @@ from rich.text import Text
 
 from cli.config import get_config
 
-
 console = Console()
 
 
@@ -149,6 +148,7 @@ def format_error(error: Exception, verbose: bool = False) -> str:
 
     if verbose:
         import traceback
+
         tb = traceback.format_exc()
         return f"[red bold]{error_type}:[/red bold] {error_msg}\n\n{tb}"
     else:
@@ -197,9 +197,7 @@ def display_info(message: str) -> None:
 
 
 def display_panel(
-    content: str,
-    title: Optional[str] = None,
-    border_style: str = "blue"
+    content: str, title: Optional[str] = None, border_style: str = "blue"
 ) -> None:
     """
     Display content in a Rich panel.
@@ -224,6 +222,7 @@ def confirm_action(prompt: str, default: bool = False) -> bool:
         True if user confirms, False otherwise
     """
     from rich.prompt import Confirm
+
     return Confirm.ask(prompt, default=default)
 
 
@@ -292,4 +291,4 @@ def truncate_string(text: str, max_length: int = 80, suffix: str = "...") -> str
     """
     if len(text) <= max_length:
         return text
-    return text[:max_length - len(suffix)] + suffix
+    return text[: max_length - len(suffix)] + suffix

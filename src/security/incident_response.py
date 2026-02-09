@@ -97,21 +97,19 @@ class IncidentResponse:
 
         # Filter events in time window
         recent_events = [
-            e for e in events
-            if self._parse_timestamp(e["timestamp"]) >= window_start
+            e for e in events if self._parse_timestamp(e["timestamp"]) >= window_start
         ]
 
         # Analyze events
         high_risk = [
-            e for e in recent_events
+            e
+            for e in recent_events
             if self._get_risk_level(e.get("risk_level", "low")) >= min_risk_level
         ]
 
-        affected_servers = list(set(
-            e.get("mcp_server")
-            for e in recent_events
-            if e.get("mcp_server")
-        ))
+        affected_servers = list(
+            set(e.get("mcp_server") for e in recent_events if e.get("mcp_server"))
+        )
 
         # Find suspicious patterns
         suspicious = self._identify_suspicious_actions(recent_events)
@@ -138,12 +136,15 @@ class IncidentResponse:
             recommendations=recommendations,
         )
 
-        self._log_action("incident_report_generated", {
-            "report_id": report.report_id,
-            "time_window_hours": time_window_hours,
-            "total_events": report.total_events,
-            "high_risk_events": report.high_risk_events,
-        })
+        self._log_action(
+            "incident_report_generated",
+            {
+                "report_id": report.report_id,
+                "time_window_hours": time_window_hours,
+                "total_events": report.total_events,
+                "high_risk_events": report.high_risk_events,
+            },
+        )
 
         return report
 
@@ -178,12 +179,15 @@ class IncidentResponse:
 
         self._isolated_servers.add(mcp_server)
 
-        self._log_action("mcp_isolated", {
-            "isolation_id": record.isolation_id,
-            "mcp_server": mcp_server,
-            "reason": reason,
-            "isolated_by": isolated_by,
-        })
+        self._log_action(
+            "mcp_isolated",
+            {
+                "isolation_id": record.isolation_id,
+                "mcp_server": mcp_server,
+                "reason": reason,
+                "isolated_by": isolated_by,
+            },
+        )
 
         return record
 
@@ -214,10 +218,13 @@ class IncidentResponse:
             status="restored",
         )
 
-        self._log_action("mcp_restored", {
-            "mcp_server": mcp_server,
-            "restored_by": restored_by,
-        })
+        self._log_action(
+            "mcp_restored",
+            {
+                "mcp_server": mcp_server,
+                "restored_by": restored_by,
+            },
+        )
 
         return record
 
@@ -248,11 +255,14 @@ class IncidentResponse:
         # Get all stored credentials from vault
         # Note: This requires vault to expose a list_all method
         # For now, we'll log the intent
-        self._log_action("mass_credential_rotation", {
-            "reason": reason,
-            "rotated_by": rotated_by,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        })
+        self._log_action(
+            "mass_credential_rotation",
+            {
+                "reason": reason,
+                "rotated_by": rotated_by,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            },
+        )
 
         # TODO: Integrate with vault.list_all() when available
         # TODO: Implement actual rotation logic per service
@@ -324,36 +334,38 @@ class IncidentResponse:
 
         for server, count in failure_counts.items():
             if count >= 5:
-                suspicious.append({
-                    "type": "multiple_failures",
-                    "server": server,
-                    "count": count,
-                    "severity": "high",
-                })
+                suspicious.append(
+                    {
+                        "type": "multiple_failures",
+                        "server": server,
+                        "count": count,
+                        "severity": "high",
+                    }
+                )
 
         # Rate limit violations
         rate_limit_violations = [
-            e for e in events
-            if e.get("result") == "rate_limit_exceeded"
+            e for e in events if e.get("result") == "rate_limit_exceeded"
         ]
         if len(rate_limit_violations) >= 3:
-            suspicious.append({
-                "type": "rate_limit_abuse",
-                "count": len(rate_limit_violations),
-                "severity": "medium",
-            })
+            suspicious.append(
+                {
+                    "type": "rate_limit_abuse",
+                    "count": len(rate_limit_violations),
+                    "severity": "medium",
+                }
+            )
 
         # Circuit breaker trips
-        circuit_trips = [
-            e for e in events
-            if e.get("result") == "circuit_open"
-        ]
+        circuit_trips = [e for e in events if e.get("result") == "circuit_open"]
         if len(circuit_trips) >= 2:
-            suspicious.append({
-                "type": "circuit_breaker_trips",
-                "count": len(circuit_trips),
-                "severity": "high",
-            })
+            suspicious.append(
+                {
+                    "type": "circuit_breaker_trips",
+                    "count": len(circuit_trips),
+                    "severity": "high",
+                }
+            )
 
         return suspicious
 
@@ -364,18 +376,18 @@ class IncidentResponse:
         for event in events:
             result = event.get("result", "")
             if "error" in result or result in ["rate_limit_exceeded", "circuit_open"]:
-                failed.append({
-                    "timestamp": event.get("timestamp"),
-                    "server": event.get("mcp_server"),
-                    "action": event.get("action"),
-                    "result": result,
-                })
+                failed.append(
+                    {
+                        "timestamp": event.get("timestamp"),
+                        "server": event.get("mcp_server"),
+                        "action": event.get("action"),
+                        "result": result,
+                    }
+                )
 
         return failed[:10]  # Limit to 10 most recent
 
-    def _generate_summary(
-        self, total: int, high_risk: int, servers: int
-    ) -> str:
+    def _generate_summary(self, total: int, high_risk: int, servers: int) -> str:
         """Generate incident summary text."""
         if high_risk == 0:
             return f"Analyzed {total} events across {servers} servers. No high-risk activity detected."
@@ -441,4 +453,5 @@ class IncidentResponse:
     def _generate_id(self, prefix: str) -> str:
         """Generate unique ID for records."""
         import uuid
+
         return f"{prefix}-{uuid.uuid4().hex[:12]}"

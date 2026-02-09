@@ -90,7 +90,12 @@ class FileSystemWatcher(BaseWatcher, FileSystemEventHandler):
         self.recursive = recursive
         self.include_patterns = include_patterns or []
         self.exclude_patterns = exclude_patterns or [
-            "*.tmp", "*.swp", "*.bak", "~*", ".DS_Store", "Thumbs.db"
+            "*.tmp",
+            "*.swp",
+            "*.bak",
+            "~*",
+            ".DS_Store",
+            "Thumbs.db",
         ]
         self.max_hash_size = max_hash_size
 
@@ -109,7 +114,9 @@ class FileSystemWatcher(BaseWatcher, FileSystemEventHandler):
     def _load_gitignore(self) -> Optional["pathspec.PathSpec"]:
         """Load .gitignore patterns from watch directory."""
         if pathspec is None:
-            logger.warning("pathspec library not installed, .gitignore patterns disabled")
+            logger.warning(
+                "pathspec library not installed, .gitignore patterns disabled"
+            )
             return None
 
         gitignore_path = self.watch_path / ".gitignore"

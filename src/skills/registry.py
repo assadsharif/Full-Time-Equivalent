@@ -53,8 +53,7 @@ class SkillRegistry:
         """Return skills that carry a specific tag (case-insensitive)."""
         tag_lower = tag.lower()
         return [
-            s for s in self._skills.values()
-            if tag_lower in [t.lower() for t in s.tags]
+            s for s in self._skills.values() if tag_lower in [t.lower() for t in s.tags]
         ]
 
     def search_by_category(self, category: str) -> list[SkillMetadata]:

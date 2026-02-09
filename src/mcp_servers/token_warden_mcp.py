@@ -40,13 +40,50 @@ MODE_EXECUTION = "EXECUTION"
 MODE_DESIGN = "DESIGN"
 
 # Mode detection patterns
-EXECUTION_PATTERNS = ["build", "create", "implement", "fix", "generate", "write", "add", "remove", "delete", "update", "deploy"]
-DESIGN_PATTERNS = ["design", "analyze", "plan", "explore", "consider", "evaluate", "compare", "assess", "review", "think"]
+EXECUTION_PATTERNS = [
+    "build",
+    "create",
+    "implement",
+    "fix",
+    "generate",
+    "write",
+    "add",
+    "remove",
+    "delete",
+    "update",
+    "deploy",
+]
+DESIGN_PATTERNS = [
+    "design",
+    "analyze",
+    "plan",
+    "explore",
+    "consider",
+    "evaluate",
+    "compare",
+    "assess",
+    "review",
+    "think",
+]
 
 # Verbosity configs per mode
 MODE_CONFIGS = {
-    MODE_EXECUTION: {"v": 0, "prose": False, "explain": False, "alternatives": False, "exploration": False, "cot": False},
-    MODE_DESIGN: {"v": 2, "prose": True, "explain": True, "alternatives": True, "exploration": True, "cot": True},
+    MODE_EXECUTION: {
+        "v": 0,
+        "prose": False,
+        "explain": False,
+        "alternatives": False,
+        "exploration": False,
+        "cot": False,
+    },
+    MODE_DESIGN: {
+        "v": 2,
+        "prose": True,
+        "explain": True,
+        "alternatives": True,
+        "exploration": True,
+        "cot": True,
+    },
 }
 
 # Default budgets (tokens)
@@ -82,7 +119,18 @@ WASTE_PATTERNS = [
 ]
 
 # Blocked phrases for stripping
-BLOCKED = ["let me", "here's", "alternatively", "you could", "another option", "consider", "it's worth", "note that", "to clarify", "in summary"]
+BLOCKED = [
+    "let me",
+    "here's",
+    "alternatively",
+    "you could",
+    "another option",
+    "consider",
+    "it's worth",
+    "note that",
+    "to clarify",
+    "in summary",
+]
 
 # ---------------------------------------------------------------------------
 # Global state (per-process, reset on failure)
@@ -168,7 +216,9 @@ class SetBudgetInput(BaseModel):
 class EnforceInput(BaseModel):
     model_config = _CFG
     payload: str = Field(..., min_length=1, description="Payload to enforce")
-    context_paths: list[str] = Field(default_factory=list, description="Paths in context")
+    context_paths: list[str] = Field(
+        default_factory=list, description="Paths in context"
+    )
     est_tokens: int = Field(default=0, ge=0, description="Estimated output tokens")
 
 
@@ -302,7 +352,9 @@ async def tw_enable_hook(
         inp = EnableHookInput(whitelist=whitelist or [])
         _STATE["hook_enabled"] = True
         _STATE["whitelist"] = inp.whitelist
-        return json.dumps({"enabled": True, "whitelist": inp.whitelist, "hash": _hash_state()})
+        return json.dumps(
+            {"enabled": True, "whitelist": inp.whitelist, "hash": _hash_state()}
+        )
     except Exception:
         _reset_to_safe()
         return json.dumps({"enabled": True, "fail_closed": True, "hash": _hash_state()})
@@ -312,7 +364,9 @@ async def tw_enable_hook(
 async def tw_disable_hook() -> str:
     """Disable global pre-hook. Only allowed in DESIGN mode."""
     if _STATE["mode"] != MODE_DESIGN:
-        return json.dumps({"error": "DENIED", "reason": "Hook disable blocked in EXECUTION mode"})
+        return json.dumps(
+            {"error": "DENIED", "reason": "Hook disable blocked in EXECUTION mode"}
+        )
 
     _STATE["hook_enabled"] = False
     return json.dumps({"enabled": False, "hash": _hash_state()})
@@ -330,7 +384,9 @@ async def tw_set_mode(
         return json.dumps({"mode": inp.mode, "cfg": cfg, "hash": _hash_state()})
     except Exception:
         _reset_to_safe()
-        return json.dumps({"mode": MODE_EXECUTION, "fail_closed": True, "hash": _hash_state()})
+        return json.dumps(
+            {"mode": MODE_EXECUTION, "fail_closed": True, "hash": _hash_state()}
+        )
 
 
 @mcp.tool()
@@ -344,10 +400,19 @@ async def tw_detect_mode(
         detected = _detect_mode(inp.task, inp.override)
         _STATE["mode"] = detected
         cfg = MODE_CONFIGS[detected]
-        return json.dumps({"mode": detected, "cfg": cfg, "auto": inp.override is None, "hash": _hash_state()})
+        return json.dumps(
+            {
+                "mode": detected,
+                "cfg": cfg,
+                "auto": inp.override is None,
+                "hash": _hash_state(),
+            }
+        )
     except Exception:
         _reset_to_safe()
-        return json.dumps({"mode": MODE_EXECUTION, "fail_closed": True, "hash": _hash_state()})
+        return json.dumps(
+            {"mode": MODE_EXECUTION, "fail_closed": True, "hash": _hash_state()}
+        )
 
 
 @mcp.tool()
@@ -371,21 +436,25 @@ async def tw_set_budget(
         return json.dumps({"budgets": _STATE["budgets"], "hash": _hash_state()})
     except Exception:
         _reset_to_safe()
-        return json.dumps({"budgets": MIN_BUDGETS, "fail_closed": True, "hash": _hash_state()})
+        return json.dumps(
+            {"budgets": MIN_BUDGETS, "fail_closed": True, "hash": _hash_state()}
+        )
 
 
 @mcp.tool()
 async def tw_get_state() -> str:
     """Query current policy state. Returns full state."""
-    return json.dumps({
-        "hook_enabled": _STATE["hook_enabled"],
-        "mode": _STATE["mode"],
-        "cfg": MODE_CONFIGS[_STATE["mode"]],
-        "budgets": _STATE["budgets"],
-        "whitelist": _STATE["whitelist"],
-        "session_used": _STATE["session_used"],
-        "hash": _hash_state(),
-    })
+    return json.dumps(
+        {
+            "hook_enabled": _STATE["hook_enabled"],
+            "mode": _STATE["mode"],
+            "cfg": MODE_CONFIGS[_STATE["mode"]],
+            "budgets": _STATE["budgets"],
+            "whitelist": _STATE["whitelist"],
+            "session_used": _STATE["session_used"],
+            "hash": _hash_state(),
+        }
+    )
 
 
 @mcp.tool()
@@ -396,7 +465,9 @@ async def tw_enforce(
 ) -> str:
     """Enforce policy on payload (pre-hook entry point). Returns enforced payload or termination."""
     try:
-        inp = EnforceInput(payload=payload, context_paths=context_paths or [], est_tokens=est_tokens)
+        inp = EnforceInput(
+            payload=payload, context_paths=context_paths or [], est_tokens=est_tokens
+        )
 
         # Skip enforcement if hook disabled (DESIGN mode only)
         if not _STATE["hook_enabled"]:
@@ -415,37 +486,45 @@ async def tw_enforce(
         budget = _STATE["budgets"]["request"]
 
         if est > budget:
-            return json.dumps({
-                "TERMINATED": True,
-                "reason": "BUDGET_EXCEEDED",
-                "scope": "request",
-                "budget": budget,
-                "estimated": est,
-            })
+            return json.dumps(
+                {
+                    "TERMINATED": True,
+                    "reason": "BUDGET_EXCEEDED",
+                    "scope": "request",
+                    "budget": budget,
+                    "estimated": est,
+                }
+            )
 
         # 4. Update session usage
         _STATE["session_used"] += est
         if _STATE["session_used"] > _STATE["budgets"]["session"]:
-            return json.dumps({
-                "TERMINATED": True,
-                "reason": "SESSION_BUDGET_EXCEEDED",
-                "budget": _STATE["budgets"]["session"],
-                "used": _STATE["session_used"],
-            })
+            return json.dumps(
+                {
+                    "TERMINATED": True,
+                    "reason": "SESSION_BUDGET_EXCEEDED",
+                    "budget": _STATE["budgets"]["session"],
+                    "used": _STATE["session_used"],
+                }
+            )
 
-        return json.dumps({
-            "payload": stripped_prose,
-            "enforced": True,
-            "mode": _STATE["mode"],
-            "ctx_stripped": ctx_removed,
-            "prose_stripped": prose_removed,
-            "est_tokens": est,
-            "budget_remaining": budget - est,
-        })
+        return json.dumps(
+            {
+                "payload": stripped_prose,
+                "enforced": True,
+                "mode": _STATE["mode"],
+                "ctx_stripped": ctx_removed,
+                "prose_stripped": prose_removed,
+                "est_tokens": est,
+                "budget_remaining": budget - est,
+            }
+        )
 
     except Exception:
         _reset_to_safe()
-        return json.dumps({"TERMINATED": True, "reason": "ENFORCEMENT_FAILURE", "fail_closed": True})
+        return json.dumps(
+            {"TERMINATED": True, "reason": "ENFORCEMENT_FAILURE", "fail_closed": True}
+        )
 
 
 @mcp.tool()
@@ -461,10 +540,26 @@ async def tw_check_budget(
         if inp.scope == "session":
             remaining = budget - _STATE["session_used"]
             allowed = tokens <= remaining
-            return json.dumps({"allowed": allowed, "scope": inp.scope, "budget": budget, "used": _STATE["session_used"], "remaining": remaining, "requested": tokens})
+            return json.dumps(
+                {
+                    "allowed": allowed,
+                    "scope": inp.scope,
+                    "budget": budget,
+                    "used": _STATE["session_used"],
+                    "remaining": remaining,
+                    "requested": tokens,
+                }
+            )
 
         allowed = tokens <= budget
-        return json.dumps({"allowed": allowed, "scope": inp.scope, "budget": budget, "requested": tokens})
+        return json.dumps(
+            {
+                "allowed": allowed,
+                "scope": inp.scope,
+                "budget": budget,
+                "requested": tokens,
+            }
+        )
 
     except Exception:
         return json.dumps({"allowed": False, "fail_closed": True})
@@ -478,13 +573,15 @@ async def tw_terminate(
     used: int,
 ) -> str:
     """Return structured budget-exceeded termination. No prose. No fallback."""
-    return json.dumps({
-        "TERMINATED": True,
-        "reason": reason,
-        "scope": scope,
-        "budget": budget,
-        "used": used,
-    })
+    return json.dumps(
+        {
+            "TERMINATED": True,
+            "reason": reason,
+            "scope": scope,
+            "budget": budget,
+            "used": used,
+        }
+    )
 
 
 @mcp.tool()

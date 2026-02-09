@@ -103,8 +103,12 @@ class ScaffoldProjectInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     project_name: str = Field(..., min_length=1, description="Project name")
-    resource_name: Optional[str] = Field(None, description="Initial resource to scaffold")
-    database_type: Optional[str] = Field(None, description="Database type: postgresql, sqlite, mysql")
+    resource_name: Optional[str] = Field(
+        None, description="Initial resource to scaffold"
+    )
+    database_type: Optional[str] = Field(
+        None, description="Database type: postgresql, sqlite, mysql"
+    )
 
     @field_validator("project_name")
     @classmethod
@@ -124,8 +128,12 @@ class GenerateEndpointInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    resource_name: str = Field(..., min_length=1, description="Resource name (e.g. 'todo')")
-    operations: list[str] = Field(..., min_length=1, description="CRUD operations to include")
+    resource_name: str = Field(
+        ..., min_length=1, description="Resource name (e.g. 'todo')"
+    )
+    operations: list[str] = Field(
+        ..., min_length=1, description="CRUD operations to include"
+    )
     prefix: Optional[str] = Field(None, description="Custom URL prefix")
 
     @field_validator("resource_name")
@@ -138,7 +146,9 @@ class GenerateEndpointInput(BaseModel):
     def validate_operations(cls, v: list[str]) -> list[str]:
         for op in v:
             if op not in VALID_OPERATIONS:
-                raise ValueError(f"Invalid operation '{op}'. Must be one of {VALID_OPERATIONS}")
+                raise ValueError(
+                    f"Invalid operation '{op}'. Must be one of {VALID_OPERATIONS}"
+                )
         return v
 
 
@@ -159,7 +169,9 @@ class GenerateSchemaInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    model_name: str = Field(..., min_length=1, description="Model name for schema generation")
+    model_name: str = Field(
+        ..., min_length=1, description="Model name for schema generation"
+    )
     fields: list[FieldSpec] = Field(..., min_length=1, description="Field definitions")
     include_update: bool = Field(False, description="Generate Update schema")
     include_list: bool = Field(False, description="Generate paginated list schema")
@@ -194,7 +206,9 @@ class ValidateProjectInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    project_files: dict[str, str] = Field(..., min_length=1, description="Map of filename -> content")
+    project_files: dict[str, str] = Field(
+        ..., min_length=1, description="Map of filename -> content"
+    )
 
     @field_validator("project_files")
     @classmethod
@@ -228,7 +242,9 @@ def _gen_main_py(project_name: str, resource_name: str | None) -> str:
     router_import = ""
     router_include = ""
     if resource_name:
-        plural = resource_name + "s" if not resource_name.endswith("s") else resource_name
+        plural = (
+            resource_name + "s" if not resource_name.endswith("s") else resource_name
+        )
         router_import = f"from routers import {plural}\n"
         router_include = f"app.include_router({plural}.router)\n"
 
@@ -382,63 +398,73 @@ def _gen_router(resource_name: str, operations: list[str], prefix: str | None) -
     ]
 
     if "list" in operations:
-        lines.extend([
-            "",
-            f'@router.get("/")',
-            f"async def list_{plural}(session: Session = Depends(get_session)):",
-            f'    """List all {plural}."""',
-            f"    # statement = select({cap})",
-            f"    # return session.exec(statement).all()",
-            f"    return []",
-            "",
-        ])
+        lines.extend(
+            [
+                "",
+                f'@router.get("/")',
+                f"async def list_{plural}(session: Session = Depends(get_session)):",
+                f'    """List all {plural}."""',
+                f"    # statement = select({cap})",
+                f"    # return session.exec(statement).all()",
+                f"    return []",
+                "",
+            ]
+        )
 
     if "get" in operations:
-        lines.extend([
-            "",
-            f'@router.get("/{{{singular}_id}}")',
-            f"async def get_{singular}({singular}_id: int, session: Session = Depends(get_session)):",
-            f'    """Get a single {singular} by ID."""',
-            f"    # {singular} = session.get({cap}, {singular}_id)",
-            f"    # if not {singular}:",
-            f'    #     raise HTTPException(status_code=404, detail="{cap} not found")',
-            f"    # return {singular}",
-            f'    raise HTTPException(status_code=404, detail="{cap} not found")',
-            "",
-        ])
+        lines.extend(
+            [
+                "",
+                f'@router.get("/{{{singular}_id}}")',
+                f"async def get_{singular}({singular}_id: int, session: Session = Depends(get_session)):",
+                f'    """Get a single {singular} by ID."""',
+                f"    # {singular} = session.get({cap}, {singular}_id)",
+                f"    # if not {singular}:",
+                f'    #     raise HTTPException(status_code=404, detail="{cap} not found")',
+                f"    # return {singular}",
+                f'    raise HTTPException(status_code=404, detail="{cap} not found")',
+                "",
+            ]
+        )
 
     if "create" in operations:
-        lines.extend([
-            "",
-            f'@router.post("/", status_code=status.HTTP_201_CREATED)',
-            f"async def create_{singular}(session: Session = Depends(get_session)):",
-            f'    """Create a new {singular}."""',
-            f"    # Implement creation logic",
-            f"    pass",
-            "",
-        ])
+        lines.extend(
+            [
+                "",
+                f'@router.post("/", status_code=status.HTTP_201_CREATED)',
+                f"async def create_{singular}(session: Session = Depends(get_session)):",
+                f'    """Create a new {singular}."""',
+                f"    # Implement creation logic",
+                f"    pass",
+                "",
+            ]
+        )
 
     if "update" in operations:
-        lines.extend([
-            "",
-            f'@router.put("/{{{singular}_id}}")',
-            f"async def update_{singular}({singular}_id: int, session: Session = Depends(get_session)):",
-            f'    """Update an existing {singular}."""',
-            f"    # Implement update logic",
-            f"    pass",
-            "",
-        ])
+        lines.extend(
+            [
+                "",
+                f'@router.put("/{{{singular}_id}}")',
+                f"async def update_{singular}({singular}_id: int, session: Session = Depends(get_session)):",
+                f'    """Update an existing {singular}."""',
+                f"    # Implement update logic",
+                f"    pass",
+                "",
+            ]
+        )
 
     if "delete" in operations:
-        lines.extend([
-            "",
-            f'@router.delete("/{{{singular}_id}}", status_code=status.HTTP_204_NO_CONTENT)',
-            f"async def delete_{singular}({singular}_id: int, session: Session = Depends(get_session)):",
-            f'    """Delete a {singular}."""',
-            f"    # Implement delete logic",
-            f"    pass",
-            "",
-        ])
+        lines.extend(
+            [
+                "",
+                f'@router.delete("/{{{singular}_id}}", status_code=status.HTTP_204_NO_CONTENT)',
+                f"async def delete_{singular}({singular}_id: int, session: Session = Depends(get_session)):",
+                f'    """Delete a {singular}."""',
+                f"    # Implement delete logic",
+                f"    pass",
+                "",
+            ]
+        )
 
     return "\n".join(lines)
 
@@ -489,13 +515,19 @@ def _gen_model(
             field_parts.append(f'default="{f["default"]}"')
 
         if field_parts:
-            lines.append(f"    {f['name']}: {type_str} = Field({', '.join(field_parts)})")
+            lines.append(
+                f"    {f['name']}: {type_str} = Field({', '.join(field_parts)})"
+            )
         else:
             lines.append(f"    {f['name']}: {type_str}")
 
     if timestamps:
-        lines.append("    created_at: datetime = Field(default_factory=datetime.utcnow)")
-        lines.append("    updated_at: datetime = Field(default_factory=datetime.utcnow)")
+        lines.append(
+            "    created_at: datetime = Field(default_factory=datetime.utcnow)"
+        )
+        lines.append(
+            "    updated_at: datetime = Field(default_factory=datetime.utcnow)"
+        )
 
     if soft_delete:
         lines.append("    deleted_at: Optional[datetime] = Field(default=None)")
@@ -593,7 +625,7 @@ def _gen_error_handlers(include_request_id: bool, include_logging: bool) -> str:
     if include_logging:
         lines.append("import logging")
         lines.append("")
-        lines.append('logger = logging.getLogger(__name__)')
+        lines.append("logger = logging.getLogger(__name__)")
 
     if include_request_id:
         lines.append("import uuid")
@@ -602,65 +634,77 @@ def _gen_error_handlers(include_request_id: bool, include_logging: bool) -> str:
     lines.extend(["", ""])
 
     if include_request_id:
-        lines.extend([
-            "class RequestIDMiddleware(BaseHTTPMiddleware):",
-            '    """Add X-Request-ID to every request/response."""',
-            "",
-            "    async def dispatch(self, request: Request, call_next):",
-            "        request_id = str(uuid.uuid4())",
-            "        request.state.request_id = request_id",
-            "        response = await call_next(request)",
-            '        response.headers["X-Request-ID"] = request_id',
-            "        return response",
-            "",
-            "",
-        ])
+        lines.extend(
+            [
+                "class RequestIDMiddleware(BaseHTTPMiddleware):",
+                '    """Add X-Request-ID to every request/response."""',
+                "",
+                "    async def dispatch(self, request: Request, call_next):",
+                "        request_id = str(uuid.uuid4())",
+                "        request.state.request_id = request_id",
+                "        response = await call_next(request)",
+                '        response.headers["X-Request-ID"] = request_id',
+                "        return response",
+                "",
+                "",
+            ]
+        )
 
-    lines.extend([
-        "def register_exception_handlers(app: FastAPI) -> None:",
-        '    """Register global exception handlers on the app."""',
-        "",
-        "    @app.exception_handler(RequestValidationError)",
-        "    async def validation_exception_handler(request: Request, exc: RequestValidationError):",
-        '        """Handle Pydantic validation errors."""',
-    ])
+    lines.extend(
+        [
+            "def register_exception_handlers(app: FastAPI) -> None:",
+            '    """Register global exception handlers on the app."""',
+            "",
+            "    @app.exception_handler(RequestValidationError)",
+            "    async def validation_exception_handler(request: Request, exc: RequestValidationError):",
+            '        """Handle Pydantic validation errors."""',
+        ]
+    )
 
     if include_logging:
         lines.append('        logger.error(f"Validation error: {exc.errors()}")')
 
-    lines.extend([
-        "        return JSONResponse(",
-        "            status_code=422,",
-        "            content={",
-        '                "detail": "Validation error",',
-        '                "errors": exc.errors(),',
-        "            },",
-        "        )",
-        "",
-        "    @app.exception_handler(Exception)",
-        "    async def general_exception_handler(request: Request, exc: Exception):",
-        '        """Catch-all for unexpected errors."""',
-    ])
+    lines.extend(
+        [
+            "        return JSONResponse(",
+            "            status_code=422,",
+            "            content={",
+            '                "detail": "Validation error",',
+            '                "errors": exc.errors(),',
+            "            },",
+            "        )",
+            "",
+            "    @app.exception_handler(Exception)",
+            "    async def general_exception_handler(request: Request, exc: Exception):",
+            '        """Catch-all for unexpected errors."""',
+        ]
+    )
 
     if include_logging:
-        lines.append('        logger.error(f"Unexpected error: {str(exc)}", exc_info=True)')
+        lines.append(
+            '        logger.error(f"Unexpected error: {str(exc)}", exc_info=True)'
+        )
 
-    lines.extend([
-        "        return JSONResponse(",
-        "            status_code=500,",
-        '            content={"detail": "Internal server error"},',
-        "        )",
-        "",
-    ])
+    lines.extend(
+        [
+            "        return JSONResponse(",
+            "            status_code=500,",
+            '            content={"detail": "Internal server error"},',
+            "        )",
+            "",
+        ]
+    )
 
     if include_request_id:
-        lines.extend([
-            "",
-            "def register_middleware(app: FastAPI) -> None:",
-            '    """Register middleware on the app."""',
-            "    app.add_middleware(RequestIDMiddleware)",
-            "",
-        ])
+        lines.extend(
+            [
+                "",
+                "def register_middleware(app: FastAPI) -> None:",
+                '    """Register middleware on the app."""',
+                "    app.add_middleware(RequestIDMiddleware)",
+                "",
+            ]
+        )
 
     return "\n".join(lines)
 
@@ -966,7 +1010,7 @@ DIAGNOSES: dict[str, dict] = {
             "Ensure .env file is loaded: call load_dotenv() before os.getenv()",
             "Check database server is running and accessible",
             "Verify credentials and database name in the connection string",
-            "Test connection: python -c \"from sqlalchemy import create_engine, text; ...\"",
+            'Test connection: python -c "from sqlalchemy import create_engine, text; ..."',
         ],
     },
     "500_internal_error": {
@@ -1039,71 +1083,93 @@ async def fastapi_scaffold_project(
     files = []
 
     # main.py
-    files.append({
-        "path": "main.py",
-        "content": _gen_main_py(project_name, resource_name),
-    })
+    files.append(
+        {
+            "path": "main.py",
+            "content": _gen_main_py(project_name, resource_name),
+        }
+    )
 
     # database.py
-    files.append({
-        "path": "database.py",
-        "content": _gen_database_py(database_type),
-    })
+    files.append(
+        {
+            "path": "database.py",
+            "content": _gen_database_py(database_type),
+        }
+    )
 
     # requirements.txt
-    files.append({
-        "path": "requirements.txt",
-        "content": _gen_requirements(),
-    })
+    files.append(
+        {
+            "path": "requirements.txt",
+            "content": _gen_requirements(),
+        }
+    )
 
     # .env.example
-    files.append({
-        "path": ".env.example",
-        "content": _gen_env_example(database_type),
-    })
+    files.append(
+        {
+            "path": ".env.example",
+            "content": _gen_env_example(database_type),
+        }
+    )
 
     # .gitignore
-    files.append({
-        "path": ".gitignore",
-        "content": _gen_gitignore(),
-    })
+    files.append(
+        {
+            "path": ".gitignore",
+            "content": _gen_gitignore(),
+        }
+    )
 
     # Router for resource
     if resource_name:
-        plural = resource_name + "s" if not resource_name.endswith("s") else resource_name
-        files.append({
-            "path": f"routers/{plural}.py",
-            "content": _gen_router(
-                resource_name,
-                ["list", "get", "create", "update", "delete"],
-                None,
-            ),
-        })
+        plural = (
+            resource_name + "s" if not resource_name.endswith("s") else resource_name
+        )
+        files.append(
+            {
+                "path": f"routers/{plural}.py",
+                "content": _gen_router(
+                    resource_name,
+                    ["list", "get", "create", "update", "delete"],
+                    None,
+                ),
+            }
+        )
 
-        files.append({
-            "path": f"routers/__init__.py",
-            "content": "",
-        })
+        files.append(
+            {
+                "path": f"routers/__init__.py",
+                "content": "",
+            }
+        )
 
-        files.append({
-            "path": f"schemas/{resource_name}.py",
-            "content": _gen_schema(
-                resource_name.capitalize(),
-                [{"name": "name", "type": "str"}],
-                include_update=True,
-                include_list=False,
-            ),
-        })
+        files.append(
+            {
+                "path": f"schemas/{resource_name}.py",
+                "content": _gen_schema(
+                    resource_name.capitalize(),
+                    [{"name": "name", "type": "str"}],
+                    include_update=True,
+                    include_list=False,
+                ),
+            }
+        )
 
-        files.append({
-            "path": f"schemas/__init__.py",
-            "content": "",
-        })
+        files.append(
+            {
+                "path": f"schemas/__init__.py",
+                "content": "",
+            }
+        )
 
-    return json.dumps({
-        "status": "success",
-        "files": files,
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "files": files,
+        }
+    )
 
 
 @mcp.tool()
@@ -1119,10 +1185,12 @@ async def fastapi_generate_endpoint(
     """
     code = _gen_router(resource_name, operations, prefix)
 
-    return json.dumps({
-        "status": "success",
-        "code": code,
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "code": code,
+        }
+    )
 
 
 @mcp.tool()
@@ -1140,10 +1208,12 @@ async def fastapi_generate_model(
     """
     code = _gen_model(model_name, fields, table_name, timestamps, soft_delete)
 
-    return json.dumps({
-        "status": "success",
-        "code": code,
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "code": code,
+        }
+    )
 
 
 @mcp.tool()
@@ -1160,10 +1230,12 @@ async def fastapi_generate_schema(
     """
     code = _gen_schema(model_name, fields, include_update, include_list)
 
-    return json.dumps({
-        "status": "success",
-        "code": code,
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "code": code,
+        }
+    )
 
 
 @mcp.tool()
@@ -1179,10 +1251,12 @@ async def fastapi_generate_error_handlers(
     """
     code = _gen_error_handlers(include_request_id, include_logging)
 
-    return json.dumps({
-        "status": "success",
-        "code": code,
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "code": code,
+        }
+    )
 
 
 @mcp.tool()
@@ -1197,12 +1271,14 @@ async def fastapi_suggest_crud_pattern(
     """
     pattern = CRUD_PATTERNS[pattern_name]
 
-    return json.dumps({
-        "status": "success",
-        "pattern": pattern_name,
-        "code": pattern["code"],
-        "notes": pattern["notes"],
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "pattern": pattern_name,
+            "code": pattern["code"],
+            "notes": pattern["notes"],
+        }
+    )
 
 
 @mcp.tool()
@@ -1230,7 +1306,9 @@ async def fastapi_validate_project(
         warnings.append("Missing database.py — no database configuration found")
 
     # Check requirements
-    checks["has_requirements"] = "requirements.txt" in project_files or "pyproject.toml" in project_files
+    checks["has_requirements"] = (
+        "requirements.txt" in project_files or "pyproject.toml" in project_files
+    )
     if not checks["has_requirements"]:
         warnings.append("Missing requirements.txt — no dependency manifest found")
 
@@ -1241,9 +1319,13 @@ async def fastapi_validate_project(
 
     # Check CORS configuration
     main_content = project_files.get("main.py", "")
-    checks["has_cors"] = "CORSMiddleware" in main_content or "cors" in main_content.lower()
+    checks["has_cors"] = (
+        "CORSMiddleware" in main_content or "cors" in main_content.lower()
+    )
     if not checks["has_cors"]:
-        warnings.append("No CORS middleware configured — frontend requests may be blocked")
+        warnings.append(
+            "No CORS middleware configured — frontend requests may be blocked"
+        )
 
     # Check for routers
     checks["has_routers"] = any("routers/" in k for k in project_files)
@@ -1259,19 +1341,25 @@ async def fastapi_validate_project(
 
     checks["no_hardcoded_secrets"] = not has_secrets
     if has_secrets:
-        warnings.append("Possible hardcoded secrets detected — use environment variables")
+        warnings.append(
+            "Possible hardcoded secrets detected — use environment variables"
+        )
 
     # Check DATABASE_URL from env
     db_content = project_files.get("database.py", "")
     checks["uses_env_for_db"] = "os.getenv" in db_content or "environ" in db_content
     if not checks["uses_env_for_db"] and checks["has_database"]:
-        warnings.append("DATABASE_URL may not be loaded from environment — use os.getenv()")
+        warnings.append(
+            "DATABASE_URL may not be loaded from environment — use os.getenv()"
+        )
 
-    return json.dumps({
-        "status": "success",
-        "checks": checks,
-        "warnings": warnings,
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "checks": checks,
+            "warnings": warnings,
+        }
+    )
 
 
 @mcp.tool()
@@ -1288,11 +1376,13 @@ async def fastapi_diagnose_issue(
     """
     entry = DIAGNOSES[symptom]
 
-    return json.dumps({
-        "status": "success",
-        "diagnosis": entry["diagnosis"],
-        "solutions": entry["solutions"],
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "diagnosis": entry["diagnosis"],
+            "solutions": entry["solutions"],
+        }
+    )
 
 
 # ---------------------------------------------------------------------------

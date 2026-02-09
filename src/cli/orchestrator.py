@@ -32,7 +32,9 @@ def _parse_since(since_str: str) -> datetime:
     unit = since_str[-1].lower()
     unit_map = {"h": "hours", "d": "days"}
     if unit not in unit_map:
-        raise click.BadParameter(f"Unknown unit '{unit}' — use 'h' (hours) or 'd' (days)")
+        raise click.BadParameter(
+            f"Unknown unit '{unit}' — use 'h' (hours) or 'd' (days)"
+        )
     try:
         amount = int(since_str[:-1])
     except ValueError:
@@ -102,7 +104,9 @@ def run_command(ctx, dry_run: bool, once: bool, config: Optional[Path]):
         from orchestrator.models import OrchestratorConfig
 
         if config:
-            orch_config = OrchestratorConfig.from_yaml(config, vault_path_override=vault_path)
+            orch_config = OrchestratorConfig.from_yaml(
+                config, vault_path_override=vault_path
+            )
         else:
             # Try default config location
             default_config = Path("config/orchestrator.yaml")
@@ -195,7 +199,9 @@ def metrics_command(ctx: click.Context, since: str, vault_path: Optional[Path]):
         collector = MetricsCollector(log_path=metrics_path)
 
         if not metrics_path.exists():
-            display_info("No metrics data found. The orchestrator has not recorded any events yet.")
+            display_info(
+                "No metrics data found. The orchestrator has not recorded any events yet."
+            )
             return
 
         # Load and aggregate
@@ -292,6 +298,7 @@ def health_command(ctx: click.Context, output_json: bool, vault_path: Optional[P
 
         if output_json:
             import json
+
             console.print(json.dumps(result, indent=2))
         else:
             # Rich text output
@@ -302,7 +309,9 @@ def health_command(ctx: click.Context, output_json: bool, vault_path: Optional[P
                 "unhealthy": "red",
             }.get(status, "white")
 
-            console.print(f"\n[bold]Orchestrator Health Status[/bold]: [{status_color}]{status.upper()}[/{status_color}]")
+            console.print(
+                f"\n[bold]Orchestrator Health Status[/bold]: [{status_color}]{status.upper()}[/{status_color}]"
+            )
             console.print(f"  Checked at: {result['timestamp']}\n")
 
             table = Table(show_header=True, header_style="bold cyan")
@@ -388,14 +397,18 @@ def dashboard_command(ctx: click.Context, watch: bool, vault_path: Optional[Path
             console.print()
 
             # Queue section
-            console.print(f"[bold cyan]Pending Tasks[/bold cyan] ({len(queue)} in queue)")
+            console.print(
+                f"[bold cyan]Pending Tasks[/bold cyan] ({len(queue)} in queue)"
+            )
             if queue:
                 queue_table = Table(show_header=True, header_style="bold")
                 queue_table.add_column("Priority", style="bold")
                 queue_table.add_column("Task")
                 for task in queue[:10]:  # Show top 10
                     pri = task["priority"]
-                    pri_str = f"[yellow]{pri:.1f}[/yellow]" if pri > 3.0 else f"{pri:.1f}"
+                    pri_str = (
+                        f"[yellow]{pri:.1f}[/yellow]" if pri > 3.0 else f"{pri:.1f}"
+                    )
                     queue_table.add_row(pri_str, task["name"])
                 if len(queue) > 10:
                     queue_table.add_row("...", f"({len(queue) - 10} more)")
@@ -405,27 +418,35 @@ def dashboard_command(ctx: click.Context, watch: bool, vault_path: Optional[Path
             console.print()
 
             # Active tasks section
-            console.print(f"[bold magenta]Active Tasks[/bold magenta] ({len(active)} executing)")
+            console.print(
+                f"[bold magenta]Active Tasks[/bold magenta] ({len(active)} executing)"
+            )
             if active:
                 active_table = Table(show_header=True, header_style="bold")
                 active_table.add_column("Task")
                 active_table.add_column("State")
                 active_table.add_column("Attempts")
                 for task in active:
-                    console.print(f"  [cyan]{task['name']}[/cyan] — {task['state']} (attempt {task['attempts']})")
+                    console.print(
+                        f"  [cyan]{task['name']}[/cyan] — {task['state']} (attempt {task['attempts']})"
+                    )
             else:
                 console.print("  [dim]No active tasks[/dim]")
             console.print()
 
             # Recent completions section
-            console.print(f"[bold green]Recent Completions[/bold green] (last {len(recent)})")
+            console.print(
+                f"[bold green]Recent Completions[/bold green] (last {len(recent)})"
+            )
             if recent:
                 comp_table = Table(show_header=True, header_style="bold")
                 comp_table.add_column("Task")
                 comp_table.add_column("Status")
                 comp_table.add_column("Duration")
                 for comp in recent:
-                    status_icon = "[green]✓[/green]" if comp["success"] else "[red]✗[/red]"
+                    status_icon = (
+                        "[green]✓[/green]" if comp["success"] else "[red]✗[/red]"
+                    )
                     duration = f"{comp['duration_s']:.1f}s"
                     comp_table.add_row(comp["task"], status_icon, duration)
                 console.print(comp_table)
@@ -442,6 +463,7 @@ def dashboard_command(ctx: click.Context, watch: bool, vault_path: Optional[Path
                     console.clear()
                     render_dashboard()
                     import time as time_module
+
                     time_module.sleep(5)
             except KeyboardInterrupt:
                 console.print("\n[yellow]Dashboard stopped[/yellow]")
@@ -476,7 +498,9 @@ def dashboard_command(ctx: click.Context, watch: bool, vault_path: Optional[Path
     help="Path to vault (overrides config)",
 )
 @click.pass_context
-def queue_command(ctx: click.Context, verbose: bool, watch: bool, vault_path: Optional[Path]):
+def queue_command(
+    ctx: click.Context, verbose: bool, watch: bool, vault_path: Optional[Path]
+):
     """
     Display orchestrator task queue.
 
@@ -503,7 +527,9 @@ def queue_command(ctx: click.Context, verbose: bool, watch: bool, vault_path: Op
             """Render a single queue frame."""
             queue = visualizer.render_queue_table(verbose=verbose)
 
-            console.print(f"\n[bold]Orchestrator Task Queue[/bold] ({len(queue)} pending)")
+            console.print(
+                f"\n[bold]Orchestrator Task Queue[/bold] ({len(queue)} pending)"
+            )
             console.print()
 
             if queue:
@@ -517,10 +543,16 @@ def queue_command(ctx: click.Context, verbose: bool, watch: bool, vault_path: Op
                 for task in queue:
                     pri = task["priority"]
                     # Highlight high-priority tasks
-                    pri_str = f"[yellow]{pri:.1f}[/yellow]" if pri > 3.0 else f"{pri:.1f}"
+                    pri_str = (
+                        f"[yellow]{pri:.1f}[/yellow]" if pri > 3.0 else f"{pri:.1f}"
+                    )
                     wait = task["wait_time_display"]
                     # Highlight stale tasks (> 1 hour)
-                    wait_str = f"[red]{wait}[/red]" if task["wait_time_seconds"] > 3600 else wait
+                    wait_str = (
+                        f"[red]{wait}[/red]"
+                        if task["wait_time_seconds"] > 3600
+                        else wait
+                    )
 
                     row = [pri_str, task["name"], wait_str]
                     if verbose:
@@ -541,6 +573,7 @@ def queue_command(ctx: click.Context, verbose: bool, watch: bool, vault_path: Op
                     console.clear()
                     render_queue()
                     import time as time_module
+
                     time_module.sleep(5)
             except KeyboardInterrupt:
                 console.print("\n[yellow]Queue monitor stopped[/yellow]")

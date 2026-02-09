@@ -259,7 +259,11 @@ BRANCH_STRATEGIES: dict[str, dict] = {
         "description": "Two branches: main (production) + development",
         "branches": [
             {"name": "main", "purpose": "Production database", "persistent": True},
-            {"name": "development", "purpose": "Local development and testing", "persistent": True},
+            {
+                "name": "development",
+                "purpose": "Local development and testing",
+                "persistent": True,
+            },
         ],
         "use_case": "Solo developer, small project",
     },
@@ -267,8 +271,16 @@ BRANCH_STRATEGIES: dict[str, dict] = {
         "description": "Three branches: main + staging + development",
         "branches": [
             {"name": "main", "purpose": "Production database", "persistent": True},
-            {"name": "staging", "purpose": "Pre-production testing", "persistent": True},
-            {"name": "development", "purpose": "Active development", "persistent": True},
+            {
+                "name": "staging",
+                "purpose": "Pre-production testing",
+                "persistent": True,
+            },
+            {
+                "name": "development",
+                "purpose": "Active development",
+                "persistent": True,
+            },
         ],
         "use_case": "Team project, CI/CD pipeline",
     },
@@ -277,8 +289,16 @@ BRANCH_STRATEGIES: dict[str, dict] = {
         "branches": [
             {"name": "main", "purpose": "Production", "persistent": True},
             {"name": "staging", "purpose": "Pre-production", "persistent": True},
-            {"name": "development", "purpose": "Active development", "persistent": True},
-            {"name": "feature-*", "purpose": "Per-feature isolated testing", "persistent": False},
+            {
+                "name": "development",
+                "purpose": "Active development",
+                "persistent": True,
+            },
+            {
+                "name": "feature-*",
+                "purpose": "Per-feature isolated testing",
+                "persistent": False,
+            },
         ],
         "use_case": "Team with feature branch workflow, PR-based testing",
     },
@@ -289,17 +309,57 @@ BRANCH_STRATEGIES: dict[str, dict] = {
 # ---------------------------------------------------------------------------
 
 QUALITY_GATES: list[dict] = [
-    {"category": "Connection", "item": "DATABASE_URL loads from environment (not hardcoded)", "severity": "critical"},
-    {"category": "Connection", "item": "Connection string includes ?sslmode=require", "severity": "critical"},
+    {
+        "category": "Connection",
+        "item": "DATABASE_URL loads from environment (not hardcoded)",
+        "severity": "critical",
+    },
+    {
+        "category": "Connection",
+        "item": "Connection string includes ?sslmode=require",
+        "severity": "critical",
+    },
     {"category": "Security", "item": ".env is in .gitignore", "severity": "critical"},
-    {"category": "Security", "item": ".env.example template committed (no real credentials)", "severity": "high"},
-    {"category": "Connection", "item": "Connection test passes (SELECT 1)", "severity": "high"},
-    {"category": "Startup", "item": "Tables create successfully on startup", "severity": "high"},
-    {"category": "Startup", "item": "FastAPI lifespan verifies connection", "severity": "medium"},
-    {"category": "Environment", "item": "Separate dev/staging/prod connection strings", "severity": "medium"},
-    {"category": "Pool", "item": "Connection pool configured with pool_pre_ping=True", "severity": "medium"},
-    {"category": "Pool", "item": "pool_recycle set to prevent stale connections", "severity": "medium"},
-    {"category": "Resilience", "item": "Retry logic for cold start handling", "severity": "medium"},
+    {
+        "category": "Security",
+        "item": ".env.example template committed (no real credentials)",
+        "severity": "high",
+    },
+    {
+        "category": "Connection",
+        "item": "Connection test passes (SELECT 1)",
+        "severity": "high",
+    },
+    {
+        "category": "Startup",
+        "item": "Tables create successfully on startup",
+        "severity": "high",
+    },
+    {
+        "category": "Startup",
+        "item": "FastAPI lifespan verifies connection",
+        "severity": "medium",
+    },
+    {
+        "category": "Environment",
+        "item": "Separate dev/staging/prod connection strings",
+        "severity": "medium",
+    },
+    {
+        "category": "Pool",
+        "item": "Connection pool configured with pool_pre_ping=True",
+        "severity": "medium",
+    },
+    {
+        "category": "Pool",
+        "item": "pool_recycle set to prevent stale connections",
+        "severity": "medium",
+    },
+    {
+        "category": "Resilience",
+        "item": "Retry logic for cold start handling",
+        "severity": "medium",
+    },
     {"category": "Resilience", "item": "connect_timeout configured", "severity": "low"},
 ]
 
@@ -312,10 +372,19 @@ _CFG = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 class NeonGenerateDbConfigInput(BaseModel):
     model_config = _CFG
-    environment: str = Field(default="development", description="Target environment: development, staging, production")
-    include_pool_config: bool = Field(default=True, description="Include connection pool settings")
-    include_session_factory: bool = Field(default=True, description="Include get_session dependency")
-    include_connection_check: bool = Field(default=True, description="Include connection verification function")
+    environment: str = Field(
+        default="development",
+        description="Target environment: development, staging, production",
+    )
+    include_pool_config: bool = Field(
+        default=True, description="Include connection pool settings"
+    )
+    include_session_factory: bool = Field(
+        default=True, description="Include get_session dependency"
+    )
+    include_connection_check: bool = Field(
+        default=True, description="Include connection verification function"
+    )
 
     @field_validator("environment")
     @classmethod
@@ -328,11 +397,20 @@ class NeonGenerateDbConfigInput(BaseModel):
 class NeonGenerateConnectionStringInput(BaseModel):
     model_config = _CFG
     username: str = Field(default="<username>", description="Database username")
-    host: str = Field(default="<endpoint>", description="Neon endpoint hostname (ep-xxx.region.aws.neon.tech)")
+    host: str = Field(
+        default="<endpoint>",
+        description="Neon endpoint hostname (ep-xxx.region.aws.neon.tech)",
+    )
     database: str = Field(default="neondb", description="Database name")
-    use_pooler: bool = Field(default=False, description="Use Neon pgBouncer pooler endpoint")
-    ssl_mode: str = Field(default="require", description="SSL mode: require, verify-ca, verify-full")
-    connect_timeout: Optional[int] = Field(default=10, ge=1, le=60, description="Connection timeout in seconds")
+    use_pooler: bool = Field(
+        default=False, description="Use Neon pgBouncer pooler endpoint"
+    )
+    ssl_mode: str = Field(
+        default="require", description="SSL mode: require, verify-ca, verify-full"
+    )
+    connect_timeout: Optional[int] = Field(
+        default=10, ge=1, le=60, description="Connection timeout in seconds"
+    )
     region: str = Field(default="us-east-2", description="AWS region for Neon endpoint")
 
     @field_validator("ssl_mode")
@@ -356,35 +434,53 @@ class NeonGenerateEnvConfigInput(BaseModel):
         default=["development", "production"],
         description="Environments to generate configs for",
     )
-    include_example: bool = Field(default=True, description="Include .env.example template")
-    include_gitignore: bool = Field(default=True, description="Include .gitignore entries")
+    include_example: bool = Field(
+        default=True, description="Include .env.example template"
+    )
+    include_gitignore: bool = Field(
+        default=True, description="Include .gitignore entries"
+    )
 
     @field_validator("environments")
     @classmethod
     def _check_envs(cls, v: list[str]) -> list[str]:
         for env in v:
             if env not in VALID_ENVIRONMENTS:
-                raise ValueError(f"Each environment must be one of {VALID_ENVIRONMENTS}")
+                raise ValueError(
+                    f"Each environment must be one of {VALID_ENVIRONMENTS}"
+                )
         return v
 
 
 class NeonGenerateFastapiInput(BaseModel):
     model_config = _CFG
-    include_lifespan: bool = Field(default=True, description="Include lifespan with connection verification")
-    include_health_endpoint: bool = Field(default=True, description="Include /health/db endpoint")
-    include_table_creation: bool = Field(default=True, description="Include create_db_and_tables in lifespan")
+    include_lifespan: bool = Field(
+        default=True, description="Include lifespan with connection verification"
+    )
+    include_health_endpoint: bool = Field(
+        default=True, description="Include /health/db endpoint"
+    )
+    include_table_creation: bool = Field(
+        default=True, description="Include create_db_and_tables in lifespan"
+    )
 
 
 class NeonGenerateBranchStrategyInput(BaseModel):
     model_config = _CFG
-    strategy: str = Field(default="standard", description="Strategy: simple, standard, feature-branching")
-    project_name: str = Field(default="myapp", description="Project name for branch naming")
+    strategy: str = Field(
+        default="standard", description="Strategy: simple, standard, feature-branching"
+    )
+    project_name: str = Field(
+        default="myapp", description="Project name for branch naming"
+    )
 
     @field_validator("strategy")
     @classmethod
     def _check_strategy(cls, v: str) -> str:
         if v not in BRANCH_STRATEGIES:
-            raise ValueError(f"strategy must be one of {list(BRANCH_STRATEGIES.keys())}")
+            raise ValueError(
+                f"strategy must be one of {list(BRANCH_STRATEGIES.keys())}"
+            )
         return v
 
     @field_validator("project_name")
@@ -397,42 +493,61 @@ class NeonGenerateBranchStrategyInput(BaseModel):
 
 class NeonDetectAntipatternsInput(BaseModel):
     model_config = _CFG
-    deployment_target: str = Field(default="fastapi", description="Deployment target: fastapi, serverless, lambda, vercel, docker")
+    deployment_target: str = Field(
+        default="fastapi",
+        description="Deployment target: fastapi, serverless, lambda, vercel, docker",
+    )
     include_fixes: bool = Field(default=True, description="Include fix recommendations")
-    severity_filter: Optional[str] = Field(default=None, description="Filter by severity: critical, high, medium, low")
+    severity_filter: Optional[str] = Field(
+        default=None, description="Filter by severity: critical, high, medium, low"
+    )
 
     @field_validator("deployment_target")
     @classmethod
     def _check_target(cls, v: str) -> str:
         if v not in VALID_DEPLOYMENT_TARGETS:
-            raise ValueError(f"deployment_target must be one of {VALID_DEPLOYMENT_TARGETS}")
+            raise ValueError(
+                f"deployment_target must be one of {VALID_DEPLOYMENT_TARGETS}"
+            )
         return v
 
     @field_validator("severity_filter")
     @classmethod
     def _check_severity(cls, v: Optional[str]) -> Optional[str]:
         if v is not None and v not in ("critical", "high", "medium", "low"):
-            raise ValueError("severity_filter must be one of: critical, high, medium, low")
+            raise ValueError(
+                "severity_filter must be one of: critical, high, medium, low"
+            )
         return v
 
 
 class NeonTroubleshootInput(BaseModel):
     model_config = _CFG
-    error_message: str = Field(..., min_length=3, max_length=500, description="Error message to diagnose")
+    error_message: str = Field(
+        ..., min_length=3, max_length=500, description="Error message to diagnose"
+    )
 
 
 class NeonGenerateHealthCheckInput(BaseModel):
     model_config = _CFG
-    include_retry: bool = Field(default=True, description="Include retry logic for cold starts")
-    max_retries: int = Field(default=3, ge=1, le=10, description="Maximum retry attempts")
-    include_metrics: bool = Field(default=False, description="Include response time metrics")
+    include_retry: bool = Field(
+        default=True, description="Include retry logic for cold starts"
+    )
+    max_retries: int = Field(
+        default=3, ge=1, le=10, description="Maximum retry attempts"
+    )
+    include_metrics: bool = Field(
+        default=False, description="Include response time metrics"
+    )
 
 
 class NeonRecommendPoolInput(BaseModel):
     model_config = _CFG
     environment: str = Field(default="development", description="Target environment")
     deployment_target: str = Field(default="fastapi", description="Deployment target")
-    expected_concurrency: Optional[int] = Field(default=None, ge=1, le=1000, description="Expected concurrent users")
+    expected_concurrency: Optional[int] = Field(
+        default=None, ge=1, le=1000, description="Expected concurrent users"
+    )
 
     @field_validator("environment")
     @classmethod
@@ -445,21 +560,32 @@ class NeonRecommendPoolInput(BaseModel):
     @classmethod
     def _check_target(cls, v: str) -> str:
         if v not in VALID_DEPLOYMENT_TARGETS:
-            raise ValueError(f"deployment_target must be one of {VALID_DEPLOYMENT_TARGETS}")
+            raise ValueError(
+                f"deployment_target must be one of {VALID_DEPLOYMENT_TARGETS}"
+            )
         return v
 
 
 class NeonGenerateMigrationWorkflowInput(BaseModel):
     model_config = _CFG
-    strategy: str = Field(default="standard", description="Branch strategy: simple, standard, feature-branching")
-    migration_tool: str = Field(default="alembic", description="Migration tool: alembic, sqlmodel-direct")
-    include_rollback: bool = Field(default=True, description="Include rollback procedures")
+    strategy: str = Field(
+        default="standard",
+        description="Branch strategy: simple, standard, feature-branching",
+    )
+    migration_tool: str = Field(
+        default="alembic", description="Migration tool: alembic, sqlmodel-direct"
+    )
+    include_rollback: bool = Field(
+        default=True, description="Include rollback procedures"
+    )
 
     @field_validator("strategy")
     @classmethod
     def _check_strategy(cls, v: str) -> str:
         if v not in BRANCH_STRATEGIES:
-            raise ValueError(f"strategy must be one of {list(BRANCH_STRATEGIES.keys())}")
+            raise ValueError(
+                f"strategy must be one of {list(BRANCH_STRATEGIES.keys())}"
+            )
         return v
 
     @field_validator("migration_tool")
@@ -475,8 +601,9 @@ class NeonGenerateMigrationWorkflowInput(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-def _gen_db_config(environment: str, include_pool: bool,
-                   include_session: bool, include_check: bool) -> dict:
+def _gen_db_config(
+    environment: str, include_pool: bool, include_session: bool, include_check: bool
+) -> dict:
     """Generate database.py configuration code."""
     pool = POOL_CONFIGS[environment]
 
@@ -503,53 +630,63 @@ def _gen_db_config(environment: str, include_pool: bool,
 
     # Engine creation
     if include_pool:
-        lines.extend([
-            "engine = create_engine(",
-            "    DATABASE_URL,",
-            f"    echo={pool['echo']},",
-            f"    pool_size={pool['pool_size']},",
-            f"    max_overflow={pool['max_overflow']},",
-            f"    pool_timeout={pool['pool_timeout']},",
-            f"    pool_recycle={pool['pool_recycle']},",
-            f"    pool_pre_ping={pool['pool_pre_ping']},",
-            ")",
-        ])
+        lines.extend(
+            [
+                "engine = create_engine(",
+                "    DATABASE_URL,",
+                f"    echo={pool['echo']},",
+                f"    pool_size={pool['pool_size']},",
+                f"    max_overflow={pool['max_overflow']},",
+                f"    pool_timeout={pool['pool_timeout']},",
+                f"    pool_recycle={pool['pool_recycle']},",
+                f"    pool_pre_ping={pool['pool_pre_ping']},",
+                ")",
+            ]
+        )
     else:
-        lines.extend([
-            "engine = create_engine(DATABASE_URL, echo=True)",
-        ])
+        lines.extend(
+            [
+                "engine = create_engine(DATABASE_URL, echo=True)",
+            ]
+        )
 
-    lines.extend([
-        "",
-        "",
-        "def create_db_and_tables():",
-        "    SQLModel.metadata.create_all(engine)",
-    ])
+    lines.extend(
+        [
+            "",
+            "",
+            "def create_db_and_tables():",
+            "    SQLModel.metadata.create_all(engine)",
+        ]
+    )
 
     if include_session:
-        lines.extend([
-            "",
-            "",
-            "def get_session():",
-            "    with Session(engine) as session:",
-            "        yield session",
-        ])
+        lines.extend(
+            [
+                "",
+                "",
+                "def get_session():",
+                "    with Session(engine) as session:",
+                "        yield session",
+            ]
+        )
 
     if include_check:
-        lines.extend([
-            "",
-            "",
-            "def check_connection() -> bool:",
-            '    """Verify database connection."""',
-            "    try:",
-            "        with Session(engine) as session:",
-            '            session.exec(text("SELECT 1"))',
-            '            print("Database connection successful")',
-            "            return True",
-            "    except Exception as e:",
-            '        print(f"Database connection failed: {e}")',
-            "        return False",
-        ])
+        lines.extend(
+            [
+                "",
+                "",
+                "def check_connection() -> bool:",
+                '    """Verify database connection."""',
+                "    try:",
+                "        with Session(engine) as session:",
+                '            session.exec(text("SELECT 1"))',
+                '            print("Database connection successful")',
+                "            return True",
+                "    except Exception as e:",
+                '        print(f"Database connection failed: {e}")',
+                "        return False",
+            ]
+        )
 
     code = "\n".join(lines)
 
@@ -558,13 +695,21 @@ def _gen_db_config(environment: str, include_pool: bool,
         "environment": environment,
         "pool_config": pool if include_pool else None,
         "code": code,
-        "quality_gates": [g for g in QUALITY_GATES if g["category"] in ("Connection", "Pool")],
+        "quality_gates": [
+            g for g in QUALITY_GATES if g["category"] in ("Connection", "Pool")
+        ],
     }
 
 
-def _gen_connection_string(username: str, host: str, database: str,
-                           use_pooler: bool, ssl_mode: str,
-                           connect_timeout: Optional[int], region: str) -> dict:
+def _gen_connection_string(
+    username: str,
+    host: str,
+    database: str,
+    use_pooler: bool,
+    ssl_mode: str,
+    connect_timeout: Optional[int],
+    region: str,
+) -> dict:
     """Build a properly formatted Neon connection string."""
     # Add -pooler suffix if requested
     effective_host = host
@@ -599,12 +744,18 @@ def _gen_connection_string(username: str, host: str, database: str,
             "Replace <password> with actual password",
             "Never commit actual credentials to version control",
             "URL-encode special characters in password",
-        ] + (["Using Neon pooler endpoint (pgBouncer) for connection pooling"] if use_pooler else []),
+        ]
+        + (
+            ["Using Neon pooler endpoint (pgBouncer) for connection pooling"]
+            if use_pooler
+            else []
+        ),
     }
 
 
-def _gen_env_config(environments: list[str], include_example: bool,
-                    include_gitignore: bool) -> dict:
+def _gen_env_config(
+    environments: list[str], include_example: bool, include_gitignore: bool
+) -> dict:
     """Generate environment configuration files."""
     files: dict = {}
 
@@ -629,8 +780,8 @@ def _gen_env_config(environments: list[str], include_example: bool,
     result: dict = {
         "files": files,
         "loader_code": (
-            'import os\n'
-            'from dotenv import load_dotenv\n\n'
+            "import os\n"
+            "from dotenv import load_dotenv\n\n"
             'env = os.getenv("ENVIRONMENT", "development")\n'
             'load_dotenv(f".env.{env}")\n'
         ),
@@ -650,8 +801,9 @@ def _gen_env_config(environments: list[str], include_example: bool,
     return result
 
 
-def _gen_fastapi_integration(include_lifespan: bool, include_health: bool,
-                             include_tables: bool) -> dict:
+def _gen_fastapi_integration(
+    include_lifespan: bool, include_health: bool, include_tables: bool
+) -> dict:
     """Generate FastAPI integration code."""
     imports = ["from fastapi import FastAPI"]
     if include_lifespan:
@@ -670,43 +822,49 @@ def _gen_fastapi_integration(include_lifespan: bool, include_health: bool,
     ]
 
     if include_lifespan:
-        lines.extend([
-            "",
-            "@asynccontextmanager",
-            "async def lifespan(app: FastAPI):",
-            '    """Application lifespan: verify connection and create tables."""',
-        ])
+        lines.extend(
+            [
+                "",
+                "@asynccontextmanager",
+                "async def lifespan(app: FastAPI):",
+                '    """Application lifespan: verify connection and create tables."""',
+            ]
+        )
         if include_tables:
             lines.append("    create_db_and_tables()")
-        lines.extend([
-            "    try:",
-            "        with Session(engine) as session:",
-            '            session.exec(text("SELECT 1"))',
-            '        print("Database connection verified")',
-            "    except Exception as e:",
-            '        print(f"Database connection failed: {e}")',
-            "        raise",
-            "    yield",
-            "",
-            "",
-            "app = FastAPI(lifespan=lifespan)",
-        ])
+        lines.extend(
+            [
+                "    try:",
+                "        with Session(engine) as session:",
+                '            session.exec(text("SELECT 1"))',
+                '        print("Database connection verified")',
+                "    except Exception as e:",
+                '        print(f"Database connection failed: {e}")',
+                "        raise",
+                "    yield",
+                "",
+                "",
+                "app = FastAPI(lifespan=lifespan)",
+            ]
+        )
     else:
         lines.extend(["", "app = FastAPI()"])
 
     if include_health:
-        lines.extend([
-            "",
-            "",
-            '@app.get("/health/db", status_code=status.HTTP_200_OK)',
-            "def database_health_check(session: Session = Depends(get_session)):",
-            '    """Check database connectivity."""',
-            "    try:",
-            '        session.exec(text("SELECT 1"))',
-            '        return {"status": "healthy", "database": "connected"}',
-            "    except Exception as e:",
-            '        return {"status": "unhealthy", "error": str(e)}',
-        ])
+        lines.extend(
+            [
+                "",
+                "",
+                '@app.get("/health/db", status_code=status.HTTP_200_OK)',
+                "def database_health_check(session: Session = Depends(get_session)):",
+                '    """Check database connectivity."""',
+                "    try:",
+                '        session.exec(text("SELECT 1"))',
+                '        return {"status": "healthy", "database": "connected"}',
+                "    except Exception as e:",
+                '        return {"status": "unhealthy", "error": str(e)}',
+            ]
+        )
 
     code = "\n".join(lines)
 
@@ -733,13 +891,15 @@ def _gen_branch_strategy(strategy: str, project_name: str) -> dict:
         else:
             endpoint = f"ep-{project_name}-{name}.us-east-2.aws.neon.tech"
 
-        branches_detail.append({
-            "name": name.replace("*", f"<feature-name>") if "*" in name else name,
-            "purpose": b["purpose"],
-            "persistent": b["persistent"],
-            "endpoint": endpoint,
-            "connection_string": f"postgresql://<user>:<pass>@{endpoint}/neondb?sslmode=require",
-        })
+        branches_detail.append(
+            {
+                "name": name.replace("*", f"<feature-name>") if "*" in name else name,
+                "purpose": b["purpose"],
+                "persistent": b["persistent"],
+                "endpoint": endpoint,
+                "connection_string": f"postgresql://<user>:<pass>@{endpoint}/neondb?sslmode=require",
+            }
+        )
 
     tree_lines = ["main (production)"]
     for b in defn["branches"][1:]:
@@ -773,30 +933,35 @@ def _match_error(error_message: str) -> list[dict]:
     matches = []
     for pattern, info in CONNECTION_ERRORS.items():
         if pattern in lower:
-            matches.append({
-                "matched_pattern": pattern,
-                "cause": info["cause"],
-                "solutions": info["solutions"],
-            })
+            matches.append(
+                {
+                    "matched_pattern": pattern,
+                    "cause": info["cause"],
+                    "solutions": info["solutions"],
+                }
+            )
 
     if not matches:
-        matches.append({
-            "matched_pattern": None,
-            "cause": "Unknown error — could not match to known patterns",
-            "solutions": [
-                "Check DATABASE_URL format: postgresql://user:pass@host/db?sslmode=require",
-                "Verify Neon project is active in console",
-                "Test network connectivity to Neon endpoint",
-                "Enable SQLAlchemy logging: engine = create_engine(url, echo=True)",
-                "Check Neon status page: https://neon.tech/status",
-            ],
-        })
+        matches.append(
+            {
+                "matched_pattern": None,
+                "cause": "Unknown error — could not match to known patterns",
+                "solutions": [
+                    "Check DATABASE_URL format: postgresql://user:pass@host/db?sslmode=require",
+                    "Verify Neon project is active in console",
+                    "Test network connectivity to Neon endpoint",
+                    "Enable SQLAlchemy logging: engine = create_engine(url, echo=True)",
+                    "Check Neon status page: https://neon.tech/status",
+                ],
+            }
+        )
 
     return matches
 
 
-def _gen_health_check(include_retry: bool, max_retries: int,
-                      include_metrics: bool) -> dict:
+def _gen_health_check(
+    include_retry: bool, max_retries: int, include_metrics: bool
+) -> dict:
     """Generate health check code."""
     imports = [
         "from sqlmodel import Session",
@@ -815,68 +980,82 @@ def _gen_health_check(include_retry: bool, max_retries: int,
     ]
 
     if include_retry:
-        lines.extend([
+        lines.extend(
+            [
+                "",
+                f"def check_connection_with_retry(engine, max_retries: int = {max_retries}) -> bool:",
+                '    """Verify connection with retry for cold starts."""',
+                "    for attempt in range(max_retries):",
+                "        try:",
+                "            with Session(engine) as session:",
+                '                session.exec(text("SELECT 1"))',
+                "            return True",
+                "        except OperationalError:",
+                "            if attempt < max_retries - 1:",
+                "                time.sleep(2 ** attempt)  # Exponential backoff",
+                "            else:",
+                "                raise",
+                "    return False",
+            ]
+        )
+
+    lines.extend(
+        [
             "",
-            f"def check_connection_with_retry(engine, max_retries: int = {max_retries}) -> bool:",
-            '    """Verify connection with retry for cold starts."""',
-            "    for attempt in range(max_retries):",
-            "        try:",
-            "            with Session(engine) as session:",
-            '                session.exec(text("SELECT 1"))',
-            "            return True",
-            "        except OperationalError:",
-            "            if attempt < max_retries - 1:",
-            "                time.sleep(2 ** attempt)  # Exponential backoff",
-            "            else:",
-            "                raise",
-            "    return False",
-        ])
-
-    lines.extend([
-        "",
-        "",
-        "def check_connection(engine) -> dict:",
-        '    """Check database connection and return status."""',
-    ])
+            "",
+            "def check_connection(engine) -> dict:",
+            '    """Check database connection and return status."""',
+        ]
+    )
 
     if include_metrics:
-        lines.extend([
-            "    start = _time.monotonic()",
-        ])
+        lines.extend(
+            [
+                "    start = _time.monotonic()",
+            ]
+        )
 
-    lines.extend([
-        "    try:",
-        "        with Session(engine) as session:",
-        '            result = session.exec(text("SELECT version()"))',
-        "            version = result.fetchone()[0]",
-    ])
+    lines.extend(
+        [
+            "    try:",
+            "        with Session(engine) as session:",
+            '            result = session.exec(text("SELECT version()"))',
+            "            version = result.fetchone()[0]",
+        ]
+    )
 
     if include_metrics:
-        lines.extend([
-            "        elapsed_ms = (_time.monotonic() - start) * 1000",
-            "        return {",
-            '            "status": "healthy",',
-            '            "database": "connected",',
-            '            "version": version,',
-            '            "response_time_ms": round(elapsed_ms, 2),',
-            "        }",
-        ])
+        lines.extend(
+            [
+                "        elapsed_ms = (_time.monotonic() - start) * 1000",
+                "        return {",
+                '            "status": "healthy",',
+                '            "database": "connected",',
+                '            "version": version,',
+                '            "response_time_ms": round(elapsed_ms, 2),',
+                "        }",
+            ]
+        )
     else:
-        lines.extend([
-            "        return {",
-            '            "status": "healthy",',
-            '            "database": "connected",',
-            '            "version": version,',
-            "        }",
-        ])
+        lines.extend(
+            [
+                "        return {",
+                '            "status": "healthy",',
+                '            "database": "connected",',
+                '            "version": version,',
+                "        }",
+            ]
+        )
 
-    lines.extend([
-        "    except Exception as e:",
-        "        return {",
-        '            "status": "unhealthy",',
-        '            "error": str(e),',
-        "        }",
-    ])
+    lines.extend(
+        [
+            "    except Exception as e:",
+            "        return {",
+            '            "status": "unhealthy",',
+            '            "error": str(e),',
+            "        }",
+        ]
+    )
 
     code = "\n".join(lines)
 
@@ -891,8 +1070,9 @@ def _gen_health_check(include_retry: bool, max_retries: int,
     }
 
 
-def _recommend_pool(environment: str, deployment_target: str,
-                    expected_concurrency: Optional[int]) -> dict:
+def _recommend_pool(
+    environment: str, deployment_target: str, expected_concurrency: Optional[int]
+) -> dict:
     """Recommend connection pool configuration."""
     base = POOL_CONFIGS[environment].copy()
 
@@ -956,8 +1136,9 @@ def _recommend_pool(environment: str, deployment_target: str,
     }
 
 
-def _gen_migration_workflow(strategy: str, migration_tool: str,
-                            include_rollback: bool) -> dict:
+def _gen_migration_workflow(
+    strategy: str, migration_tool: str, include_rollback: bool
+) -> dict:
     """Generate migration workflow with branching safety."""
     defn = BRANCH_STRATEGIES[strategy]
 
@@ -979,14 +1160,38 @@ def _gen_migration_workflow(strategy: str, migration_tool: str,
         }
 
     steps = [
-        {"step": 1, "name": "Create feature branch", "action": "Create Neon branch from staging (via Console or CLI)"},
-        {"step": 2, "name": "Set DATABASE_URL", "action": "Point to feature branch endpoint"},
+        {
+            "step": 1,
+            "name": "Create feature branch",
+            "action": "Create Neon branch from staging (via Console or CLI)",
+        },
+        {
+            "step": 2,
+            "name": "Set DATABASE_URL",
+            "action": "Point to feature branch endpoint",
+        },
         {"step": 3, "name": "Run migration", "action": migration_commands["upgrade"]},
-        {"step": 4, "name": "Test thoroughly", "action": "Run test suite against feature branch"},
-        {"step": 5, "name": "Merge to staging", "action": "Apply migration to staging branch"},
+        {
+            "step": 4,
+            "name": "Test thoroughly",
+            "action": "Run test suite against feature branch",
+        },
+        {
+            "step": 5,
+            "name": "Merge to staging",
+            "action": "Apply migration to staging branch",
+        },
         {"step": 6, "name": "Test in staging", "action": "Full integration test"},
-        {"step": 7, "name": "Apply to production", "action": "Apply migration to main branch"},
-        {"step": 8, "name": "Cleanup", "action": "Delete feature branch (if ephemeral)"},
+        {
+            "step": 7,
+            "name": "Apply to production",
+            "action": "Apply migration to main branch",
+        },
+        {
+            "step": 8,
+            "name": "Cleanup",
+            "action": "Delete feature branch (if ephemeral)",
+        },
     ]
 
     result: dict = {
@@ -1041,8 +1246,12 @@ async def neon_generate_db_config(
         include_session_factory=include_session_factory,
         include_connection_check=include_connection_check,
     )
-    result = _gen_db_config(inp.environment, inp.include_pool_config,
-                            inp.include_session_factory, inp.include_connection_check)
+    result = _gen_db_config(
+        inp.environment,
+        inp.include_pool_config,
+        inp.include_session_factory,
+        inp.include_connection_check,
+    )
     return json.dumps(result, indent=2)
 
 
@@ -1072,8 +1281,13 @@ async def neon_generate_connection_string(
         region=region,
     )
     result = _gen_connection_string(
-        inp.username, inp.host, inp.database, inp.use_pooler,
-        inp.ssl_mode, inp.connect_timeout, inp.region,
+        inp.username,
+        inp.host,
+        inp.database,
+        inp.use_pooler,
+        inp.ssl_mode,
+        inp.connect_timeout,
+        inp.region,
     )
     return json.dumps(result, indent=2)
 
@@ -1095,7 +1309,9 @@ async def neon_generate_env_config(
         include_example=include_example,
         include_gitignore=include_gitignore,
     )
-    result = _gen_env_config(inp.environments, inp.include_example, inp.include_gitignore)
+    result = _gen_env_config(
+        inp.environments, inp.include_example, inp.include_gitignore
+    )
     return json.dumps(result, indent=2)
 
 
@@ -1116,7 +1332,9 @@ async def neon_generate_fastapi_integration(
         include_table_creation=include_table_creation,
     )
     result = _gen_fastapi_integration(
-        inp.include_lifespan, inp.include_health_endpoint, inp.include_table_creation,
+        inp.include_lifespan,
+        inp.include_health_endpoint,
+        inp.include_table_creation,
     )
     return json.dumps(result, indent=2)
 
@@ -1162,7 +1380,11 @@ async def neon_detect_antipatterns(
             continue
 
         # Filter for deployment-target-specific patterns
-        if name == "direct-connection-serverless" and inp.deployment_target not in ("serverless", "lambda", "vercel"):
+        if name == "direct-connection-serverless" and inp.deployment_target not in (
+            "serverless",
+            "lambda",
+            "vercel",
+        ):
             continue
 
         entry: dict = {
@@ -1176,11 +1398,14 @@ async def neon_detect_antipatterns(
             entry["fix"] = info["fix"]
         patterns.append(entry)
 
-    return json.dumps({
-        "deployment_target": inp.deployment_target,
-        "antipatterns": patterns,
-        "quality_gates": QUALITY_GATES,
-    }, indent=2)
+    return json.dumps(
+        {
+            "deployment_target": inp.deployment_target,
+            "antipatterns": patterns,
+            "quality_gates": QUALITY_GATES,
+        },
+        indent=2,
+    )
 
 
 @mcp.tool()
@@ -1195,16 +1420,19 @@ async def neon_troubleshoot_connection(
     inp = NeonTroubleshootInput(error_message=error_message)
     matches = _match_error(inp.error_message)
 
-    return json.dumps({
-        "error_message": inp.error_message,
-        "diagnoses": matches,
-        "general_debug_steps": [
-            "Enable SQLAlchemy logging: create_engine(url, echo=True)",
-            "Test connection: python -c 'from database import check_connection; check_connection()'",
-            "Verify URL format: postgresql://user:pass@host/db?sslmode=require",
-            "Check Neon status: https://neon.tech/status",
-        ],
-    }, indent=2)
+    return json.dumps(
+        {
+            "error_message": inp.error_message,
+            "diagnoses": matches,
+            "general_debug_steps": [
+                "Enable SQLAlchemy logging: create_engine(url, echo=True)",
+                "Test connection: python -c 'from database import check_connection; check_connection()'",
+                "Verify URL format: postgresql://user:pass@host/db?sslmode=require",
+                "Check Neon status: https://neon.tech/status",
+            ],
+        },
+        indent=2,
+    )
 
 
 @mcp.tool()
@@ -1243,7 +1471,9 @@ async def neon_recommend_pool_config(
         deployment_target=deployment_target,
         expected_concurrency=expected_concurrency,
     )
-    result = _recommend_pool(inp.environment, inp.deployment_target, inp.expected_concurrency)
+    result = _recommend_pool(
+        inp.environment, inp.deployment_target, inp.expected_concurrency
+    )
     return json.dumps(result, indent=2)
 
 
@@ -1264,7 +1494,9 @@ async def neon_generate_migration_workflow(
         migration_tool=migration_tool,
         include_rollback=include_rollback,
     )
-    result = _gen_migration_workflow(inp.strategy, inp.migration_tool, inp.include_rollback)
+    result = _gen_migration_workflow(
+        inp.strategy, inp.migration_tool, inp.include_rollback
+    )
     return json.dumps(result, indent=2)
 
 

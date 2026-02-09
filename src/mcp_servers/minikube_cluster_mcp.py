@@ -95,8 +95,18 @@ ADDON_CATALOG: dict[str, dict] = {
 USE_CASE_ADDONS: dict[str, list[str]] = {
     "learning": ["dashboard", "metrics-server"],
     "development": ["ingress", "dashboard", "metrics-server", "storage-provisioner"],
-    "helm-testing": ["ingress", "storage-provisioner", "default-storageclass", "metrics-server"],
-    "production-like": ["ingress", "metrics-server", "storage-provisioner", "default-storageclass"],
+    "helm-testing": [
+        "ingress",
+        "storage-provisioner",
+        "default-storageclass",
+        "metrics-server",
+    ],
+    "production-like": [
+        "ingress",
+        "metrics-server",
+        "storage-provisioner",
+        "default-storageclass",
+    ],
     "ci-cd": ["registry", "metrics-server"],
 }
 
@@ -118,11 +128,31 @@ STARTUP_ISSUES: dict[str, dict] = {
             "docker ps  # if using docker driver",
         ],
         "causes": [
-            {"cause": "Driver not running", "diagnosis": "docker ps fails", "solution": "Start Docker Desktop/daemon"},
-            {"cause": "Insufficient resources", "diagnosis": "OOM or resource errors in logs", "solution": "Reduce --memory or --cpus"},
-            {"cause": "Corrupted cluster", "diagnosis": "Previous failed start", "solution": "minikube delete && minikube start"},
-            {"cause": "Network issues", "diagnosis": "Timeout pulling images", "solution": "Check proxy settings, internet connectivity"},
-            {"cause": "Permission denied", "diagnosis": "Permission errors in logs", "solution": "Run as admin or fix docker group membership"},
+            {
+                "cause": "Driver not running",
+                "diagnosis": "docker ps fails",
+                "solution": "Start Docker Desktop/daemon",
+            },
+            {
+                "cause": "Insufficient resources",
+                "diagnosis": "OOM or resource errors in logs",
+                "solution": "Reduce --memory or --cpus",
+            },
+            {
+                "cause": "Corrupted cluster",
+                "diagnosis": "Previous failed start",
+                "solution": "minikube delete && minikube start",
+            },
+            {
+                "cause": "Network issues",
+                "diagnosis": "Timeout pulling images",
+                "solution": "Check proxy settings, internet connectivity",
+            },
+            {
+                "cause": "Permission denied",
+                "diagnosis": "Permission errors in logs",
+                "solution": "Run as admin or fix docker group membership",
+            },
         ],
     },
     "guest_provision": {
@@ -132,8 +162,16 @@ STARTUP_ISSUES: dict[str, dict] = {
             "minikube logs --problems",
         ],
         "causes": [
-            {"cause": "Corrupted VM/container state", "diagnosis": "Error during provisioning", "solution": "minikube delete --purge && minikube start"},
-            {"cause": "Driver mismatch", "diagnosis": "Wrong driver for platform", "solution": "Specify correct driver: --driver=docker"},
+            {
+                "cause": "Corrupted VM/container state",
+                "diagnosis": "Error during provisioning",
+                "solution": "minikube delete --purge && minikube start",
+            },
+            {
+                "cause": "Driver mismatch",
+                "diagnosis": "Wrong driver for platform",
+                "solution": "Specify correct driver: --driver=docker",
+            },
         ],
     },
     "api_server_down": {
@@ -145,9 +183,21 @@ STARTUP_ISSUES: dict[str, dict] = {
             'minikube ssh "curl -k https://localhost:8443/healthz"',
         ],
         "causes": [
-            {"cause": "Cluster stopped", "diagnosis": "host: Stopped in status", "solution": "minikube start"},
-            {"cause": "API server crash", "diagnosis": "apiserver: Stopped", "solution": "minikube stop && minikube start"},
-            {"cause": "Kubeconfig stale", "diagnosis": "Context points to old cluster", "solution": "minikube update-context"},
+            {
+                "cause": "Cluster stopped",
+                "diagnosis": "host: Stopped in status",
+                "solution": "minikube start",
+            },
+            {
+                "cause": "API server crash",
+                "diagnosis": "apiserver: Stopped",
+                "solution": "minikube stop && minikube start",
+            },
+            {
+                "cause": "Kubeconfig stale",
+                "diagnosis": "Context points to old cluster",
+                "solution": "minikube update-context",
+            },
         ],
     },
     "stuck_starting": {
@@ -158,9 +208,21 @@ STARTUP_ISSUES: dict[str, dict] = {
             'minikube ssh "journalctl -u kubelet"',
         ],
         "causes": [
-            {"cause": "Image pull timeout", "diagnosis": "Pulling image logs", "solution": "Check internet, use minikube cache add"},
-            {"cause": "DNS issues", "diagnosis": "DNS resolution errors", "solution": "Check /etc/resolv.conf, proxy settings"},
-            {"cause": "Resource exhaustion", "diagnosis": "Node OOM events", "solution": "Increase --memory allocation"},
+            {
+                "cause": "Image pull timeout",
+                "diagnosis": "Pulling image logs",
+                "solution": "Check internet, use minikube cache add",
+            },
+            {
+                "cause": "DNS issues",
+                "diagnosis": "DNS resolution errors",
+                "solution": "Check /etc/resolv.conf, proxy settings",
+            },
+            {
+                "cause": "Resource exhaustion",
+                "diagnosis": "Node OOM events",
+                "solution": "Increase --memory allocation",
+            },
         ],
     },
 }
@@ -192,10 +254,22 @@ NETWORKING_ISSUES: dict[str, dict] = {
             "kubectl get ingress -o wide",
         ],
         "causes": [
-            {"cause": "Addon not enabled", "solution": "minikube addons enable ingress"},
-            {"cause": "Controller not ready", "solution": "Wait and check: kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx"},
-            {"cause": "Wrong host header", "solution": "Add to /etc/hosts: $(minikube ip) myapp.local"},
-            {"cause": "Missing ingressClassName", "solution": "Add ingressClassName: nginx to Ingress spec"},
+            {
+                "cause": "Addon not enabled",
+                "solution": "minikube addons enable ingress",
+            },
+            {
+                "cause": "Controller not ready",
+                "solution": "Wait and check: kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx",
+            },
+            {
+                "cause": "Wrong host header",
+                "solution": "Add to /etc/hosts: $(minikube ip) myapp.local",
+            },
+            {
+                "cause": "Missing ingressClassName",
+                "solution": "Add ingressClassName: nginx to Ingress spec",
+            },
         ],
     },
     "dns_failure": {
@@ -204,11 +278,17 @@ NETWORKING_ISSUES: dict[str, dict] = {
         "diagnostics": [
             "kubectl get pods -n kube-system -l k8s-app=kube-dns",
             "kubectl logs -n kube-system -l k8s-app=kube-dns",
-            'kubectl run -it --rm debug --image=busybox --restart=Never -- nslookup kubernetes.default',
+            "kubectl run -it --rm debug --image=busybox --restart=Never -- nslookup kubernetes.default",
         ],
         "causes": [
-            {"cause": "CoreDNS pods not running", "solution": "Check kube-system pods, restart minikube"},
-            {"cause": "Network policy blocking DNS", "solution": "Allow UDP 53 egress to kube-system"},
+            {
+                "cause": "CoreDNS pods not running",
+                "solution": "Check kube-system pods, restart minikube",
+            },
+            {
+                "cause": "Network policy blocking DNS",
+                "solution": "Allow UDP 53 egress to kube-system",
+            },
         ],
     },
     "loadbalancer_pending": {
@@ -218,7 +298,10 @@ NETWORKING_ISSUES: dict[str, dict] = {
             "kubectl get svc",
         ],
         "causes": [
-            {"cause": "No tunnel running", "solution": "Run 'minikube tunnel' in a separate terminal"},
+            {
+                "cause": "No tunnel running",
+                "solution": "Run 'minikube tunnel' in a separate terminal",
+            },
         ],
     },
 }
@@ -234,9 +317,18 @@ STORAGE_ISSUES: dict[str, dict] = {
             "kubectl describe sc standard",
         ],
         "causes": [
-            {"cause": "Storage provisioner not enabled", "solution": "minikube addons enable storage-provisioner && minikube addons enable default-storageclass"},
-            {"cause": "StorageClass missing", "solution": "Verify: kubectl get sc  # should show 'standard'"},
-            {"cause": "Incompatible accessMode", "solution": "Use ReadWriteOnce for hostPath storage"},
+            {
+                "cause": "Storage provisioner not enabled",
+                "solution": "minikube addons enable storage-provisioner && minikube addons enable default-storageclass",
+            },
+            {
+                "cause": "StorageClass missing",
+                "solution": "Verify: kubectl get sc  # should show 'standard'",
+            },
+            {
+                "cause": "Incompatible accessMode",
+                "solution": "Use ReadWriteOnce for hostPath storage",
+            },
         ],
     },
     "permission_denied": {
@@ -247,31 +339,91 @@ STORAGE_ISSUES: dict[str, dict] = {
             "kubectl logs <pod-name>",
         ],
         "causes": [
-            {"cause": "Missing fsGroup", "solution": "Add securityContext.fsGroup: 1000 to pod spec"},
-            {"cause": "Wrong runAsUser", "solution": "Set securityContext.runAsUser to match volume owner"},
-            {"cause": "ReadOnly volume", "solution": "Check volumeMount readOnly setting"},
+            {
+                "cause": "Missing fsGroup",
+                "solution": "Add securityContext.fsGroup: 1000 to pod spec",
+            },
+            {
+                "cause": "Wrong runAsUser",
+                "solution": "Set securityContext.runAsUser to match volume owner",
+            },
+            {
+                "cause": "ReadOnly volume",
+                "solution": "Check volumeMount readOnly setting",
+            },
         ],
     },
 }
 
 ERROR_LOOKUP: dict[str, dict[str, str]] = {
-    "machine does not exist": {"cause": "Deleted or corrupted cluster", "fix": "minikube delete && minikube start"},
-    "kubeconfig not found": {"cause": "Context not set", "fix": "minikube update-context"},
-    "connection refused": {"cause": "API server down", "fix": "minikube stop && minikube start"},
-    "unable to upgrade connection": {"cause": "kubectl version mismatch", "fix": "Update kubectl to match cluster version"},
-    "no space left on device": {"cause": "Disk full", "fix": "Increase --disk-size, prune images: docker system prune"},
-    "unable to resolve host": {"cause": "DNS issues", "fix": "Check network connectivity and proxy settings"},
-    "ImagePullBackOff": {"cause": "Cannot pull container image", "fix": "Check image name/tag, registry access, or use eval $(minikube docker-env)"},
-    "CrashLoopBackOff": {"cause": "Container keeps crashing", "fix": "Check kubectl logs <pod-name> --previous"},
-    "Pending": {"cause": "Resources or config issue", "fix": "kubectl describe <resource> for details"},
-    "OOMKilled": {"cause": "Out of memory", "fix": "Increase container memory limits or minikube --memory"},
-    "ErrImagePull": {"cause": "Image not found in registry", "fix": "Verify image exists: docker pull <image>"},
-    "Insufficient cpu": {"cause": "Not enough CPU on node", "fix": "Restart minikube with higher --cpus"},
-    "Insufficient memory": {"cause": "Not enough memory on node", "fix": "Restart minikube with higher --memory"},
-    "no persistent volumes available": {"cause": "No PV matches PVC", "fix": "Enable: minikube addons enable storage-provisioner"},
-    "Hyper-V is not available": {"cause": "Hyper-V feature disabled", "fix": "Enable Hyper-V in Windows Features, use Pro/Enterprise edition"},
-    "Cannot connect to the Docker daemon": {"cause": "Docker not running", "fix": "Start Docker Desktop or: sudo systemctl start docker"},
-    "VT-x is not available": {"cause": "Virtualization disabled in BIOS", "fix": "Enable VT-x/AMD-V in BIOS/UEFI settings"},
+    "machine does not exist": {
+        "cause": "Deleted or corrupted cluster",
+        "fix": "minikube delete && minikube start",
+    },
+    "kubeconfig not found": {
+        "cause": "Context not set",
+        "fix": "minikube update-context",
+    },
+    "connection refused": {
+        "cause": "API server down",
+        "fix": "minikube stop && minikube start",
+    },
+    "unable to upgrade connection": {
+        "cause": "kubectl version mismatch",
+        "fix": "Update kubectl to match cluster version",
+    },
+    "no space left on device": {
+        "cause": "Disk full",
+        "fix": "Increase --disk-size, prune images: docker system prune",
+    },
+    "unable to resolve host": {
+        "cause": "DNS issues",
+        "fix": "Check network connectivity and proxy settings",
+    },
+    "ImagePullBackOff": {
+        "cause": "Cannot pull container image",
+        "fix": "Check image name/tag, registry access, or use eval $(minikube docker-env)",
+    },
+    "CrashLoopBackOff": {
+        "cause": "Container keeps crashing",
+        "fix": "Check kubectl logs <pod-name> --previous",
+    },
+    "Pending": {
+        "cause": "Resources or config issue",
+        "fix": "kubectl describe <resource> for details",
+    },
+    "OOMKilled": {
+        "cause": "Out of memory",
+        "fix": "Increase container memory limits or minikube --memory",
+    },
+    "ErrImagePull": {
+        "cause": "Image not found in registry",
+        "fix": "Verify image exists: docker pull <image>",
+    },
+    "Insufficient cpu": {
+        "cause": "Not enough CPU on node",
+        "fix": "Restart minikube with higher --cpus",
+    },
+    "Insufficient memory": {
+        "cause": "Not enough memory on node",
+        "fix": "Restart minikube with higher --memory",
+    },
+    "no persistent volumes available": {
+        "cause": "No PV matches PVC",
+        "fix": "Enable: minikube addons enable storage-provisioner",
+    },
+    "Hyper-V is not available": {
+        "cause": "Hyper-V feature disabled",
+        "fix": "Enable Hyper-V in Windows Features, use Pro/Enterprise edition",
+    },
+    "Cannot connect to the Docker daemon": {
+        "cause": "Docker not running",
+        "fix": "Start Docker Desktop or: sudo systemctl start docker",
+    },
+    "VT-x is not available": {
+        "cause": "Virtualization disabled in BIOS",
+        "fix": "Enable VT-x/AMD-V in BIOS/UEFI settings",
+    },
 }
 
 # ---------------------------------------------------------------------------
@@ -284,7 +436,9 @@ class ConfigGenerateInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    profile_name: str = Field("standard", description="Resource profile: minimal, standard, heavy")
+    profile_name: str = Field(
+        "standard", description="Resource profile: minimal, standard, heavy"
+    )
     kubernetes_version: str = Field("v1.29.0", description="Kubernetes version")
     driver: str = Field("docker", description="Virtualization driver")
     addons: list[str] = Field(default_factory=list, description="Addons to enable")
@@ -294,7 +448,9 @@ class ConfigGenerateInput(BaseModel):
     disk_size: str | None = Field(None, description="Override disk size (e.g. '20g')")
     container_runtime: str = Field("containerd", description="Container runtime")
     cni: str | None = Field(None, description="CNI plugin")
-    extra_config: list[str] = Field(default_factory=list, description="Extra config flags")
+    extra_config: list[str] = Field(
+        default_factory=list, description="Extra config flags"
+    )
 
     @field_validator("profile_name")
     @classmethod
@@ -323,7 +479,10 @@ class AddonSuggestInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    use_case: str = Field(..., description="Use case: learning, development, helm-testing, production-like, ci-cd")
+    use_case: str = Field(
+        ...,
+        description="Use case: learning, development, helm-testing, production-like, ci-cd",
+    )
 
     @field_validator("use_case")
     @classmethod
@@ -349,7 +508,10 @@ class StartupDiagnoseInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    issue_type: str = Field(..., description="Issue: wont_start, guest_provision, api_server_down, stuck_starting")
+    issue_type: str = Field(
+        ...,
+        description="Issue: wont_start, guest_provision, api_server_down, stuck_starting",
+    )
 
     @field_validator("issue_type")
     @classmethod
@@ -365,7 +527,10 @@ class NetworkDiagnoseInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    issue_type: str = Field(..., description="Issue: service_unreachable, ingress_broken, dns_failure, loadbalancer_pending")
+    issue_type: str = Field(
+        ...,
+        description="Issue: service_unreachable, ingress_broken, dns_failure, loadbalancer_pending",
+    )
 
     @field_validator("issue_type")
     @classmethod
@@ -397,13 +562,25 @@ class LifecycleInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    action: str = Field(..., description="Action: start, stop, pause, unpause, delete, status, ssh, tunnel")
+    action: str = Field(
+        ...,
+        description="Action: start, stop, pause, unpause, delete, status, ssh, tunnel",
+    )
     profile: str | None = Field(None, description="Profile name")
 
     @field_validator("action")
     @classmethod
     def validate_action(cls, v: str) -> str:
-        valid = ("start", "stop", "pause", "unpause", "delete", "status", "ssh", "tunnel")
+        valid = (
+            "start",
+            "stop",
+            "pause",
+            "unpause",
+            "delete",
+            "status",
+            "ssh",
+            "tunnel",
+        )
         if v not in valid:
             raise ValueError(f"action must be one of {valid}")
         return v
@@ -414,7 +591,9 @@ class ResourceRecommendInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    workload_type: str = Field(..., description="Workload: single-pod, multi-service, helm-chart, multi-node")
+    workload_type: str = Field(
+        ..., description="Workload: single-pod, multi-service, helm-chart, multi-node"
+    )
     estimated_pods: int = Field(5, ge=1, le=100, description="Estimated number of pods")
     needs_persistence: bool = Field(False, description="Whether PVCs are needed")
     needs_ingress: bool = Field(False, description="Whether ingress is needed")
@@ -425,7 +604,9 @@ class CIConfigInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    ci_platform: str = Field(..., description="CI platform: github-actions, gitlab-ci, jenkins")
+    ci_platform: str = Field(
+        ..., description="CI platform: github-actions, gitlab-ci, jenkins"
+    )
     kubernetes_version: str = Field("v1.29.0", description="Kubernetes version")
     chart_path: str | None = Field(None, description="Helm chart path for testing")
 
@@ -442,7 +623,9 @@ class ErrorLookupInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    error_message: str | None = Field(None, description="Specific error message to look up")
+    error_message: str | None = Field(
+        None, description="Specific error message to look up"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -522,34 +705,44 @@ async def minikube_generate_config(
     ]
 
     if "ingress" in parsed.addons:
-        post_checks.append("kubectl get pods -n ingress-nginx  # Verify ingress controller running")
+        post_checks.append(
+            "kubectl get pods -n ingress-nginx  # Verify ingress controller running"
+        )
 
-    if "storage-provisioner" in parsed.addons or "default-storageclass" in parsed.addons:
+    if (
+        "storage-provisioner" in parsed.addons
+        or "default-storageclass" in parsed.addons
+    ):
         post_checks.append("kubectl get sc  # Verify default storage class exists")
 
     if "metrics-server" in parsed.addons:
-        post_checks.append("kubectl top nodes  # Verify metrics available (may take 1-2 min)")
+        post_checks.append(
+            "kubectl top nodes  # Verify metrics available (may take 1-2 min)"
+        )
 
-    return json.dumps({
-        "status": "success",
-        "command": command,
-        "profile_details": {
-            "profile": parsed.profile_name,
-            "cpus_per_node": use_cpus,
-            "memory_per_node_mb": use_memory,
-            "disk_size": use_disk,
-            "total_nodes": parsed.nodes,
-            "total_cpus": total_cpus,
-            "total_memory_mb": total_mem,
+    return json.dumps(
+        {
+            "status": "success",
+            "command": command,
+            "profile_details": {
+                "profile": parsed.profile_name,
+                "cpus_per_node": use_cpus,
+                "memory_per_node_mb": use_memory,
+                "disk_size": use_disk,
+                "total_nodes": parsed.nodes,
+                "total_cpus": total_cpus,
+                "total_memory_mb": total_mem,
+            },
+            "post_start_checks": post_checks,
+            "notes": [
+                "SUGGESTION ONLY — not executed",
+                f"Profile: {parsed.profile_name} ({profile['description']})",
+                f"Driver: {parsed.driver}",
+                f"Resources per node: {use_cpus} CPUs, {use_memory}MB RAM, {use_disk} disk",
+            ],
         },
-        "post_start_checks": post_checks,
-        "notes": [
-            "SUGGESTION ONLY — not executed",
-            f"Profile: {parsed.profile_name} ({profile['description']})",
-            f"Driver: {parsed.driver}",
-            f"Resources per node: {use_cpus} CPUs, {use_memory}MB RAM, {use_disk} disk",
-        ],
-    }, indent=2)
+        indent=2,
+    )
 
 
 @mcp.tool()
@@ -567,27 +760,36 @@ async def minikube_suggest_addons(
     details = []
     for addon_name in recommended:
         addon = ADDON_CATALOG.get(addon_name, {})
-        details.append({
-            "name": addon_name,
-            "purpose": addon.get("purpose", ""),
-            "when": addon.get("when", ""),
-        })
+        details.append(
+            {
+                "name": addon_name,
+                "purpose": addon.get("purpose", ""),
+                "when": addon.get("when", ""),
+            }
+        )
 
-    enable_cmd = f"minikube addons enable {' '.join(recommended)}" if len(recommended) == 1 else None
+    enable_cmd = (
+        f"minikube addons enable {' '.join(recommended)}"
+        if len(recommended) == 1
+        else None
+    )
     if not enable_cmd:
         enable_cmd = " && ".join(f"minikube addons enable {a}" for a in recommended)
 
-    return json.dumps({
-        "status": "success",
-        "use_case": parsed.use_case,
-        "recommended_addons": recommended,
-        "addon_details": details,
-        "enable_command": enable_cmd,
-        "notes": [
-            "SUGGESTION ONLY — not executed",
-            "Addons can also be enabled at start: --addons=" + ",".join(recommended),
-        ],
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "use_case": parsed.use_case,
+            "recommended_addons": recommended,
+            "addon_details": details,
+            "enable_command": enable_cmd,
+            "notes": [
+                "SUGGESTION ONLY — not executed",
+                "Addons can also be enabled at start: --addons="
+                + ",".join(recommended),
+            ],
+        }
+    )
 
 
 @mcp.tool()
@@ -612,48 +814,131 @@ async def minikube_validate_readiness(
     checklist: list[dict] = []
 
     # Core cluster checks (always)
-    checklist.extend([
-        {"category": "cluster", "check": "Cluster status", "command": "minikube status", "expected": "host: Running, kubelet: Running, apiserver: Running"},
-        {"category": "cluster", "check": "API server responding", "command": "kubectl cluster-info", "expected": "Kubernetes control plane is running"},
-        {"category": "cluster", "check": "Node ready", "command": "kubectl get nodes", "expected": "STATUS: Ready"},
-        {"category": "cluster", "check": "System pods healthy", "command": "kubectl get pods -n kube-system", "expected": "All pods Running"},
-    ])
+    checklist.extend(
+        [
+            {
+                "category": "cluster",
+                "check": "Cluster status",
+                "command": "minikube status",
+                "expected": "host: Running, kubelet: Running, apiserver: Running",
+            },
+            {
+                "category": "cluster",
+                "check": "API server responding",
+                "command": "kubectl cluster-info",
+                "expected": "Kubernetes control plane is running",
+            },
+            {
+                "category": "cluster",
+                "check": "Node ready",
+                "command": "kubectl get nodes",
+                "expected": "STATUS: Ready",
+            },
+            {
+                "category": "cluster",
+                "check": "System pods healthy",
+                "command": "kubectl get pods -n kube-system",
+                "expected": "All pods Running",
+            },
+        ]
+    )
 
     if parsed.check_helm:
-        checklist.extend([
-            {"category": "helm", "check": "Helm installed", "command": "helm version", "expected": "version.BuildInfo{Version:\"v3.x.x\"...}"},
-            {"category": "helm", "check": "Helm repos accessible", "command": "helm repo list", "expected": "No error"},
-            {"category": "helm", "check": "Can template charts", "command": "helm template test ./chart", "expected": "Rendered YAML output"},
-        ])
+        checklist.extend(
+            [
+                {
+                    "category": "helm",
+                    "check": "Helm installed",
+                    "command": "helm version",
+                    "expected": 'version.BuildInfo{Version:"v3.x.x"...}',
+                },
+                {
+                    "category": "helm",
+                    "check": "Helm repos accessible",
+                    "command": "helm repo list",
+                    "expected": "No error",
+                },
+                {
+                    "category": "helm",
+                    "check": "Can template charts",
+                    "command": "helm template test ./chart",
+                    "expected": "Rendered YAML output",
+                },
+            ]
+        )
 
     if parsed.check_ingress:
-        checklist.extend([
-            {"category": "ingress", "check": "Ingress addon enabled", "command": "minikube addons list | grep ingress", "expected": "ingress: enabled"},
-            {"category": "ingress", "check": "Ingress controller running", "command": "kubectl get pods -n ingress-nginx", "expected": "STATUS: Running"},
-            {"category": "ingress", "check": "Ingress class available", "command": "kubectl get ingressclass", "expected": "nginx class listed"},
-        ])
+        checklist.extend(
+            [
+                {
+                    "category": "ingress",
+                    "check": "Ingress addon enabled",
+                    "command": "minikube addons list | grep ingress",
+                    "expected": "ingress: enabled",
+                },
+                {
+                    "category": "ingress",
+                    "check": "Ingress controller running",
+                    "command": "kubectl get pods -n ingress-nginx",
+                    "expected": "STATUS: Running",
+                },
+                {
+                    "category": "ingress",
+                    "check": "Ingress class available",
+                    "command": "kubectl get ingressclass",
+                    "expected": "nginx class listed",
+                },
+            ]
+        )
 
     if parsed.check_storage:
-        checklist.extend([
-            {"category": "storage", "check": "Default StorageClass", "command": "kubectl get sc", "expected": "standard (default) with provisioner"},
-            {"category": "storage", "check": "PVC can bind", "command": "kubectl get pvc", "expected": "STATUS: Bound (if PVCs exist)"},
-        ])
+        checklist.extend(
+            [
+                {
+                    "category": "storage",
+                    "check": "Default StorageClass",
+                    "command": "kubectl get sc",
+                    "expected": "standard (default) with provisioner",
+                },
+                {
+                    "category": "storage",
+                    "check": "PVC can bind",
+                    "command": "kubectl get pvc",
+                    "expected": "STATUS: Bound (if PVCs exist)",
+                },
+            ]
+        )
 
     if parsed.check_metrics:
-        checklist.extend([
-            {"category": "metrics", "check": "Metrics server running", "command": "kubectl get pods -n kube-system -l k8s-app=metrics-server", "expected": "STATUS: Running"},
-            {"category": "metrics", "check": "Metrics available", "command": "kubectl top nodes", "expected": "CPU/memory values shown"},
-        ])
+        checklist.extend(
+            [
+                {
+                    "category": "metrics",
+                    "check": "Metrics server running",
+                    "command": "kubectl get pods -n kube-system -l k8s-app=metrics-server",
+                    "expected": "STATUS: Running",
+                },
+                {
+                    "category": "metrics",
+                    "check": "Metrics available",
+                    "command": "kubectl top nodes",
+                    "expected": "CPU/memory values shown",
+                },
+            ]
+        )
 
-    return json.dumps({
-        "status": "success",
-        "checklist": checklist,
-        "total_checks": len(checklist),
-        "notes": [
-            "Run each command and verify against expected output",
-            "All commands are read-only and safe to execute",
-        ],
-    }, indent=2)
+    return json.dumps(
+        {
+            "status": "success",
+            "checklist": checklist,
+            "total_checks": len(checklist),
+            "notes": [
+                "Run each command and verify against expected output",
+                "All commands are read-only and safe to execute",
+            ],
+        },
+        indent=2,
+    )
 
 
 @mcp.tool()
@@ -668,18 +953,21 @@ async def minikube_diagnose_startup(
     parsed = StartupDiagnoseInput(issue_type=issue_type)
     issue = STARTUP_ISSUES[parsed.issue_type]
 
-    return json.dumps({
-        "status": "success",
-        "title": issue["title"],
-        "symptoms": issue["symptoms"],
-        "diagnostic_commands": issue["diagnostics"],
-        "causes_and_solutions": issue["causes"],
-        "recovery_fallback": "minikube delete --purge && minikube start --driver=docker",
-        "notes": [
-            "Diagnostic commands are read-only and safe",
-            "Recovery fallback will destroy existing cluster data",
-        ],
-    }, indent=2)
+    return json.dumps(
+        {
+            "status": "success",
+            "title": issue["title"],
+            "symptoms": issue["symptoms"],
+            "diagnostic_commands": issue["diagnostics"],
+            "causes_and_solutions": issue["causes"],
+            "recovery_fallback": "minikube delete --purge && minikube start --driver=docker",
+            "notes": [
+                "Diagnostic commands are read-only and safe",
+                "Recovery fallback will destroy existing cluster data",
+            ],
+        },
+        indent=2,
+    )
 
 
 @mcp.tool()
@@ -726,17 +1014,20 @@ async def minikube_diagnose_storage(
     parsed = StorageDiagnoseInput(issue_type=issue_type)
     issue = STORAGE_ISSUES[parsed.issue_type]
 
-    return json.dumps({
-        "status": "success",
-        "title": issue["title"],
-        "symptoms": issue["symptoms"],
-        "diagnostic_commands": issue["diagnostics"],
-        "causes_and_solutions": issue["causes"],
-        "notes": [
-            "Minikube uses hostPath provisioner by default",
-            "Enable storage-provisioner and default-storageclass addons for PVC support",
-        ],
-    }, indent=2)
+    return json.dumps(
+        {
+            "status": "success",
+            "title": issue["title"],
+            "symptoms": issue["symptoms"],
+            "diagnostic_commands": issue["diagnostics"],
+            "causes_and_solutions": issue["causes"],
+            "notes": [
+                "Minikube uses hostPath provisioner by default",
+                "Enable storage-provisioner and default-storageclass addons for PVC support",
+            ],
+        },
+        indent=2,
+    )
 
 
 @mcp.tool()
@@ -756,12 +1047,18 @@ async def minikube_suggest_lifecycle(
         "start": {
             "command": f"minikube start{p_flag}",
             "description": "Start or resume the cluster (preserves existing data)",
-            "notes": ["Add --driver=docker if first start", "Existing workloads will be restored"],
+            "notes": [
+                "Add --driver=docker if first start",
+                "Existing workloads will be restored",
+            ],
         },
         "stop": {
             "command": f"minikube stop{p_flag}",
             "description": "Stop the cluster, preserving all data on disk",
-            "notes": ["No resource consumption while stopped", "Use at end of work day"],
+            "notes": [
+                "No resource consumption while stopped",
+                "Use at end of work day",
+            ],
         },
         "pause": {
             "command": f"minikube pause{p_flag}",
@@ -776,7 +1073,10 @@ async def minikube_suggest_lifecycle(
         "delete": {
             "command": f"minikube delete{p_flag}",
             "description": "Delete the cluster and all data",
-            "notes": ["WARNING: This is destructive — all cluster data will be lost", "Add --purge to remove cache too"],
+            "notes": [
+                "WARNING: This is destructive — all cluster data will be lost",
+                "Add --purge to remove cache too",
+            ],
         },
         "status": {
             "command": f"minikube status{p_flag}",
@@ -786,23 +1086,31 @@ async def minikube_suggest_lifecycle(
         "ssh": {
             "command": f"minikube ssh{p_flag}",
             "description": "SSH into the minikube node",
-            "notes": ["For advanced debugging only", "Use: minikube ssh -- 'command' for one-off commands"],
+            "notes": [
+                "For advanced debugging only",
+                "Use: minikube ssh -- 'command' for one-off commands",
+            ],
         },
         "tunnel": {
             "command": f"minikube tunnel{p_flag}",
             "description": "Create a network tunnel for LoadBalancer services",
-            "notes": ["Must run continuously in a separate terminal", "May require sudo/admin"],
+            "notes": [
+                "Must run continuously in a separate terminal",
+                "May require sudo/admin",
+            ],
         },
     }
 
     cmd = commands[parsed.action]
-    return json.dumps({
-        "status": "success",
-        "action": parsed.action,
-        "command": cmd["command"],
-        "description": cmd["description"],
-        "notes": ["SUGGESTION ONLY — not executed"] + cmd["notes"],
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "action": parsed.action,
+            "command": cmd["command"],
+            "description": cmd["description"],
+            "notes": ["SUGGESTION ONLY — not executed"] + cmd["notes"],
+        }
+    )
 
 
 @mcp.tool()
@@ -886,30 +1194,33 @@ async def minikube_recommend_resources(
 
     command = " \\\n".join(parts)
 
-    return json.dumps({
-        "status": "success",
-        "recommendation": {
-            "profile": profile,
-            "cpus": rec_cpu,
-            "memory_mb": rec_mem,
-            "disk_size": rec_disk,
-            "addons": addons,
+    return json.dumps(
+        {
+            "status": "success",
+            "recommendation": {
+                "profile": profile,
+                "cpus": rec_cpu,
+                "memory_mb": rec_mem,
+                "disk_size": rec_disk,
+                "addons": addons,
+            },
+            "calculation": {
+                "system_overhead_mb": base_mem_mb,
+                "pod_estimate_mb": pod_mem,
+                "addon_overhead_mb": addon_mem,
+                "total_estimated_mb": total_mem,
+                "rounded_up_mb": rec_mem,
+            },
+            "start_command": command,
+            "notes": [
+                "SUGGESTION ONLY — not executed",
+                f"Workload: {parsed.workload_type} with ~{parsed.estimated_pods} pods",
+                f"Recommended profile: {profile}",
+                "Ensure host machine has sufficient resources available",
+            ],
         },
-        "calculation": {
-            "system_overhead_mb": base_mem_mb,
-            "pod_estimate_mb": pod_mem,
-            "addon_overhead_mb": addon_mem,
-            "total_estimated_mb": total_mem,
-            "rounded_up_mb": rec_mem,
-        },
-        "start_command": command,
-        "notes": [
-            "SUGGESTION ONLY — not executed",
-            f"Workload: {parsed.workload_type} with ~{parsed.estimated_pods} pods",
-            f"Recommended profile: {profile}",
-            "Ensure host machine has sufficient resources available",
-        ],
-    }, indent=2)
+        indent=2,
+    )
 
 
 @mcp.tool()
@@ -1060,18 +1371,21 @@ pipeline {{
 
     config = configs[parsed.ci_platform]
 
-    return json.dumps({
-        "status": "success",
-        "platform": parsed.ci_platform,
-        "filename": config["filename"],
-        "content": config["content"],
-        "notes": [
-            f"CI platform: {parsed.ci_platform}",
-            f"Kubernetes version: {parsed.kubernetes_version}",
-            f"Chart path: {chart}",
-            "Review and adjust resource limits for your CI runner",
-        ],
-    }, indent=2)
+    return json.dumps(
+        {
+            "status": "success",
+            "platform": parsed.ci_platform,
+            "filename": config["filename"],
+            "content": config["content"],
+            "notes": [
+                f"CI platform: {parsed.ci_platform}",
+                f"Kubernetes version: {parsed.kubernetes_version}",
+                f"Chart path: {chart}",
+                "Review and adjust resource limits for your CI runner",
+            ],
+        },
+        indent=2,
+    )
 
 
 @mcp.tool()
@@ -1090,37 +1404,45 @@ async def minikube_list_error_solutions(
         matches = []
         for error_key, info in ERROR_LOOKUP.items():
             if query in error_key.lower() or error_key.lower() in query:
-                matches.append({
-                    "error": error_key,
-                    "cause": info["cause"],
-                    "fix": info["fix"],
-                })
+                matches.append(
+                    {
+                        "error": error_key,
+                        "cause": info["cause"],
+                        "fix": info["fix"],
+                    }
+                )
 
         if not matches:
-            return json.dumps({
+            return json.dumps(
+                {
+                    "status": "success",
+                    "matches": [],
+                    "note": f"No exact match for '{parsed.error_message}'. Listing all known errors.",
+                    "all_errors": [
+                        {"error": k, "cause": v["cause"], "fix": v["fix"]}
+                        for k, v in ERROR_LOOKUP.items()
+                    ],
+                }
+            )
+
+        return json.dumps(
+            {
                 "status": "success",
-                "matches": [],
-                "note": f"No exact match for '{parsed.error_message}'. Listing all known errors.",
-                "all_errors": [
-                    {"error": k, "cause": v["cause"], "fix": v["fix"]}
-                    for k, v in ERROR_LOOKUP.items()
-                ],
-            })
+                "query": parsed.error_message,
+                "matches": matches,
+            }
+        )
 
-        return json.dumps({
+    return json.dumps(
+        {
             "status": "success",
-            "query": parsed.error_message,
-            "matches": matches,
-        })
-
-    return json.dumps({
-        "status": "success",
-        "all_errors": [
-            {"error": k, "cause": v["cause"], "fix": v["fix"]}
-            for k, v in ERROR_LOOKUP.items()
-        ],
-        "total": len(ERROR_LOOKUP),
-    })
+            "all_errors": [
+                {"error": k, "cause": v["cause"], "fix": v["fix"]}
+                for k, v in ERROR_LOOKUP.items()
+            ],
+            "total": len(ERROR_LOOKUP),
+        }
+    )
 
 
 # ---------------------------------------------------------------------------

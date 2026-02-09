@@ -22,7 +22,6 @@ from .models import ExceptionInfo, LogEntry, LogLevel, StackFrame
 from .redaction import SecretRedactor
 from .trace import bind_trace_id as _bind_trace_id, get_trace_id, new_trace_id
 
-
 # Context variable for bound context
 _context_var: ContextVar[Dict[str, Any]] = ContextVar("log_context", default={})
 
@@ -53,12 +52,7 @@ class LoggerService:
         >>> logger.info("Application started")
     """
 
-    def __init__(
-        self,
-        config: "LoggerConfig",
-        *,
-        start_async: bool = False
-    ):
+    def __init__(self, config: "LoggerConfig", *, start_async: bool = False):
         """
         Initialize logging service.
 
@@ -72,8 +66,7 @@ class LoggerService:
         """
         self.config = config
         self._redactor = SecretRedactor(
-            patterns=config.secret_patterns,
-            redaction_text=config.redaction_text
+            patterns=config.secret_patterns, redaction_text=config.redaction_text
         )
 
         # Runtime level overrides (mutable, separate from frozen config)
@@ -145,7 +138,7 @@ class LoggerService:
         context: Optional[Dict[str, Any]] = None,
         exception: Optional[BaseException] = None,
         duration_ms: Optional[float] = None,
-        tags: Optional[List[str]] = None
+        tags: Optional[List[str]] = None,
     ) -> None:
         """
         Log a message with structured context.
@@ -317,7 +310,7 @@ class LoggerService:
         *,
         log_level: LogLevel = LogLevel.INFO,
         log_message: Optional[str] = None,
-        **context: Any
+        **context: Any,
     ) -> Iterator[None]:
         """
         Measure and log operation duration.
@@ -335,11 +328,7 @@ class LoggerService:
         start_time = time.perf_counter()
 
         # Log start
-        self.log(
-            log_level,
-            f"{operation_name} started",
-            context=context
-        )
+        self.log(log_level, f"{operation_name} started", context=context)
 
         try:
             yield
@@ -349,12 +338,7 @@ class LoggerService:
 
             # Log end with duration
             message = log_message or f"{operation_name} complete"
-            self.log(
-                log_level,
-                message,
-                context=context,
-                duration_ms=duration_ms
-            )
+            self.log(log_level, message, context=context, duration_ms=duration_ms)
 
     def set_level(self, level: LogLevel, module: Optional[str] = None) -> None:
         """
@@ -381,7 +365,11 @@ class LoggerService:
         """
         if module is None:
             # Return runtime override if set, otherwise config default
-            return self._runtime_level if self._runtime_level is not None else self.config.level
+            return (
+                self._runtime_level
+                if self._runtime_level is not None
+                else self.config.level
+            )
 
         # Check runtime module overrides first, then config, then global
         if module in self._runtime_module_levels:
@@ -409,7 +397,11 @@ class LoggerService:
                 return level >= mod_level
 
         # Check runtime global level, then config global level
-        global_level = self._runtime_level if self._runtime_level is not None else self.config.level
+        global_level = (
+            self._runtime_level
+            if self._runtime_level is not None
+            else self.config.level
+        )
         return level >= global_level
 
     def _merge_context(self, context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
@@ -450,7 +442,7 @@ class LoggerService:
                         file=frame_summary.filename,
                         line=frame_summary.lineno,
                         function=frame_summary.name,
-                        code=frame_summary.line
+                        code=frame_summary.line,
                     )
                 )
 
@@ -460,10 +452,7 @@ class LoggerService:
             cause = self._capture_exception(exception.__cause__)
 
         return ExceptionInfo(
-            type=exc_type,
-            message=exc_message,
-            stack_trace=stack_frames,
-            cause=cause
+            type=exc_type, message=exc_message, stack_trace=stack_frames, cause=cause
         )
 
     def _write_to_stderr(self, entry: LogEntry) -> None:

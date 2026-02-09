@@ -29,7 +29,10 @@ _FALLBACK_PATTERNS: list[tuple[str, re.Pattern]] = [
     ("AWS Access Key", re.compile(r"AKIA[A-Z0-9]{16}")),
     ("API Key", re.compile(r'(?i)api[_-]?key\s*[=:]\s*["\']?([A-Za-z0-9_-]{20,})')),
     ("Password", re.compile(r'(?i)password\s*[=:]\s*["\']?([^\s"\']{8,})')),
-    ("Secret Key", re.compile(r'(?i)secret[_-]?key\s*[=:]\s*["\']?([A-Za-z0-9_-]{20,})')),
+    (
+        "Secret Key",
+        re.compile(r'(?i)secret[_-]?key\s*[=:]\s*["\']?([A-Za-z0-9_-]{20,})'),
+    ),
     ("Token", re.compile(r'(?i)token\s*[=:]\s*["\']?([A-Za-z0-9_./-]{30,})')),
 ]
 
@@ -67,7 +70,9 @@ class SecretsScanner:
         text = path.read_text(encoding="utf-8", errors="replace")
         return self._scan_with_fallback(text, source=str(path))
 
-    def scan_directory(self, directory: Path, glob: str = "**/*.md") -> list[ScanFinding]:
+    def scan_directory(
+        self, directory: Path, glob: str = "**/*.md"
+    ) -> list[ScanFinding]:
         """Scan all matching files in a directory tree."""
         findings: list[ScanFinding] = []
         for path in sorted(directory.glob(glob)):
@@ -87,13 +92,19 @@ class SecretsScanner:
             sc.scan_file(str(path))
             for _fname, secrets in sc.data.items():
                 for secret in secrets:
-                    context = lines[secret.line_number - 1] if secret.line_number <= len(lines) else ""
-                    findings.append(ScanFinding(
-                        file_path=str(path),
-                        line_number=secret.line_number,
-                        secret_type=secret.type,
-                        redacted_context=_redact(context),
-                    ))
+                    context = (
+                        lines[secret.line_number - 1]
+                        if secret.line_number <= len(lines)
+                        else ""
+                    )
+                    findings.append(
+                        ScanFinding(
+                            file_path=str(path),
+                            line_number=secret.line_number,
+                            secret_type=secret.type,
+                            redacted_context=_redact(context),
+                        )
+                    )
         return findings
 
     def _scan_text_via_tempfile(self, text: str, source: str) -> list[ScanFinding]:
@@ -126,12 +137,14 @@ class SecretsScanner:
             for secret_type, pattern in _FALLBACK_PATTERNS:
                 if pattern.search(line) and (line_num, secret_type) not in seen:
                     seen.add((line_num, secret_type))
-                    findings.append(ScanFinding(
-                        file_path=source,
-                        line_number=line_num,
-                        secret_type=secret_type,
-                        redacted_context=_redact(line),
-                    ))
+                    findings.append(
+                        ScanFinding(
+                            file_path=source,
+                            line_number=line_num,
+                            secret_type=secret_type,
+                            redacted_context=_redact(line),
+                        )
+                    )
         return findings
 
 

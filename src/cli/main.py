@@ -23,7 +23,6 @@ from cli.logging_setup import (
     setup_verbose_mode,
 )
 
-
 console = Console()
 
 
@@ -61,7 +60,7 @@ def cli(
     verbose: bool,
     quiet: bool,
     no_color: bool,
-    vault_path: Optional[Path]
+    vault_path: Optional[Path],
 ):
     """
     FTE - Digital Full-Time Employee CLI
@@ -121,48 +120,59 @@ def cli(
 
 # Import init command from cli.init module
 from cli.init import init_command
+
 cli.add_command(init_command)
 
 
 # Import status command from cli.status module
 from cli.status import status_command
+
 cli.add_command(status_command)
 
 
 # Import vault command group from cli.vault module
 from cli.vault import vault_group
+
 cli.add_command(vault_group)
 
 # Import watcher command group from cli.watcher module
 from cli.watcher import watcher_group
+
 cli.add_command(watcher_group)
 
 # Import mcp command group from cli.mcp module
 from cli.mcp import mcp_group
+
 cli.add_command(mcp_group)
 
 # Import approval command group from cli.approval module
 from cli.approval import approval_group
+
 cli.add_command(approval_group)
 
 # Import briefing command group from cli.briefing module
 from cli.briefing import briefing_group
+
 cli.add_command(briefing_group)
 
 # Import tdd command group from cli.tdd module
 from cli.tdd import tdd_group
+
 cli.add_command(tdd_group)
 
 # Import security command group from cli.security module
 from cli.security import security_group
+
 cli.add_command(security_group)
 
 # Import orchestrator command group from cli.orchestrator module
 from cli.orchestrator import orchestrator_group
+
 cli.add_command(orchestrator_group)
 
 # Import skill command group from cli.skill module
 from cli.skill import skill_group
+
 cli.add_command(skill_group)
 
 

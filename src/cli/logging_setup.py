@@ -16,7 +16,6 @@ from rich.logging import RichHandler
 
 from cli.config import get_config
 
-
 # Rich console for styled output
 console = Console(stderr=True)
 
@@ -24,7 +23,7 @@ console = Console(stderr=True)
 def setup_logging(
     level: Optional[str] = None,
     colored: Optional[bool] = None,
-    log_file: Optional[Path] = None
+    log_file: Optional[Path] = None,
 ) -> None:
     """
     Configure CLI logging with Rich integration.
@@ -46,16 +45,20 @@ def setup_logging(
     logging.basicConfig(
         level=log_level.upper(),
         format="%(message)s",
-        handlers=[
-            RichHandler(
-                console=console,
-                rich_tracebacks=True,
-                show_time=False,
-                show_path=False,
-                markup=True,
-                enable_link_path=False
-            )
-        ] if use_color else [logging.StreamHandler(sys.stderr)]
+        handlers=(
+            [
+                RichHandler(
+                    console=console,
+                    rich_tracebacks=True,
+                    show_time=False,
+                    show_path=False,
+                    markup=True,
+                    enable_link_path=False,
+                )
+            ]
+            if use_color
+            else [logging.StreamHandler(sys.stderr)]
+        ),
     )
 
     # Configure structlog
@@ -80,9 +83,7 @@ def setup_logging(
         file_handler = logging.FileHandler(file_path)
         file_handler.setLevel(log_level.upper())
         file_handler.setFormatter(
-            logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            )
+            logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         )
         logging.getLogger().addHandler(file_handler)
 
@@ -124,5 +125,5 @@ def disable_colors() -> None:
         level=logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         handlers=[logging.StreamHandler(sys.stderr)],
-        force=True
+        force=True,
     )

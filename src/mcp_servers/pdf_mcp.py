@@ -401,14 +401,46 @@ def ocr_pdf(pdf_path: str, output_path: str | None = None, language: str = "eng"
 
 # Anti-patterns
 ANTIPATTERNS = [
-    {"pattern": r"\.extract_text\(\).*for.*in.*range\(len", "issue": "Inefficient page iteration", "fix": "Use `for page in reader.pages:` instead of range(len())"},
-    {"pattern": r"open\([^)]+\)\s*$", "issue": "File handle not closed", "fix": "Use context manager: `with open(...) as f:`"},
-    {"pattern": r"PdfReader\([^)]+\)\.pages\[0\]\.extract_text\(\)", "issue": "Reader created just to read one page", "fix": "Store reader in variable for potential reuse"},
-    {"pattern": r"for.*in.*pdf\.pages.*:\s*writer = PdfWriter", "issue": "Creating writer inside loop", "fix": "Create PdfWriter once before loop"},
-    {"pattern": r"\.decrypt\(['\"]['\"]", "issue": "Empty password string", "fix": "Provide actual password or handle unencrypted PDFs"},
-    {"pattern": r"convert_from_path\([^)]+\)\s*#.*all", "issue": "Loading all pages to memory for OCR", "fix": "Use `first_page` and `last_page` params for large PDFs"},
-    {"pattern": r"page\.rotate\(\d+\).*page\.rotate", "issue": "Multiple rotations on same page", "fix": "Calculate final rotation and apply once"},
-    {"pattern": r"pdfplumber\.open.*for.*in.*range", "issue": "Reopening PDF for each page", "fix": "Open once with context manager, iterate pages"},
+    {
+        "pattern": r"\.extract_text\(\).*for.*in.*range\(len",
+        "issue": "Inefficient page iteration",
+        "fix": "Use `for page in reader.pages:` instead of range(len())",
+    },
+    {
+        "pattern": r"open\([^)]+\)\s*$",
+        "issue": "File handle not closed",
+        "fix": "Use context manager: `with open(...) as f:`",
+    },
+    {
+        "pattern": r"PdfReader\([^)]+\)\.pages\[0\]\.extract_text\(\)",
+        "issue": "Reader created just to read one page",
+        "fix": "Store reader in variable for potential reuse",
+    },
+    {
+        "pattern": r"for.*in.*pdf\.pages.*:\s*writer = PdfWriter",
+        "issue": "Creating writer inside loop",
+        "fix": "Create PdfWriter once before loop",
+    },
+    {
+        "pattern": r"\.decrypt\(['\"]['\"]",
+        "issue": "Empty password string",
+        "fix": "Provide actual password or handle unencrypted PDFs",
+    },
+    {
+        "pattern": r"convert_from_path\([^)]+\)\s*#.*all",
+        "issue": "Loading all pages to memory for OCR",
+        "fix": "Use `first_page` and `last_page` params for large PDFs",
+    },
+    {
+        "pattern": r"page\.rotate\(\d+\).*page\.rotate",
+        "issue": "Multiple rotations on same page",
+        "fix": "Calculate final rotation and apply once",
+    },
+    {
+        "pattern": r"pdfplumber\.open.*for.*in.*range",
+        "issue": "Reopening PDF for each page",
+        "fix": "Open once with context manager, iterate pages",
+    },
 ]
 
 # ---------------------------------------------------------------------------
@@ -420,9 +452,15 @@ _CFG = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 class ExtractionInput(BaseModel):
     model_config = _CFG
-    extraction_type: str = Field(..., description="Type: text, tables, text_with_coords, images")
-    library: str = Field(default="pypdf", description="Library: pypdf, pdfplumber, pypdfium2")
-    include_page_numbers: bool = Field(default=True, description="Include page numbers in output")
+    extraction_type: str = Field(
+        ..., description="Type: text, tables, text_with_coords, images"
+    )
+    library: str = Field(
+        default="pypdf", description="Library: pypdf, pdfplumber, pypdfium2"
+    )
+    include_page_numbers: bool = Field(
+        default=True, description="Include page numbers in output"
+    )
 
     @field_validator("extraction_type")
     @classmethod
@@ -434,9 +472,13 @@ class ExtractionInput(BaseModel):
 
 class CreationInput(BaseModel):
     model_config = _CFG
-    creation_type: str = Field(..., description="Type: basic, report, invoice, multi_page")
+    creation_type: str = Field(
+        ..., description="Type: basic, report, invoice, multi_page"
+    )
     pagesize: str = Field(default="letter", description="Page size: letter, A4, legal")
-    include_tables: bool = Field(default=False, description="Include table creation code")
+    include_tables: bool = Field(
+        default=False, description="Include table creation code"
+    )
 
     @field_validator("creation_type")
     @classmethod
@@ -449,7 +491,9 @@ class CreationInput(BaseModel):
 class MergeSplitInput(BaseModel):
     model_config = _CFG
     operation: str = Field(..., description="Operation: merge, split, extract_pages")
-    include_error_handling: bool = Field(default=True, description="Include try/except blocks")
+    include_error_handling: bool = Field(
+        default=True, description="Include try/except blocks"
+    )
 
     @field_validator("operation")
     @classmethod
@@ -461,8 +505,12 @@ class MergeSplitInput(BaseModel):
 
 class ManipulationInput(BaseModel):
     model_config = _CFG
-    manipulation_type: str = Field(..., description="Type: rotate, crop, watermark, resize")
-    include_batch: bool = Field(default=False, description="Include batch processing support")
+    manipulation_type: str = Field(
+        ..., description="Type: rotate, crop, watermark, resize"
+    )
+    include_batch: bool = Field(
+        default=False, description="Include batch processing support"
+    )
 
     @field_validator("manipulation_type")
     @classmethod
@@ -487,8 +535,12 @@ class MetadataInput(BaseModel):
 
 class FormInput(BaseModel):
     model_config = _CFG
-    form_type: str = Field(..., description="Type: fillable, non_fillable, detect_fields")
-    include_validation: bool = Field(default=True, description="Include field validation")
+    form_type: str = Field(
+        ..., description="Type: fillable, non_fillable, detect_fields"
+    )
+    include_validation: bool = Field(
+        default=True, description="Include field validation"
+    )
 
     @field_validator("form_type")
     @classmethod
@@ -514,7 +566,9 @@ class EncryptionInput(BaseModel):
 class OcrInput(BaseModel):
     model_config = _CFG
     language: str = Field(default="eng", description="Tesseract language code")
-    include_preprocessing: bool = Field(default=False, description="Include image preprocessing")
+    include_preprocessing: bool = Field(
+        default=False, description="Include image preprocessing"
+    )
     output_format: str = Field(default="text", description="Output: text, hocr, pdf")
 
     @field_validator("output_format")
@@ -527,19 +581,25 @@ class OcrInput(BaseModel):
 
 class AntipatternInput(BaseModel):
     model_config = _CFG
-    code: str = Field(..., min_length=10, max_length=50000, description="Code to analyze")
+    code: str = Field(
+        ..., min_length=10, max_length=50000, description="Code to analyze"
+    )
 
 
 class ScaffoldInput(BaseModel):
     model_config = _CFG
-    project_name: str = Field(..., min_length=1, max_length=100, description="Project name")
+    project_name: str = Field(
+        ..., min_length=1, max_length=100, description="Project name"
+    )
     features: list[str] = Field(default_factory=list, description="Features to include")
 
     @field_validator("project_name")
     @classmethod
     def _check_name(cls, v: str) -> str:
         if not re.match(r"^[a-zA-Z][a-zA-Z0-9_-]*$", v):
-            raise ValueError("project_name must start with letter, contain only alphanumeric, underscore, hyphen")
+            raise ValueError(
+                "project_name must start with letter, contain only alphanumeric, underscore, hyphen"
+            )
         return v
 
 
@@ -551,20 +611,20 @@ class ScaffoldInput(BaseModel):
 def _generate_text_extraction(library: str, include_page_numbers: bool) -> str:
     """Generate text extraction code."""
     if library == "pypdf":
-        body = '''    reader = PdfReader(pdf_path)
+        body = """    reader = PdfReader(pdf_path)
     text_parts = []
 
     for i, page in enumerate(reader.pages):
-        page_text = page.extract_text()'''
+        page_text = page.extract_text()"""
         if include_page_numbers:
-            body += '''
-        text_parts.append(f"--- Page {i + 1} ---\\n{page_text}")'''
+            body += """
+        text_parts.append(f"--- Page {i + 1} ---\\n{page_text}")"""
         else:
-            body += '''
-        text_parts.append(page_text)'''
-        body += '''
+            body += """
+        text_parts.append(page_text)"""
+        body += """
 
-    return "\\n\\n".join(text_parts)'''
+    return "\\n\\n".join(text_parts)"""
         return TEXT_EXTRACTION_TEMPLATE.format(
             library="pypdf",
             import_path="pypdf",
@@ -572,20 +632,20 @@ def _generate_text_extraction(library: str, include_page_numbers: bool) -> str:
             body=body,
         )
     elif library == "pdfplumber":
-        body = '''    text_parts = []
+        body = """    text_parts = []
 
     with pdfplumber.open(pdf_path) as pdf:
         for i, page in enumerate(pdf.pages):
-            page_text = page.extract_text()'''
+            page_text = page.extract_text()"""
         if include_page_numbers:
-            body += '''
-            text_parts.append(f"--- Page {i + 1} ---\\n{page_text}")'''
+            body += """
+            text_parts.append(f"--- Page {i + 1} ---\\n{page_text}")"""
         else:
-            body += '''
-            text_parts.append(page_text or "")'''
-        body += '''
+            body += """
+            text_parts.append(page_text or "")"""
+        body += """
 
-    return "\\n\\n".join(text_parts)'''
+    return "\\n\\n".join(text_parts)"""
         return TEXT_EXTRACTION_TEMPLATE.format(
             library="pdfplumber",
             import_path="pdfplumber",
@@ -593,20 +653,20 @@ def _generate_text_extraction(library: str, include_page_numbers: bool) -> str:
             body=body,
         ).replace("from pdfplumber import pdfplumber", "import pdfplumber")
     else:
-        body = '''    pdf = pdfium.PdfDocument(pdf_path)
+        body = """    pdf = pdfium.PdfDocument(pdf_path)
     text_parts = []
 
     for i, page in enumerate(pdf):
-        page_text = page.get_textpage().get_text_range()'''
+        page_text = page.get_textpage().get_text_range()"""
         if include_page_numbers:
-            body += '''
-        text_parts.append(f"--- Page {i + 1} ---\\n{page_text}")'''
+            body += """
+        text_parts.append(f"--- Page {i + 1} ---\\n{page_text}")"""
         else:
-            body += '''
-        text_parts.append(page_text)'''
-        body += '''
+            body += """
+        text_parts.append(page_text)"""
+        body += """
 
-    return "\\n\\n".join(text_parts)'''
+    return "\\n\\n".join(text_parts)"""
         return TEXT_EXTRACTION_TEMPLATE.format(
             library="pypdfium2",
             import_path="pypdfium2",
@@ -620,11 +680,13 @@ def _detect_antipatterns(code: str) -> list[dict]:
     findings = []
     for ap in ANTIPATTERNS:
         if re.search(ap["pattern"], code, re.IGNORECASE):
-            findings.append({
-                "issue": ap["issue"],
-                "fix": ap["fix"],
-                "pattern": ap["pattern"],
-            })
+            findings.append(
+                {
+                    "issue": ap["issue"],
+                    "fix": ap["fix"],
+                    "pattern": ap["pattern"],
+                }
+            )
     return findings
 
 
@@ -709,7 +771,9 @@ def extract_images(pdf_path: str, output_dir: str) -> list[str]:
     return saved_paths
 '''
 
-        return json.dumps({"code": code, "library": inp.library, "type": inp.extraction_type})
+        return json.dumps(
+            {"code": code, "library": inp.library, "type": inp.extraction_type}
+        )
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -819,7 +883,9 @@ def create_multipage_pdf(output_path: str, pages: list[dict]) -> None:
     doc.build(story)
 '''.format(pagesize=inp.pagesize)
 
-        return json.dumps({"code": code, "type": inp.creation_type, "pagesize": inp.pagesize})
+        return json.dumps(
+            {"code": code, "type": inp.creation_type, "pagesize": inp.pagesize}
+        )
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -831,7 +897,9 @@ async def pdf_generate_merge_split_code(
 ) -> str:
     """Generate code for merging/splitting PDFs. Returns Python code string."""
     try:
-        inp = MergeSplitInput(operation=operation, include_error_handling=include_error_handling)
+        inp = MergeSplitInput(
+            operation=operation, include_error_handling=include_error_handling
+        )
 
         if inp.operation == "merge":
             code = MERGE_TEMPLATE
@@ -863,11 +931,11 @@ def extract_pages(pdf_path: str, output_path: str, page_numbers: list[int]) -> N
         if inp.include_error_handling:
             code = code.replace(
                 "def ",
-                '''import logging
+                """import logging
 
 logger = logging.getLogger(__name__)
 
-def ''',
+def """,
                 1,
             )
 
@@ -883,7 +951,9 @@ async def pdf_generate_manipulation_code(
 ) -> str:
     """Generate code for PDF page manipulation. Returns Python code string."""
     try:
-        inp = ManipulationInput(manipulation_type=manipulation_type, include_batch=include_batch)
+        inp = ManipulationInput(
+            manipulation_type=manipulation_type, include_batch=include_batch
+        )
 
         if inp.manipulation_type == "rotate":
             code = ROTATE_TEMPLATE
@@ -966,7 +1036,9 @@ async def pdf_generate_metadata_code(
         elif inp.operation == "set":
             # Extract only set_metadata function
             lines = code.split("\n")
-            start_idx = next(i for i, line in enumerate(lines) if "def set_metadata" in line)
+            start_idx = next(
+                i for i, line in enumerate(lines) if "def set_metadata" in line
+            )
             code = "\n".join(lines[:3] + lines[start_idx:])
 
         return json.dumps({"code": code, "operation": inp.operation})
@@ -1090,10 +1162,14 @@ async def pdf_generate_encryption_code(
             code = code.split("def decrypt_pdf")[0].rstrip()
         elif inp.operation == "decrypt":
             lines = code.split("\n")
-            start_idx = next(i for i, line in enumerate(lines) if "def decrypt_pdf" in line)
+            start_idx = next(
+                i for i, line in enumerate(lines) if "def decrypt_pdf" in line
+            )
             code = "\n".join(lines[:3] + lines[start_idx:])
 
-        return json.dumps({"code": code, "operation": inp.operation, "algorithm": inp.algorithm})
+        return json.dumps(
+            {"code": code, "operation": inp.operation, "algorithm": inp.algorithm}
+        )
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -1106,7 +1182,11 @@ async def pdf_generate_ocr_code(
 ) -> str:
     """Generate code for OCR on scanned PDFs. Returns Python code string."""
     try:
-        inp = OcrInput(language=language, include_preprocessing=include_preprocessing, output_format=output_format)
+        inp = OcrInput(
+            language=language,
+            include_preprocessing=include_preprocessing,
+            output_format=output_format,
+        )
         code = OCR_TEMPLATE
 
         if inp.include_preprocessing:
@@ -1168,7 +1248,13 @@ def ocr_pdf(pdf_path: str, output_path: str | None = None, language: str = "{lan
     return full_text
 '''.format(language=inp.language)
 
-        return json.dumps({"code": code, "language": inp.language, "preprocessing": inp.include_preprocessing})
+        return json.dumps(
+            {
+                "code": code,
+                "language": inp.language,
+                "preprocessing": inp.include_preprocessing,
+            }
+        )
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -1182,11 +1268,13 @@ async def pdf_detect_antipatterns(
         inp = AntipatternInput(code=code)
         findings = _detect_antipatterns(inp.code)
 
-        return json.dumps({
-            "findings": findings,
-            "count": len(findings),
-            "clean": len(findings) == 0,
-        })
+        return json.dumps(
+            {
+                "findings": findings,
+                "count": len(findings),
+                "clean": len(findings) == 0,
+            }
+        )
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -1250,10 +1338,10 @@ class PDFProcessor:
         with open(output_path, "wb") as f:
             writer.write(f)
 ''',
-            f"{inp.project_name}/requirements.txt": '''pypdf>=4.0.0
+            f"{inp.project_name}/requirements.txt": """pypdf>=4.0.0
 pdfplumber>=0.10.0
 reportlab>=4.0.0
-''',
+""",
             f"{inp.project_name}/__init__.py": f'''"""
 {inp.project_name} - PDF processing toolkit.
 """
@@ -1307,11 +1395,13 @@ if __name__ == "__main__":
         if "forms" in inp.features:
             files[f"{inp.project_name}/forms.py"] = FORM_FILLABLE_TEMPLATE
 
-        return json.dumps({
-            "project": inp.project_name,
-            "files": files,
-            "features": inp.features,
-        })
+        return json.dumps(
+            {
+                "project": inp.project_name,
+                "files": files,
+                "features": inp.features,
+            }
+        )
     except Exception as e:
         return json.dumps({"error": str(e)})
 

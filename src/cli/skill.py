@@ -17,13 +17,13 @@ from rich.table import Table
 
 from cli.utils import display_error, display_info, display_success
 
-
 console = Console()
 
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def find_skills_dir() -> Path:
     """Locate .claude/skills/ relative to the repo root."""
@@ -85,6 +85,7 @@ def load_all_skills(skills_dir: Path) -> List[Dict]:
 # CLI group
 # ---------------------------------------------------------------------------
 
+
 @click.group(name="skill")
 def skill_group():
     """Agent Skill management commands"""
@@ -115,7 +116,11 @@ def skill_list_command(ctx: click.Context):
             cat = s.get("category", "uncategorised")
             groups.setdefault(cat, []).append(s)
 
-        table = Table(title=f"Installed Skills ({len(skills)} total)", show_header=True, header_style="bold cyan")
+        table = Table(
+            title=f"Installed Skills ({len(skills)} total)",
+            show_header=True,
+            header_style="bold cyan",
+        )
         table.add_column("Name", style="cyan", min_width=30)
         table.add_column("Category", style="yellow", width=14)
         table.add_column("Safety", style="white", width=8)
@@ -157,7 +162,11 @@ def skill_show_command(ctx: click.Context, name: str):
         slug = name.replace(".", "-")
         match = None
         for s in skills:
-            if s.get("name") == name or s.get("_slug") == name or s.get("_slug") == slug:
+            if (
+                s.get("name") == name
+                or s.get("_slug") == name
+                or s.get("_slug") == slug
+            ):
                 match = s
                 break
 
@@ -167,10 +176,23 @@ def skill_show_command(ctx: click.Context, name: str):
             return
 
         # Print all fields
-        console.print(f"\n[bold cyan]Skill:[/bold cyan] {match.get('name', match['_slug'])}")
-        for key in ("version", "description", "command", "aliases", "category",
-                    "tags", "safety_level", "approval_required", "destructive",
-                    "author", "created", "last_updated"):
+        console.print(
+            f"\n[bold cyan]Skill:[/bold cyan] {match.get('name', match['_slug'])}"
+        )
+        for key in (
+            "version",
+            "description",
+            "command",
+            "aliases",
+            "category",
+            "tags",
+            "safety_level",
+            "approval_required",
+            "destructive",
+            "author",
+            "created",
+            "last_updated",
+        ):
             val = match.get(key)
             if val is not None:
                 console.print(f"  [bold]{key}:[/bold] {val}")
@@ -182,7 +204,9 @@ def skill_show_command(ctx: click.Context, name: str):
         if "parameters" in match:
             console.print(f"  [bold]parameters:[/bold] {match['parameters']}")
         if "constitutional_compliance" in match:
-            console.print(f"  [bold]constitutional_compliance:[/bold] sections {match['constitutional_compliance']}")
+            console.print(
+                f"  [bold]constitutional_compliance:[/bold] sections {match['constitutional_compliance']}"
+            )
         console.print()
 
     except Exception as e:
@@ -194,7 +218,9 @@ def skill_show_command(ctx: click.Context, name: str):
 @click.option("--tag", "-t", help="Filter by tag")
 @click.option("--category", "-c", help="Filter by category")
 @click.pass_context
-def skill_search_command(ctx: click.Context, tag: Optional[str], category: Optional[str]):
+def skill_search_command(
+    ctx: click.Context, tag: Optional[str], category: Optional[str]
+):
     """
     Search installed skills by tag or category.
 
@@ -214,15 +240,25 @@ def skill_search_command(ctx: click.Context, tag: Optional[str], category: Optio
 
         results = skills
         if tag:
-            results = [s for s in results if tag.lower() in [t.lower() for t in s.get("tags", [])]]
+            results = [
+                s
+                for s in results
+                if tag.lower() in [t.lower() for t in s.get("tags", [])]
+            ]
         if category:
-            results = [s for s in results if s.get("category", "").lower() == category.lower()]
+            results = [
+                s for s in results if s.get("category", "").lower() == category.lower()
+            ]
 
         if not results:
             display_info(f"No skills match the filter.")
             return
 
-        table = Table(title=f"Search Results ({len(results)})", show_header=True, header_style="bold cyan")
+        table = Table(
+            title=f"Search Results ({len(results)})",
+            show_header=True,
+            header_style="bold cyan",
+        )
         table.add_column("Name", style="cyan", min_width=30)
         table.add_column("Category", style="yellow", width=14)
         table.add_column("Description", style="dim")

@@ -56,20 +56,76 @@ class TemplateKind(str, Enum):
 
 
 TEMPLATE_CATALOG: list[dict] = [
-    {"kind": "deployment", "description": "Deployment resource for pods", "required": True},
-    {"kind": "service", "description": "Service resource for networking", "required": True},
-    {"kind": "ingress", "description": "Ingress resource for HTTP routing", "required": False},
-    {"kind": "configmap", "description": "ConfigMap for non-sensitive config", "required": False},
-    {"kind": "secret", "description": "ExternalSecret/SealedSecret references", "required": False},
-    {"kind": "pvc", "description": "PersistentVolumeClaim for storage", "required": False},
-    {"kind": "hpa", "description": "HorizontalPodAutoscaler for scaling", "required": False},
-    {"kind": "serviceaccount", "description": "ServiceAccount and RBAC", "required": False},
-    {"kind": "networkpolicy", "description": "NetworkPolicy for traffic control", "required": False},
-    {"kind": "pdb", "description": "PodDisruptionBudget for availability", "required": False},
-    {"kind": "cronjob", "description": "CronJob for scheduled tasks", "required": False},
-    {"kind": "job", "description": "Job for one-time operations / hooks", "required": False},
-    {"kind": "helpers", "description": "_helpers.tpl naming and label helpers", "required": True},
-    {"kind": "notes", "description": "NOTES.txt post-install instructions", "required": True},
+    {
+        "kind": "deployment",
+        "description": "Deployment resource for pods",
+        "required": True,
+    },
+    {
+        "kind": "service",
+        "description": "Service resource for networking",
+        "required": True,
+    },
+    {
+        "kind": "ingress",
+        "description": "Ingress resource for HTTP routing",
+        "required": False,
+    },
+    {
+        "kind": "configmap",
+        "description": "ConfigMap for non-sensitive config",
+        "required": False,
+    },
+    {
+        "kind": "secret",
+        "description": "ExternalSecret/SealedSecret references",
+        "required": False,
+    },
+    {
+        "kind": "pvc",
+        "description": "PersistentVolumeClaim for storage",
+        "required": False,
+    },
+    {
+        "kind": "hpa",
+        "description": "HorizontalPodAutoscaler for scaling",
+        "required": False,
+    },
+    {
+        "kind": "serviceaccount",
+        "description": "ServiceAccount and RBAC",
+        "required": False,
+    },
+    {
+        "kind": "networkpolicy",
+        "description": "NetworkPolicy for traffic control",
+        "required": False,
+    },
+    {
+        "kind": "pdb",
+        "description": "PodDisruptionBudget for availability",
+        "required": False,
+    },
+    {
+        "kind": "cronjob",
+        "description": "CronJob for scheduled tasks",
+        "required": False,
+    },
+    {
+        "kind": "job",
+        "description": "Job for one-time operations / hooks",
+        "required": False,
+    },
+    {
+        "kind": "helpers",
+        "description": "_helpers.tpl naming and label helpers",
+        "required": True,
+    },
+    {
+        "kind": "notes",
+        "description": "NOTES.txt post-install instructions",
+        "required": True,
+    },
 ]
 
 RESOURCE_PRESETS: dict[str, dict[str, dict[str, str]]] = {
@@ -121,9 +177,17 @@ class ComponentSpec(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    name: str = Field(..., min_length=1, description="Component name (backend, frontend, worker, etc.)")
-    image_repository: str = Field(..., min_length=1, description="Container image repository (e.g. myapp/backend)")
-    image_tag: str = Field("", description="Image tag (empty defaults to Chart.appVersion)")
+    name: str = Field(
+        ...,
+        min_length=1,
+        description="Component name (backend, frontend, worker, etc.)",
+    )
+    image_repository: str = Field(
+        ..., min_length=1, description="Container image repository (e.g. myapp/backend)"
+    )
+    image_tag: str = Field(
+        "", description="Image tag (empty defaults to Chart.appVersion)"
+    )
     port: int = Field(8000, ge=1, le=65535, description="Container port")
     service_type: str = Field("ClusterIP", description="Kubernetes Service type")
     replicas: int = Field(1, ge=0, le=100, description="Number of replicas")
@@ -133,7 +197,9 @@ class ComponentSpec(BaseModel):
     @classmethod
     def validate_name(cls, v: str) -> str:
         if not _NAME_PATTERN.match(v):
-            raise ValueError("Component name must be lowercase alphanumeric with hyphens")
+            raise ValueError(
+                "Component name must be lowercase alphanumeric with hyphens"
+            )
         return v
 
     @field_validator("service_type")
@@ -149,11 +215,20 @@ class ChartGenerateInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    application_name: str = Field(..., min_length=1, max_length=53, description="Chart/application name (lowercase, hyphenated)")
-    description: str = Field("A Helm chart for Kubernetes", description="Chart description")
+    application_name: str = Field(
+        ...,
+        min_length=1,
+        max_length=53,
+        description="Chart/application name (lowercase, hyphenated)",
+    )
+    description: str = Field(
+        "A Helm chart for Kubernetes", description="Chart description"
+    )
     version: str = Field("0.1.0", description="Chart version (SemVer)")
     app_version: str = Field("1.0.0", description="Application version")
-    components: list[ComponentSpec] = Field(..., min_length=1, description="Application components")
+    components: list[ComponentSpec] = Field(
+        ..., min_length=1, description="Application components"
+    )
     ingress_enabled: bool = Field(False, description="Enable ingress resource")
     ingress_host: str = Field("myapp.local", description="Ingress hostname")
     persistence_enabled: bool = Field(False, description="Enable persistent storage")
@@ -176,7 +251,9 @@ class ValuesGenerateInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     application_name: str = Field(..., min_length=1, description="Application name")
-    components: list[ComponentSpec] = Field(..., min_length=1, description="Application components")
+    components: list[ComponentSpec] = Field(
+        ..., min_length=1, description="Application components"
+    )
     ingress_enabled: bool = Field(False, description="Enable ingress")
     ingress_host: str = Field("myapp.local", description="Ingress hostname")
     persistence_enabled: bool = Field(False, description="Enable persistence")
@@ -216,8 +293,12 @@ class HelpersInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    application_name: str = Field(..., min_length=1, description="Application name for template helpers")
-    components: list[str] = Field(default_factory=lambda: ["backend"], description="Component names")
+    application_name: str = Field(
+        ..., min_length=1, description="Application name for template helpers"
+    )
+    components: list[str] = Field(
+        default_factory=lambda: ["backend"], description="Component names"
+    )
 
     @field_validator("application_name")
     @classmethod
@@ -231,7 +312,9 @@ class DeploymentInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     application_name: str = Field(..., min_length=1, description="Application name")
-    component: str = Field(..., min_length=1, description="Component name (backend, frontend, etc.)")
+    component: str = Field(
+        ..., min_length=1, description="Component name (backend, frontend, etc.)"
+    )
 
     @field_validator("application_name")
     @classmethod
@@ -245,7 +328,9 @@ class ServiceInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     application_name: str = Field(..., min_length=1, description="Application name")
-    components: list[str] = Field(..., min_length=1, description="Component names to create services for")
+    components: list[str] = Field(
+        ..., min_length=1, description="Component names to create services for"
+    )
 
     @field_validator("application_name")
     @classmethod
@@ -275,7 +360,9 @@ class ValidateChartInput(BaseModel):
     values_yaml: Optional[str] = Field(None, description="Content of values.yaml")
     has_helpers: bool = Field(False, description="Whether _helpers.tpl exists")
     has_notes: bool = Field(False, description="Whether NOTES.txt exists")
-    template_files: list[str] = Field(default_factory=list, description="List of template file names present")
+    template_files: list[str] = Field(
+        default_factory=list, description="List of template file names present"
+    )
 
 
 class CommandSuggestInput(BaseModel):
@@ -295,7 +382,16 @@ class CommandSuggestInput(BaseModel):
     @field_validator("operation")
     @classmethod
     def validate_operation(cls, v: str) -> str:
-        valid = ("install", "upgrade", "template", "lint", "package", "uninstall", "rollback", "list")
+        valid = (
+            "install",
+            "upgrade",
+            "template",
+            "lint",
+            "package",
+            "uninstall",
+            "rollback",
+            "list",
+        )
         if v not in valid:
             raise ValueError(f"operation must be one of {valid}")
         return v
@@ -389,7 +485,9 @@ def _gen_values_yaml(
         lines.append("  # -- Image configuration")
         lines.append("  image:")
         lines.append(f"    repository: {comp.image_repository}")
-        tag_val = comp.image_tag if comp.image_tag else '""  # Defaults to Chart.appVersion'
+        tag_val = (
+            comp.image_tag if comp.image_tag else '""  # Defaults to Chart.appVersion'
+        )
         lines.append(f"    tag: {tag_val}")
         lines.append("    pullPolicy: IfNotPresent")
         lines.append("")
@@ -536,11 +634,19 @@ def _gen_env_values(
     presets = RESOURCE_PRESETS[environment]
     lines: list[str] = []
 
-    env_labels = {"dev": "Development/Minikube", "staging": "Staging", "prod": "Production"}
+    env_labels = {
+        "dev": "Development/Minikube",
+        "staging": "Staging",
+        "prod": "Production",
+    }
     replicas = {"dev": 1, "staging": 2, "prod": 3}
     log_level = {"dev": "debug", "staging": "info", "prod": "info"}
     pvc_size = {"dev": "1Gi", "staging": "10Gi", "prod": "50Gi"}
-    host_suffix = {"dev": ".local", "staging": ".staging.example.com", "prod": ".example.com"}
+    host_suffix = {
+        "dev": ".local",
+        "staging": ".staging.example.com",
+        "prod": ".example.com",
+    }
 
     lines.append(f"# {env_labels[environment]} environment overrides")
     lines.append(f"# Usage: helm install myapp ./myapp -f values-{environment}.yaml")
@@ -601,7 +707,9 @@ def _gen_env_values(
         lines.append("  annotations:")
         lines.append("    cert-manager.io/cluster-issuer: letsencrypt-prod")
         lines.append("  tls:")
-        lines.append(f"    - secretName: {components[0] if components else 'myapp'}-tls")
+        lines.append(
+            f"    - secretName: {components[0] if components else 'myapp'}-tls"
+        )
         lines.append("      hosts:")
         lines.append(f"        - {resolved_host}")
 
@@ -630,76 +738,84 @@ def _gen_env_values(
 
 def _gen_helpers_tpl(app_name: str, components: list[str]) -> str:
     lines: list[str] = []
-    lines.append('{{/*')
-    lines.append('Expand the name of the chart.')
-    lines.append('*/}}')
+    lines.append("{{/*")
+    lines.append("Expand the name of the chart.")
+    lines.append("*/}}")
     lines.append(f'{{{{- define "{app_name}.name" -}}}}')
-    lines.append(f'{{{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}}}')
-    lines.append('{{- end }}')
-    lines.append('')
-    lines.append('{{/*')
-    lines.append('Create a default fully qualified app name.')
-    lines.append('*/}}')
+    lines.append(
+        f'{{{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}}}'
+    )
+    lines.append("{{- end }}")
+    lines.append("")
+    lines.append("{{/*")
+    lines.append("Create a default fully qualified app name.")
+    lines.append("*/}}")
     lines.append(f'{{{{- define "{app_name}.fullname" -}}}}')
-    lines.append('{{- if .Values.fullnameOverride }}')
+    lines.append("{{- if .Values.fullnameOverride }}")
     lines.append('{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}')
-    lines.append('{{- else }}')
-    lines.append('{{- $name := default .Chart.Name .Values.nameOverride }}')
-    lines.append('{{- if contains $name .Release.Name }}')
+    lines.append("{{- else }}")
+    lines.append("{{- $name := default .Chart.Name .Values.nameOverride }}")
+    lines.append("{{- if contains $name .Release.Name }}")
     lines.append('{{- .Release.Name | trunc 63 | trimSuffix "-" }}')
-    lines.append('{{- else }}')
-    lines.append('{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}')
-    lines.append('{{- end }}')
-    lines.append('{{- end }}')
-    lines.append('{{- end }}')
-    lines.append('')
-    lines.append('{{/*')
-    lines.append('Create chart name and version as used by the chart label.')
-    lines.append('*/}}')
+    lines.append("{{- else }}")
+    lines.append(
+        '{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}'
+    )
+    lines.append("{{- end }}")
+    lines.append("{{- end }}")
+    lines.append("{{- end }}")
+    lines.append("")
+    lines.append("{{/*")
+    lines.append("Create chart name and version as used by the chart label.")
+    lines.append("*/}}")
     lines.append(f'{{{{- define "{app_name}.chart" -}}}}')
-    lines.append('{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}')
-    lines.append('{{- end }}')
-    lines.append('')
-    lines.append('{{/*')
-    lines.append('Common labels')
-    lines.append('*/}}')
+    lines.append(
+        '{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}'
+    )
+    lines.append("{{- end }}")
+    lines.append("")
+    lines.append("{{/*")
+    lines.append("Common labels")
+    lines.append("*/}}")
     lines.append(f'{{{{- define "{app_name}.labels" -}}}}')
     lines.append(f'helm.sh/chart: {{{{{{ include "{app_name}.chart" . }}}}}}')
     lines.append(f'{{{{{{ include "{app_name}.selectorLabels" . }}}}}}')
-    lines.append('{{- if .Chart.AppVersion }}')
-    lines.append('app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}')
-    lines.append('{{- end }}')
-    lines.append('app.kubernetes.io/managed-by: {{ .Release.Service }}')
-    lines.append('{{- end }}')
-    lines.append('')
-    lines.append('{{/*')
-    lines.append('Selector labels')
-    lines.append('*/}}')
+    lines.append("{{- if .Chart.AppVersion }}")
+    lines.append("app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}")
+    lines.append("{{- end }}")
+    lines.append("app.kubernetes.io/managed-by: {{ .Release.Service }}")
+    lines.append("{{- end }}")
+    lines.append("")
+    lines.append("{{/*")
+    lines.append("Selector labels")
+    lines.append("*/}}")
     lines.append(f'{{{{- define "{app_name}.selectorLabels" -}}}}')
     lines.append(f'app.kubernetes.io/name: {{{{{{ include "{app_name}.name" . }}}}}}')
-    lines.append('app.kubernetes.io/instance: {{ .Release.Name }}')
-    lines.append('{{- end }}')
-    lines.append('')
-    lines.append('{{/*')
-    lines.append('Create the name of the service account to use')
-    lines.append('*/}}')
+    lines.append("app.kubernetes.io/instance: {{ .Release.Name }}")
+    lines.append("{{- end }}")
+    lines.append("")
+    lines.append("{{/*")
+    lines.append("Create the name of the service account to use")
+    lines.append("*/}}")
     lines.append(f'{{{{- define "{app_name}.serviceAccountName" -}}}}')
-    lines.append('{{- if .Values.serviceAccount.create }}')
-    lines.append(f'{{{{- default (include "{app_name}.fullname" .) .Values.serviceAccount.name }}}}')
-    lines.append('{{- else }}')
+    lines.append("{{- if .Values.serviceAccount.create }}")
+    lines.append(
+        f'{{{{- default (include "{app_name}.fullname" .) .Values.serviceAccount.name }}}}'
+    )
+    lines.append("{{- else }}")
     lines.append('{{- default "default" .Values.serviceAccount.name }}')
-    lines.append('{{- end }}')
-    lines.append('{{- end }}')
+    lines.append("{{- end }}")
+    lines.append("{{- end }}")
 
     # Component-specific fullname helpers
     for comp in components:
-        lines.append('')
-        lines.append('{{/*')
-        lines.append(f'{comp.capitalize()} fullname')
-        lines.append('*/}}')
+        lines.append("")
+        lines.append("{{/*")
+        lines.append(f"{comp.capitalize()} fullname")
+        lines.append("*/}}")
         lines.append(f'{{{{- define "{app_name}.{comp}.fullname" -}}}}')
         lines.append(f'{{{{- printf "%s-{comp}" (include "{app_name}.fullname" .) }}}}')
-        lines.append('{{- end }}')
+        lines.append("{{- end }}")
 
     return "\n".join(lines) + "\n"
 
@@ -782,7 +898,7 @@ def _gen_service_yaml(app_name: str, components: list[str]) -> str:
     for i, comp in enumerate(components):
         if i > 0:
             parts.append("---")
-        parts.append(f'{{{{- if .Values.{comp}.enabled }}}}')
+        parts.append(f"{{{{- if .Values.{comp}.enabled }}}}")
         parts.append("apiVersion: v1")
         parts.append("kind: Service")
         parts.append("metadata:")
@@ -791,14 +907,18 @@ def _gen_service_yaml(app_name: str, components: list[str]) -> str:
         parts.append(f'    {{{{- include "{app_name}.labels" . | nindent 4 }}}}')
         parts.append(f"    app.kubernetes.io/component: {comp}")
         parts.append("spec:")
-        parts.append(f'  type: {{{{{{ .Values.{comp}.service.type }}}}}}')
+        parts.append(f"  type: {{{{{{ .Values.{comp}.service.type }}}}}}")
         parts.append("  ports:")
-        parts.append(f'    - port: {{{{{{ .Values.{comp}.service.port }}}}}}')
-        parts.append(f'      targetPort: {{{{{{ .Values.{comp}.service.targetPort }}}}}}')
+        parts.append(f"    - port: {{{{{{ .Values.{comp}.service.port }}}}}}")
+        parts.append(
+            f"      targetPort: {{{{{{ .Values.{comp}.service.targetPort }}}}}}"
+        )
         parts.append("      protocol: TCP")
         parts.append("      name: http")
         parts.append("  selector:")
-        parts.append(f'    {{{{- include "{app_name}.selectorLabels" . | nindent 4 }}}}')
+        parts.append(
+            f'    {{{{- include "{app_name}.selectorLabels" . | nindent 4 }}}}'
+        )
         parts.append(f"    app.kubernetes.io/component: {comp}")
         parts.append("{{- end }}")
 
@@ -859,49 +979,53 @@ spec:
 
 def _gen_notes_txt(app_name: str, components: list[str]) -> str:
     parts: list[str] = []
-    parts.append(f'Thank you for installing {{{{{{ .Chart.Name }}}}}}!')
-    parts.append('')
-    parts.append(f'Your release is named: {{{{{{ .Release.Name }}}}}}')
-    parts.append(f'Chart version: {{{{{{ .Chart.Version }}}}}}')
-    parts.append(f'App version: {{{{{{ .Chart.AppVersion }}}}}}')
-    parts.append('')
-    parts.append('{{- if .Values.ingress.enabled }}')
-    parts.append('')
-    parts.append('=== Ingress Access ===')
-    parts.append('')
-    parts.append('Your application is accessible via:')
-    parts.append('{{- range .Values.ingress.hosts }}')
-    parts.append('  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}')
-    parts.append('{{- end }}')
-    parts.append('')
-    parts.append('{{- else }}')
-    parts.append('')
-    parts.append('=== Service Access ===')
+    parts.append(f"Thank you for installing {{{{{{ .Chart.Name }}}}}}!")
+    parts.append("")
+    parts.append(f"Your release is named: {{{{{{ .Release.Name }}}}}}")
+    parts.append(f"Chart version: {{{{{{ .Chart.Version }}}}}}")
+    parts.append(f"App version: {{{{{{ .Chart.AppVersion }}}}}}")
+    parts.append("")
+    parts.append("{{- if .Values.ingress.enabled }}")
+    parts.append("")
+    parts.append("=== Ingress Access ===")
+    parts.append("")
+    parts.append("Your application is accessible via:")
+    parts.append("{{- range .Values.ingress.hosts }}")
+    parts.append("  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}")
+    parts.append("{{- end }}")
+    parts.append("")
+    parts.append("{{- else }}")
+    parts.append("")
+    parts.append("=== Service Access ===")
 
     for comp in components:
-        parts.append('')
-        parts.append(f'{{{{- if .Values.{comp}.enabled }}}}')
-        parts.append(f'{comp.capitalize()}:')
-        parts.append(f'  kubectl port-forward svc/{{{{{{ include "{app_name}.{comp}.fullname" . }}}}}} {{{{{{ .Values.{comp}.service.port }}}}}}:{{{{{{ .Values.{comp}.service.port }}}}}}')
-        parts.append(f'  Then visit: http://localhost:{{{{{{ .Values.{comp}.service.port }}}}}}')
-        parts.append('{{- end }}')
+        parts.append("")
+        parts.append(f"{{{{- if .Values.{comp}.enabled }}}}")
+        parts.append(f"{comp.capitalize()}:")
+        parts.append(
+            f'  kubectl port-forward svc/{{{{{{ include "{app_name}.{comp}.fullname" . }}}}}} {{{{{{ .Values.{comp}.service.port }}}}}}:{{{{{{ .Values.{comp}.service.port }}}}}}'
+        )
+        parts.append(
+            f"  Then visit: http://localhost:{{{{{{ .Values.{comp}.service.port }}}}}}"
+        )
+        parts.append("{{- end }}")
 
-    parts.append('')
-    parts.append('{{- end }}')
-    parts.append('')
-    parts.append('=== Useful Commands ===')
-    parts.append('')
-    parts.append('# View all deployed resources')
-    parts.append('kubectl get all -l app.kubernetes.io/instance={{ .Release.Name }}')
-    parts.append('')
-    parts.append('# View logs')
-    parts.append('kubectl logs -l app.kubernetes.io/instance={{ .Release.Name }} -f')
-    parts.append('')
-    parts.append('# Upgrade the release')
-    parts.append('helm upgrade {{ .Release.Name }} ./{{ .Chart.Name }} -f values.yaml')
-    parts.append('')
-    parts.append('# Uninstall the release')
-    parts.append('helm uninstall {{ .Release.Name }}')
+    parts.append("")
+    parts.append("{{- end }}")
+    parts.append("")
+    parts.append("=== Useful Commands ===")
+    parts.append("")
+    parts.append("# View all deployed resources")
+    parts.append("kubectl get all -l app.kubernetes.io/instance={{ .Release.Name }}")
+    parts.append("")
+    parts.append("# View logs")
+    parts.append("kubectl logs -l app.kubernetes.io/instance={{ .Release.Name }} -f")
+    parts.append("")
+    parts.append("# Upgrade the release")
+    parts.append("helm upgrade {{ .Release.Name }} ./{{ .Chart.Name }} -f values.yaml")
+    parts.append("")
+    parts.append("# Uninstall the release")
+    parts.append("helm uninstall {{ .Release.Name }}")
 
     return "\n".join(parts) + "\n"
 
@@ -931,7 +1055,9 @@ async def helm_generate_chart(
     """
     # Validate and parse components
     if not components:
-        return json.dumps({"status": "error", "error": "At least one component is required"})
+        return json.dumps(
+            {"status": "error", "error": "At least one component is required"}
+        )
 
     parsed = ChartGenerateInput(
         application_name=application_name,
@@ -947,18 +1073,25 @@ async def helm_generate_chart(
 
     comp_names = [c.name for c in parsed.components]
 
-    chart_yaml = _gen_chart_yaml(parsed.application_name, parsed.description, parsed.version, parsed.app_version)
+    chart_yaml = _gen_chart_yaml(
+        parsed.application_name, parsed.description, parsed.version, parsed.app_version
+    )
     helmignore = _gen_helmignore()
     values_yaml = _gen_values_yaml(
-        parsed.components, parsed.ingress_enabled, parsed.ingress_host,
-        parsed.persistence_enabled, parsed.persistence_size,
+        parsed.components,
+        parsed.ingress_enabled,
+        parsed.ingress_host,
+        parsed.persistence_enabled,
+        parsed.persistence_size,
     )
     helpers_tpl = _gen_helpers_tpl(parsed.application_name, comp_names)
     notes_txt = _gen_notes_txt(parsed.application_name, comp_names)
 
     deployments = {}
     for comp in comp_names:
-        deployments[f"deployment-{comp}.yaml"] = _gen_deployment_yaml(parsed.application_name, comp)
+        deployments[f"deployment-{comp}.yaml"] = _gen_deployment_yaml(
+            parsed.application_name, comp
+        )
 
     service_yaml = _gen_service_yaml(parsed.application_name, comp_names)
     ingress_yaml = _gen_ingress_yaml(parsed.application_name)
@@ -977,27 +1110,30 @@ async def helm_generate_chart(
     directory_layout.append("    service.yaml")
     directory_layout.append("    ingress.yaml")
 
-    return json.dumps({
-        "status": "success",
-        "directory_layout": "\n".join(directory_layout),
-        "files": {
-            "Chart.yaml": chart_yaml,
-            "values.yaml": values_yaml,
-            ".helmignore": helmignore,
-            "templates/_helpers.tpl": helpers_tpl,
-            "templates/NOTES.txt": notes_txt,
-            "templates/service.yaml": service_yaml,
-            "templates/ingress.yaml": ingress_yaml,
-            **{f"templates/{k}": v for k, v in deployments.items()},
+    return json.dumps(
+        {
+            "status": "success",
+            "directory_layout": "\n".join(directory_layout),
+            "files": {
+                "Chart.yaml": chart_yaml,
+                "values.yaml": values_yaml,
+                ".helmignore": helmignore,
+                "templates/_helpers.tpl": helpers_tpl,
+                "templates/NOTES.txt": notes_txt,
+                "templates/service.yaml": service_yaml,
+                "templates/ingress.yaml": ingress_yaml,
+                **{f"templates/{k}": v for k, v in deployments.items()},
+            },
+            "notes": [
+                "Chart API: v2 (Helm 3)",
+                "Security: non-root containers, security contexts configured",
+                "Health: liveness and readiness probes included",
+                "Minikube: compatible with default resource limits",
+                "WARNING: Review and adjust all templates before deploying",
+            ],
         },
-        "notes": [
-            "Chart API: v2 (Helm 3)",
-            "Security: non-root containers, security contexts configured",
-            "Health: liveness and readiness probes included",
-            "Minikube: compatible with default resource limits",
-            "WARNING: Review and adjust all templates before deploying",
-        ],
-    }, indent=2)
+        indent=2,
+    )
 
 
 @mcp.tool()
@@ -1015,7 +1151,9 @@ async def helm_generate_values(
     All values are parameterized with sensible development defaults.
     """
     if not components:
-        return json.dumps({"status": "error", "error": "At least one component is required"})
+        return json.dumps(
+            {"status": "error", "error": "At least one component is required"}
+        )
 
     parsed = ValuesGenerateInput(
         application_name=application_name,
@@ -1027,20 +1165,25 @@ async def helm_generate_values(
     )
 
     content = _gen_values_yaml(
-        parsed.components, parsed.ingress_enabled, parsed.ingress_host,
-        parsed.persistence_enabled, parsed.persistence_size,
+        parsed.components,
+        parsed.ingress_enabled,
+        parsed.ingress_host,
+        parsed.persistence_enabled,
+        parsed.persistence_size,
     )
 
-    return json.dumps({
-        "status": "success",
-        "content": content,
-        "notes": [
-            "All values documented with # -- comments",
-            "Components toggleable via enabled: true/false",
-            "No secrets in values.yaml (use externalSecrets)",
-            "Resource defaults suitable for Minikube",
-        ],
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "content": content,
+            "notes": [
+                "All values documented with # -- comments",
+                "Components toggleable via enabled: true/false",
+                "No secrets in values.yaml (use externalSecrets)",
+                "Resource defaults suitable for Minikube",
+            ],
+        }
+    )
 
 
 @mcp.tool()
@@ -1056,7 +1199,9 @@ async def helm_generate_env_values(
     Provides pre-configured resources, replicas, and settings per environment.
     """
     if not components:
-        return json.dumps({"status": "error", "error": "At least one component name is required"})
+        return json.dumps(
+            {"status": "error", "error": "At least one component name is required"}
+        )
 
     parsed = EnvValuesInput(
         application_name=application_name,
@@ -1065,19 +1210,23 @@ async def helm_generate_env_values(
         ingress_host=ingress_host,
     )
 
-    content = _gen_env_values(parsed.environment, parsed.components, parsed.ingress_host)
+    content = _gen_env_values(
+        parsed.environment, parsed.components, parsed.ingress_host
+    )
     filename = f"values-{parsed.environment}.yaml"
 
-    return json.dumps({
-        "status": "success",
-        "filename": filename,
-        "content": content,
-        "notes": [
-            f"Environment: {parsed.environment}",
-            f"Usage: helm install {parsed.application_name} ./{parsed.application_name} -f {filename}",
-            "Override only what differs from base values.yaml",
-        ],
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "filename": filename,
+            "content": content,
+            "notes": [
+                f"Environment: {parsed.environment}",
+                f"Usage: helm install {parsed.application_name} ./{parsed.application_name} -f {filename}",
+                "Override only what differs from base values.yaml",
+            ],
+        }
+    )
 
 
 @mcp.tool()
@@ -1111,11 +1260,13 @@ async def helm_generate_helpers(
     for comp in parsed.components:
         helpers_defined.append(f"{parsed.application_name}.{comp}.fullname")
 
-    return json.dumps({
-        "status": "success",
-        "content": content,
-        "helpers_defined": helpers_defined,
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "content": content,
+            "helpers_defined": helpers_defined,
+        }
+    )
 
 
 @mcp.tool()
@@ -1135,16 +1286,18 @@ async def helm_generate_deployment(
 
     content = _gen_deployment_yaml(parsed.application_name, parsed.component)
 
-    return json.dumps({
-        "status": "success",
-        "content": content,
-        "notes": [
-            f"Component: {parsed.component}",
-            "Security: pod and container security contexts",
-            "Probes: liveness and readiness configured",
-            "Resources: configurable via values.yaml",
-        ],
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "content": content,
+            "notes": [
+                f"Component: {parsed.component}",
+                "Security: pod and container security contexts",
+                "Probes: liveness and readiness configured",
+                "Resources: configurable via values.yaml",
+            ],
+        }
+    )
 
 
 @mcp.tool()
@@ -1167,15 +1320,17 @@ async def helm_generate_service(
 
     content = _gen_service_yaml(parsed.application_name, parsed.components)
 
-    return json.dumps({
-        "status": "success",
-        "content": content,
-        "notes": [
-            f"Services: {', '.join(parsed.components)}",
-            "Type configurable via values.yaml (ClusterIP, NodePort, LoadBalancer)",
-            "Port mapping: service port -> target port",
-        ],
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "content": content,
+            "notes": [
+                f"Services: {', '.join(parsed.components)}",
+                "Type configurable via values.yaml (ClusterIP, NodePort, LoadBalancer)",
+                "Port mapping: service port -> target port",
+            ],
+        }
+    )
 
 
 @mcp.tool()
@@ -1191,16 +1346,18 @@ async def helm_generate_ingress(
 
     content = _gen_ingress_yaml(parsed.application_name)
 
-    return json.dumps({
-        "status": "success",
-        "content": content,
-        "notes": [
-            "Conditional creation via ingress.enabled",
-            "Supports TLS termination",
-            "Path-based routing to backend/frontend services",
-            "IngressClassName configurable",
-        ],
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "content": content,
+            "notes": [
+                "Conditional creation via ingress.enabled",
+                "Supports TLS termination",
+                "Path-based routing to backend/frontend services",
+                "IngressClassName configurable",
+            ],
+        }
+    )
 
 
 @mcp.tool()
@@ -1293,7 +1450,9 @@ async def helm_validate_chart(
         checks["values_no_hardcoded_secrets"] = not has_secrets
         passed += int(not has_secrets)
         if has_secrets:
-            warnings.append("Possible hardcoded secret in values.yaml — use externalSecrets instead")
+            warnings.append(
+                "Possible hardcoded secret in values.yaml — use externalSecrets instead"
+            )
     else:
         total += 1
         checks["values_yaml_present"] = False
@@ -1312,7 +1471,10 @@ async def helm_validate_chart(
         warnings.append("Missing NOTES.txt — no post-install instructions for users")
 
     has_deployment = any("deployment" in f.lower() for f in parsed.template_files)
-    has_service = any("service" in f.lower() and "account" not in f.lower() for f in parsed.template_files)
+    has_service = any(
+        "service" in f.lower() and "account" not in f.lower()
+        for f in parsed.template_files
+    )
     total += 2
     checks["has_deployment_template"] = has_deployment
     passed += int(has_deployment)
@@ -1326,14 +1488,18 @@ async def helm_validate_chart(
 
     score = round((passed / total * 100) if total > 0 else 0, 1)
 
-    return json.dumps({
-        "checks": checks,
-        "warnings": warnings,
-        "passed": passed,
-        "total": total,
-        "score": score,
-        "rating": "GOOD" if score >= 80 else "NEEDS WORK" if score >= 50 else "INCOMPLETE",
-    })
+    return json.dumps(
+        {
+            "checks": checks,
+            "warnings": warnings,
+            "passed": passed,
+            "total": total,
+            "score": score,
+            "rating": (
+                "GOOD" if score >= 80 else "NEEDS WORK" if score >= 50 else "INCOMPLETE"
+            ),
+        }
+    )
 
 
 @mcp.tool()
@@ -1418,10 +1584,12 @@ async def helm_suggest_commands(
 
     command = " \\\n".join(parts)
 
-    return json.dumps({
-        "command": command,
-        "notes": notes,
-    })
+    return json.dumps(
+        {
+            "command": command,
+            "notes": notes,
+        }
+    )
 
 
 @mcp.tool()
@@ -1431,13 +1599,15 @@ async def helm_list_templates() -> str:
     Returns JSON: {status, templates, resource_presets}
     Each template describes a Kubernetes resource type and whether it's required.
     """
-    return json.dumps({
-        "status": "success",
-        "templates": TEMPLATE_CATALOG,
-        "resource_presets": RESOURCE_PRESETS,
-        "supported_environments": list(VALID_ENVIRONMENTS),
-        "supported_service_types": list(VALID_SERVICE_TYPES),
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "templates": TEMPLATE_CATALOG,
+            "resource_presets": RESOURCE_PRESETS,
+            "supported_environments": list(VALID_ENVIRONMENTS),
+            "supported_service_types": list(VALID_SERVICE_TYPES),
+        }
+    )
 
 
 # ---------------------------------------------------------------------------

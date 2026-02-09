@@ -49,7 +49,8 @@ class ApprovalAuditQuery:
     def query_approver_history(self, approver: str) -> list[dict]:
         """Return all decision events (approved / rejected) made by *approver*."""
         return [
-            e for e in self._load()
+            e
+            for e in self._load()
             if e.get("approver") == approver
             and e.get("event_type") in ("approval_approved", "approval_rejected")
         ]
@@ -65,12 +66,14 @@ class ApprovalAuditQuery:
         """
         events = self._load()
         if since:
-            events = [
-                e for e in events
-                if self._parse_ts(e["timestamp"]) >= since
-            ]
+            events = [e for e in events if self._parse_ts(e["timestamp"]) >= since]
 
-        counts: dict[str, int] = {"approved": 0, "rejected": 0, "timeout": 0, "pending": 0}
+        counts: dict[str, int] = {
+            "approved": 0,
+            "rejected": 0,
+            "timeout": 0,
+            "pending": 0,
+        }
         created_at: dict[str, datetime] = {}
         decided_at: dict[str, datetime] = {}
 

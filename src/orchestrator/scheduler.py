@@ -77,7 +77,9 @@ class Orchestrator:
         self._started_at: Optional[datetime] = None
 
         # Checkpoint path
-        self._checkpoint_path = self.config.vault_path.parent / ".fte" / "orchestrator.checkpoint.json"
+        self._checkpoint_path = (
+            self.config.vault_path.parent / ".fte" / "orchestrator.checkpoint.json"
+        )
 
         # Metrics collector (append-only event log)
         self._metrics = MetricsCollector(
@@ -108,7 +110,9 @@ class Orchestrator:
         self._log("=" * 60)
 
         # Notify via webhook
-        self._webhooks.orchestrator_started(self.config.vault_path, dry_run=self.dry_run)
+        self._webhooks.orchestrator_started(
+            self.config.vault_path, dry_run=self.dry_run
+        )
 
         try:
             while True:
@@ -125,20 +129,28 @@ class Orchestrator:
                 # --- discover & score ---
                 tasks = self._discover()
                 if tasks:
-                    self._log(f"[sweep {self._iteration}] {len(tasks)} task(s) discovered")
+                    self._log(
+                        f"[sweep {self._iteration}] {len(tasks)} task(s) discovered"
+                    )
                     for task in tasks:
                         if self._stop.is_set:
-                            self._log("Stop-hook detected mid-sweep — finishing current task only.")
+                            self._log(
+                                "Stop-hook detected mid-sweep — finishing current task only."
+                            )
                             self._process_task(task)
                             break
                         self._process_task(task)
                 else:
-                    self._log(f"[sweep {self._iteration}] No tasks — sleeping {self.config.poll_interval}s")
+                    self._log(
+                        f"[sweep {self._iteration}] No tasks — sleeping {self.config.poll_interval}s"
+                    )
 
                 # --- resume previously-approved tasks ---
                 approved = self._discover_approved()
                 if approved:
-                    self._log(f"[sweep {self._iteration}] {len(approved)} approved task(s) — resuming")
+                    self._log(
+                        f"[sweep {self._iteration}] {len(approved)} approved task(s) — resuming"
+                    )
                     for task in approved:
                         self._resume_task(task)
 
@@ -227,11 +239,13 @@ class Orchestrator:
             if not self._approvals.is_approved(md):
                 continue
             score = self._scorer.score(md)
-            records.append(TaskRecord(
-                file_path=md,
-                priority_score=score,
-                state=TaskState.PENDING_APPROVAL,
-            ))
+            records.append(
+                TaskRecord(
+                    file_path=md,
+                    priority_score=score,
+                    state=TaskState.PENDING_APPROVAL,
+                )
+            )
 
         records.sort(key=lambda r: r.priority_score, reverse=True)
         return records
@@ -251,7 +265,9 @@ class Orchestrator:
                 task.file_path, TaskState.NEEDS_ACTION, TaskState.PLANNING
             )
             task.state = TaskState.PLANNING
-            self._log(f"  [{task.name}] → PLANNING (priority {task.priority_score:.2f})")
+            self._log(
+                f"  [{task.name}] → PLANNING (priority {task.priority_score:.2f})"
+            )
 
             # 2. Approval gate
             if self._approvals.requires_approval(task.file_path):
@@ -261,12 +277,16 @@ class Orchestrator:
                 # Check if already approved
                 if not self._approvals.is_approved(task.file_path):
                     # Create approval request and park in PENDING_APPROVAL
-                    approval_path = self._approvals.create_approval_request(task.file_path, keywords)
+                    approval_path = self._approvals.create_approval_request(
+                        task.file_path, keywords
+                    )
                     task.file_path = self._state_machine.transition(
                         task.file_path, TaskState.PLANNING, TaskState.PENDING_APPROVAL
                     )
                     task.state = TaskState.PENDING_APPROVAL
-                    self._log(f"  [{task.name}] → PENDING_APPROVAL  (approval at {approval_path.name})")
+                    self._log(
+                        f"  [{task.name}] → PENDING_APPROVAL  (approval at {approval_path.name})"
+                    )
                     self._record_exit(task, "pending_approval", False, start)
                     return
                 else:
@@ -379,16 +399,20 @@ class Orchestrator:
     # Internal — helpers
     # ------------------------------------------------------------------
 
-    def _record_exit(self, task: TaskRecord, reason: str, success: bool, start: float) -> None:
-        self._exit_log.append(LoopExit(
-            task_path=task.file_path,
-            reason=reason,
-            success=success,
-            iteration_count=self._iteration,
-            duration_seconds=round(time.monotonic() - start, 2),
-            final_state=task.state,
-            error=task.error,
-        ))
+    def _record_exit(
+        self, task: TaskRecord, reason: str, success: bool, start: float
+    ) -> None:
+        self._exit_log.append(
+            LoopExit(
+                task_path=task.file_path,
+                reason=reason,
+                success=success,
+                iteration_count=self._iteration,
+                duration_seconds=round(time.monotonic() - start, 2),
+                final_state=task.state,
+                error=task.error,
+            )
+        )
 
     def _log(self, msg: str) -> None:
         """Timestamped print (stdout) + append to vault log file."""
@@ -435,5 +459,7 @@ class Orchestrator:
         self._log(f"Summary: {done}/{total} tasks completed successfully")
         for e in self._exit_log:
             icon = "✓" if e.success else "✗"
-            self._log(f"  {icon} {e.task_path.name} → {e.final_state.value} ({e.reason}, {e.duration_seconds}s)")
+            self._log(
+                f"  {icon} {e.task_path.name} → {e.final_state.value} ({e.reason}, {e.duration_seconds}s)"
+            )
         self._log("=" * 60)

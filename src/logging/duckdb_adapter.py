@@ -113,8 +113,7 @@ class DuckDBAdapter:
             """
         else:
             # For multiple files, read each and union
-            subqueries = [
-                f"""
+            subqueries = [f"""
                 SELECT
                     trace_id,
                     CAST(timestamp AS TIMESTAMP) as timestamp,
@@ -128,17 +127,13 @@ class DuckDBAdapter:
                     duration_ms,
                     tags
                 FROM read_json_auto('{f}', format='newline_delimited')
-                """
-                for f in log_files
-            ]
+                """ for f in log_files]
             query = f"CREATE VIEW logs AS\n{' UNION ALL '.join(subqueries)}"
 
         self.conn.execute(query)
 
     def execute_query(
-        self,
-        sql: str,
-        params: Optional[Dict[str, Any]] = None
+        self, sql: str, params: Optional[Dict[str, Any]] = None
     ) -> List[Dict[str, Any]]:
         """
         Execute SQL query and return results.

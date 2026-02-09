@@ -34,18 +34,14 @@ def load_config(config_name: str, config_dir: Optional[Path] = None) -> Dict[str
     config_path = config_dir / f"{config_name}.yaml"
 
     try:
-        with open(config_path, 'r', encoding='utf-8') as f:
+        with open(config_path, "r", encoding="utf-8") as f:
             config = yaml.safe_load(f)
             return config if config is not None else {}
     except FileNotFoundError as e:
-        raise FileOperationError(
-            f"Config file not found: {config_path}"
-        ) from e
+        raise FileOperationError(f"Config file not found: {config_path}") from e
     except yaml.YAMLError as e:
         raise FileOperationError(
             f"Failed to parse YAML config {config_path}: {e}"
         ) from e
     except OSError as e:
-        raise FileOperationError(
-            f"Failed to read config {config_path}: {e}"
-        ) from e
+        raise FileOperationError(f"Failed to read config {config_path}: {e}") from e

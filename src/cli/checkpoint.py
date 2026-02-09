@@ -17,6 +17,7 @@ from cli.utils import get_checkpoint_path
 
 class WatcherCheckpoint(BaseModel):
     """Watcher state checkpoint"""
+
     status: str = Field(default="stopped")  # stopped, running, error
     pid: Optional[int] = Field(default=None)
     uptime: Optional[int] = Field(default=None)  # seconds
@@ -26,6 +27,7 @@ class WatcherCheckpoint(BaseModel):
 
 class VaultCheckpoint(BaseModel):
     """Vault state checkpoint"""
+
     path: Optional[str] = Field(default=None)
     initialized: bool = Field(default=False)
     last_status_check: Optional[str] = Field(default=None)  # ISO timestamp
@@ -33,6 +35,7 @@ class VaultCheckpoint(BaseModel):
 
 class MCPCheckpoint(BaseModel):
     """MCP servers state checkpoint"""
+
     registry_loaded: bool = Field(default=False)
     last_health_check: Optional[str] = Field(default=None)  # ISO timestamp
     servers: list = Field(default_factory=list)
@@ -40,6 +43,7 @@ class MCPCheckpoint(BaseModel):
 
 class ApprovalsCheckpoint(BaseModel):
     """Approvals state checkpoint"""
+
     pending_count: int = Field(default=0)
     last_review: Optional[str] = Field(default=None)  # ISO timestamp
     last_approval: Optional[str] = Field(default=None)  # ISO timestamp
@@ -48,6 +52,7 @@ class ApprovalsCheckpoint(BaseModel):
 
 class BriefingsCheckpoint(BaseModel):
     """Briefings state checkpoint"""
+
     last_generated: Optional[str] = Field(default=None)  # ISO timestamp
     last_viewed: Optional[str] = Field(default=None)  # ISO timestamp
     total_generated: int = Field(default=0)
@@ -55,6 +60,7 @@ class BriefingsCheckpoint(BaseModel):
 
 class CLIUsageCheckpoint(BaseModel):
     """CLI usage state checkpoint"""
+
     total_commands: int = Field(default=0)
     last_command: Optional[str] = Field(default=None)
     last_command_time: Optional[str] = Field(default=None)  # ISO timestamp
@@ -62,6 +68,7 @@ class CLIUsageCheckpoint(BaseModel):
 
 class Checkpoint(BaseModel):
     """Complete CLI checkpoint state"""
+
     version: str = Field(default="0.1.0")
     last_updated: Optional[str] = Field(default=None)  # ISO timestamp
     vault: VaultCheckpoint = Field(default_factory=VaultCheckpoint)
@@ -105,7 +112,7 @@ class CheckpointManager:
             return Checkpoint()
 
         try:
-            with open(self.checkpoint_path, 'r') as f:
+            with open(self.checkpoint_path, "r") as f:
                 data = json.load(f)
             self._checkpoint = Checkpoint(**data)
             return self._checkpoint
@@ -130,7 +137,7 @@ class CheckpointManager:
         self.checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Write checkpoint
-        with open(self.checkpoint_path, 'w') as f:
+        with open(self.checkpoint_path, "w") as f:
             json.dump(checkpoint.model_dump(), f, indent=2)
 
         self._checkpoint = checkpoint
@@ -147,9 +154,7 @@ class CheckpointManager:
         return self._checkpoint
 
     def update_vault(
-        self,
-        path: Optional[str] = None,
-        initialized: Optional[bool] = None
+        self, path: Optional[str] = None, initialized: Optional[bool] = None
     ) -> None:
         """
         Update vault checkpoint.
@@ -173,7 +178,7 @@ class CheckpointManager:
         watcher_name: str,
         status: Optional[str] = None,
         pid: Optional[int] = None,
-        uptime: Optional[int] = None
+        uptime: Optional[int] = None,
     ) -> None:
         """
         Update watcher checkpoint.
@@ -206,9 +211,7 @@ class CheckpointManager:
         self.save(checkpoint)
 
     def update_mcp(
-        self,
-        registry_loaded: Optional[bool] = None,
-        servers: Optional[list] = None
+        self, registry_loaded: Optional[bool] = None, servers: Optional[list] = None
     ) -> None:
         """
         Update MCP servers checkpoint.
@@ -242,7 +245,7 @@ class CheckpointManager:
     def update_approval(
         self,
         pending_count: Optional[int] = None,
-        action: Optional[str] = None  # "review", "approve", "reject"
+        action: Optional[str] = None,  # "review", "approve", "reject"
     ) -> None:
         """
         Update approvals checkpoint.
@@ -266,10 +269,7 @@ class CheckpointManager:
 
         self.save(checkpoint)
 
-    def update_briefing(
-        self,
-        action: str  # "generate", "view"
-    ) -> None:
+    def update_briefing(self, action: str) -> None:  # "generate", "view"
         """
         Update briefings checkpoint.
 

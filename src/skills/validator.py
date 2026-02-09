@@ -26,8 +26,8 @@ _REQUIRED_SECTIONS = ["Overview", "Instructions", "Examples", "Validation"]
 
 @dataclass
 class ValidationIssue:
-    level: str       # syntax | completeness | quality
-    severity: str    # error | warning
+    level: str  # syntax | completeness | quality
+    severity: str  # error | warning
     message: str
 
 
@@ -60,16 +60,30 @@ class SkillValidator:
         # ---------- Level 1: Syntax ----------
         fm, body = _parse_frontmatter(text)
         if fm is None:
-            result.issues.append(ValidationIssue("syntax", "error", "missing or unparseable YAML frontmatter"))
+            result.issues.append(
+                ValidationIssue(
+                    "syntax", "error", "missing or unparseable YAML frontmatter"
+                )
+            )
             return result
 
         for fld in _REQUIRED_FM_FIELDS:
             if fld not in fm or not fm[fld]:
-                result.issues.append(ValidationIssue("syntax", "error", f"missing required frontmatter field '{fld}'"))
+                result.issues.append(
+                    ValidationIssue(
+                        "syntax", "error", f"missing required frontmatter field '{fld}'"
+                    )
+                )
 
         safety = fm.get("safety_level", "low")
         if safety not in _VALID_SAFETY_LEVELS:
-            result.issues.append(ValidationIssue("syntax", "error", f"invalid safety_level '{safety}' (expected one of {sorted(_VALID_SAFETY_LEVELS)})"))
+            result.issues.append(
+                ValidationIssue(
+                    "syntax",
+                    "error",
+                    f"invalid safety_level '{safety}' (expected one of {sorted(_VALID_SAFETY_LEVELS)})",
+                )
+            )
 
         # Build metadata (best-effort even if there are syntax errors)
         result.metadata = SkillMetadata(
@@ -89,13 +103,27 @@ class SkillValidator:
         # ---------- Level 2: Completeness ----------
         for section in _REQUIRED_SECTIONS:
             if not re.search(rf"^##\s+{section}", body, re.MULTILINE | re.IGNORECASE):
-                result.issues.append(ValidationIssue("completeness", "error", f"missing required section '## {section}'"))
+                result.issues.append(
+                    ValidationIssue(
+                        "completeness",
+                        "error",
+                        f"missing required section '## {section}'",
+                    )
+                )
 
         if not fm.get("triggers"):
-            result.issues.append(ValidationIssue("completeness", "warning", "no triggers defined — skill won't be auto-discovered"))
+            result.issues.append(
+                ValidationIssue(
+                    "completeness",
+                    "warning",
+                    "no triggers defined — skill won't be auto-discovered",
+                )
+            )
 
         if not fm.get("version"):
-            result.issues.append(ValidationIssue("completeness", "warning", "version not specified"))
+            result.issues.append(
+                ValidationIssue("completeness", "warning", "version not specified")
+            )
 
         # ---------- Level 3: Quality ----------
         # Instructions need ≥ 2 sub-steps (### headers inside the Instructions section)
@@ -103,22 +131,40 @@ class SkillValidator:
         if instructions_body:
             sub_steps = re.findall(r"^###\s+", instructions_body, re.MULTILINE)
             if len(sub_steps) < 2:
-                result.issues.append(ValidationIssue("quality", "warning", "instructions have fewer than 2 sub-steps"))
+                result.issues.append(
+                    ValidationIssue(
+                        "quality", "warning", "instructions have fewer than 2 sub-steps"
+                    )
+                )
 
         # Examples need at least one ### Example sub-section
         examples_body = _extract_section(body, "Examples")
         if examples_body:
             example_headers = re.findall(r"^###\s+Example", examples_body, re.MULTILINE)
             if len(example_headers) < 1:
-                result.issues.append(ValidationIssue("quality", "warning", "no '### Example' sub-section in Examples"))
+                result.issues.append(
+                    ValidationIssue(
+                        "quality", "warning", "no '### Example' sub-section in Examples"
+                    )
+                )
 
         # Error handling documentation
         if "error" not in body.lower():
-            result.issues.append(ValidationIssue("quality", "warning", "no error-handling documentation detected"))
+            result.issues.append(
+                ValidationIssue(
+                    "quality", "warning", "no error-handling documentation detected"
+                )
+            )
 
         # High-safety skills must require approval
         if safety == "high" and not fm.get("approval_required"):
-            result.issues.append(ValidationIssue("quality", "error", "safety_level=high requires approval_required=true"))
+            result.issues.append(
+                ValidationIssue(
+                    "quality",
+                    "error",
+                    "safety_level=high requires approval_required=true",
+                )
+            )
 
         return result
 
@@ -137,7 +183,7 @@ def _parse_frontmatter(text: str) -> tuple[Optional[dict], str]:
         return None, text
     try:
         fm = yaml.safe_load(text[3:end]) or {}
-        return fm, text[end + 3:]
+        return fm, text[end + 3 :]
     except yaml.YAMLError:
         return None, text
 

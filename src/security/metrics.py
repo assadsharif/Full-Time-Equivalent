@@ -44,25 +44,18 @@ class SecurityMetrics:
         """MCP verification failures (result contains 'verification')."""
         events = self._load_events(since=since)
         return sum(
-            1 for e in events
-            if "verification" in (e.get("result") or "").lower()
+            1 for e in events if "verification" in (e.get("result") or "").lower()
         )
 
     def rate_limit_hit_count(self, since: Optional[datetime] = None) -> int:
         """Times a rate-limit was exceeded."""
         events = self._load_events(since=since)
-        return sum(
-            1 for e in events
-            if e.get("result") == "rate_limit_exceeded"
-        )
+        return sum(1 for e in events if e.get("result") == "rate_limit_exceeded")
 
     def circuit_open_count(self, since: Optional[datetime] = None) -> int:
         """Times a circuit breaker fired."""
         events = self._load_events(since=since)
-        return sum(
-            1 for e in events
-            if e.get("result") == "circuit_open"
-        )
+        return sum(1 for e in events if e.get("result") == "circuit_open")
 
     def mcp_action_count(self, since: Optional[datetime] = None) -> int:
         """Total MCP guard calls."""
@@ -128,15 +121,13 @@ class SecurityMetrics:
         lines = self._audit_log.read_text().strip().split("\n")
         events = [json.loads(ln) for ln in lines if ln]
         if since:
-            events = [
-                e for e in events
-                if self._parse_ts(e["timestamp"]) >= since
-            ]
+            events = [e for e in events if self._parse_ts(e["timestamp"]) >= since]
         return events
 
     def _count_events(self, event_type: str, since: Optional[datetime] = None) -> int:
         return sum(
-            1 for e in self._load_events(since=since)
+            1
+            for e in self._load_events(since=since)
             if e.get("event_type") == event_type
         )
 
@@ -144,7 +135,8 @@ class SecurityMetrics:
     def _is_error(event: dict) -> bool:
         result = event.get("result") or ""
         return "error" in result.lower() or result in (
-            "rate_limit_exceeded", "circuit_open"
+            "rate_limit_exceeded",
+            "circuit_open",
         )
 
     @staticmethod

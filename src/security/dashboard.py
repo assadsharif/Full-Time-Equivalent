@@ -20,7 +20,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-
 # ---------------------------------------------------------------------------
 # Data classes – every status section has its own typed container so the CLI
 # (or a future JSON API) can serialize each section independently.
@@ -196,13 +195,15 @@ class SecurityDashboard:
             if not line:
                 continue
             raw = json.loads(line)
-            alerts.append(AlertEntry(
-                timestamp=raw.get("timestamp", ""),
-                anomaly_type=raw.get("anomaly_type", ""),
-                severity=raw.get("severity", ""),
-                mcp_server=raw.get("mcp_server", ""),
-                description=raw.get("description", ""),
-            ))
+            alerts.append(
+                AlertEntry(
+                    timestamp=raw.get("timestamp", ""),
+                    anomaly_type=raw.get("anomaly_type", ""),
+                    severity=raw.get("severity", ""),
+                    mcp_server=raw.get("mcp_server", ""),
+                    description=raw.get("description", ""),
+                )
+            )
         return alerts
 
     def get_circuit_breaker_status(self) -> CircuitBreakerStatus:
@@ -255,7 +256,8 @@ class SecurityDashboard:
             circuit_breakers=self.get_circuit_breaker_status(),
             recent_alerts=self.get_recent_alerts(limit=alert_limit),
             isolated_servers=[
-                c.server for c in self.get_circuit_breaker_status().circuits
+                c.server
+                for c in self.get_circuit_breaker_status().circuits
                 if c.state == "open"
             ],
         )

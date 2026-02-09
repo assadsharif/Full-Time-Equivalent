@@ -73,8 +73,12 @@ class MCPGuard:
             self._rate_limiter.consume(server, action_type)
         except RateLimitExceededError:
             self._audit.log_mcp_action(
-                server, action_type, approved, risk_level,
-                approval_id=approval_id, nonce=nonce,
+                server,
+                action_type,
+                approved,
+                risk_level,
+                approval_id=approval_id,
+                nonce=nonce,
                 result="rate_limit_exceeded",
             )
             raise
@@ -86,16 +90,24 @@ class MCPGuard:
             result: T = breaker.call(fn)
         except CircuitBreakerError:
             self._audit.log_mcp_action(
-                server, action_type, approved, risk_level,
-                approval_id=approval_id, nonce=nonce,
+                server,
+                action_type,
+                approved,
+                risk_level,
+                approval_id=approval_id,
+                nonce=nonce,
                 result="circuit_open",
             )
             raise
         except Exception as exc:
             duration_ms = int((time.monotonic() - start) * 1000)
             self._audit.log_mcp_action(
-                server, action_type, approved, risk_level,
-                approval_id=approval_id, nonce=nonce,
+                server,
+                action_type,
+                approved,
+                risk_level,
+                approval_id=approval_id,
+                nonce=nonce,
                 result=f"error:{type(exc).__name__}",
                 duration_ms=duration_ms,
             )
@@ -104,8 +116,12 @@ class MCPGuard:
         # 3. Success path
         duration_ms = int((time.monotonic() - start) * 1000)
         self._audit.log_mcp_action(
-            server, action_type, approved, risk_level,
-            approval_id=approval_id, nonce=nonce,
+            server,
+            action_type,
+            approved,
+            risk_level,
+            approval_id=approval_id,
+            nonce=nonce,
             result="success",
             duration_ms=duration_ms,
         )

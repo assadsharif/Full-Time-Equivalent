@@ -79,9 +79,7 @@ def get_pm2_list() -> List[Dict]:
         CLIError: If PM2 command fails
     """
     if not check_pm2_installed():
-        raise PM2NotFoundError(
-            "PM2 is not installed. Install with: npm install -g pm2"
-        )
+        raise PM2NotFoundError("PM2 is not installed. Install with: npm install -g pm2")
 
     try:
         result = subprocess.run(
@@ -142,9 +140,7 @@ def start_watcher_pm2(name: str) -> None:
     validate_watcher_name(name)
 
     if not check_pm2_installed():
-        raise PM2NotFoundError(
-            "PM2 is not installed. Install with: npm install -g pm2"
-        )
+        raise PM2NotFoundError("PM2 is not installed. Install with: npm install -g pm2")
 
     # Check if already running
     existing = get_watcher_process(name)
@@ -156,9 +152,7 @@ def start_watcher_pm2(name: str) -> None:
     script_path = Path.cwd() / "scripts" / "run_watcher.py"
 
     if not script_path.exists():
-        raise WatcherNotFoundError(
-            f"Watcher script not found: {script_path}"
-        )
+        raise WatcherNotFoundError(f"Watcher script not found: {script_path}")
 
     # Get configuration
     config = get_config()
@@ -168,13 +162,17 @@ def start_watcher_pm2(name: str) -> None:
     try:
         result = subprocess.run(
             [
-                "pm2", "start",
+                "pm2",
+                "start",
                 str(script_path),
-                "--name", f"fte-watcher-{name}",
-                "--interpreter", "python3",
+                "--name",
+                f"fte-watcher-{name}",
+                "--interpreter",
+                "python3",
                 "--",  # Arguments after this go to the script
                 name,  # Watcher type (gmail, filesystem, whatsapp)
-                "--vault-path", vault_path,
+                "--vault-path",
+                vault_path,
             ],
             capture_output=True,
             text=True,
@@ -210,16 +208,12 @@ def stop_watcher_pm2(name: str) -> None:
     validate_watcher_name(name)
 
     if not check_pm2_installed():
-        raise PM2NotFoundError(
-            "PM2 is not installed. Install with: npm install -g pm2"
-        )
+        raise PM2NotFoundError("PM2 is not installed. Install with: npm install -g pm2")
 
     # Check if running
     existing = get_watcher_process(name)
     if not existing:
-        raise WatcherNotFoundError(
-            f"Watcher '{name}' is not running"
-        )
+        raise WatcherNotFoundError(f"Watcher '{name}' is not running")
 
     # Stop with PM2
     try:
@@ -325,7 +319,7 @@ def display_watcher_status(processes: List[Dict]) -> None:
         name = proc.get("name", "unknown")
         # Strip prefix if present
         if name.startswith("fte-watcher-"):
-            name = name[len("fte-watcher-"):]
+            name = name[len("fte-watcher-") :]
 
         pm2_env = proc.get("pm2_env", {})
         monit = proc.get("monit", {})
@@ -341,7 +335,7 @@ def display_watcher_status(processes: List[Dict]) -> None:
 
         # CPU and memory
         cpu = f"{monit.get('cpu', 0)}%"
-        memory_bytes = monit.get('memory', 0)
+        memory_bytes = monit.get("memory", 0)
         memory_mb = memory_bytes / (1024 * 1024) if memory_bytes else 0
         memory = f"{memory_mb:.1f}MB"
 
@@ -384,9 +378,7 @@ def get_watcher_logs(name: str, tail: int = 50, follow: bool = False) -> None:
     validate_watcher_name(name)
 
     if not check_pm2_installed():
-        raise PM2NotFoundError(
-            "PM2 is not installed. Install with: npm install -g pm2"
-        )
+        raise PM2NotFoundError("PM2 is not installed. Install with: npm install -g pm2")
 
     # Check if watcher exists
     existing = get_watcher_process(name)
@@ -431,6 +423,7 @@ def get_watcher_logs(name: str, tail: int = 50, follow: bool = False) -> None:
 
 # CLI Commands
 
+
 @click.group(name="watcher")
 def watcher_group():
     """Watcher lifecycle management commands"""
@@ -462,7 +455,12 @@ def watcher_start_command(ctx: click.Context, name: str):
         display_info(f"View status: fte watcher status")
         display_info(f"View logs: fte watcher logs {name}")
 
-    except (WatcherValidationError, PM2NotFoundError, WatcherNotFoundError, CLIError) as e:
+    except (
+        WatcherValidationError,
+        PM2NotFoundError,
+        WatcherNotFoundError,
+        CLIError,
+    ) as e:
         display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
         ctx.exit(1)
     except Exception as e:
@@ -490,7 +488,12 @@ def watcher_stop_command(ctx: click.Context, name: str):
 
         display_success(f"\n✓ Watcher '{name}' stopped successfully")
 
-    except (WatcherValidationError, PM2NotFoundError, WatcherNotFoundError, CLIError) as e:
+    except (
+        WatcherValidationError,
+        PM2NotFoundError,
+        WatcherNotFoundError,
+        CLIError,
+    ) as e:
         display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
         ctx.exit(1)
     except Exception as e:
@@ -556,7 +559,12 @@ def watcher_logs_command(ctx: click.Context, name: str, tail: int, follow: bool)
     try:
         get_watcher_logs(name, tail=tail, follow=follow)
 
-    except (WatcherValidationError, PM2NotFoundError, WatcherNotFoundError, CLIError) as e:
+    except (
+        WatcherValidationError,
+        PM2NotFoundError,
+        WatcherNotFoundError,
+        CLIError,
+    ) as e:
         display_error(e, verbose=ctx.obj.get("verbose", False) if ctx.obj else False)
         ctx.exit(1)
     except Exception as e:
@@ -630,6 +638,7 @@ def watcher_run_command(
             from src.watchers.whatsapp_watcher import WhatsAppWatcher
 
             import os
+
             port = int(os.environ.get("WHATSAPP_PORT", "5000"))
             verify_token = os.environ.get("WHATSAPP_VERIFY_TOKEN", "")
 
@@ -708,6 +717,7 @@ def watcher_test_command(ctx: click.Context, name: str):
             # Check watchdog
             try:
                 from watchdog.observers import Observer
+
                 display_success("  ✓ watchdog library installed")
             except ImportError:
                 display_error("  ✗ watchdog library not installed")
@@ -721,6 +731,7 @@ def watcher_test_command(ctx: click.Context, name: str):
             # Check Google API libraries
             try:
                 from google.oauth2.credentials import Credentials
+
                 display_success("  ✓ Google API libraries installed")
             except ImportError:
                 display_error("  ✗ Google API libraries not installed")
@@ -728,7 +739,9 @@ def watcher_test_command(ctx: click.Context, name: str):
                 ctx.exit(1)
 
             # Check credentials file
-            credentials_path = Path("~/.credentials/gmail_credentials.json").expanduser()
+            credentials_path = Path(
+                "~/.credentials/gmail_credentials.json"
+            ).expanduser()
 
             if credentials_path.exists():
                 display_success(f"  ✓ Credentials file exists: {credentials_path}")
@@ -741,7 +754,9 @@ def watcher_test_command(ctx: click.Context, name: str):
             if token_path.exists():
                 display_success(f"  ✓ OAuth token exists (may need refresh)")
             else:
-                display_info(f"  i OAuth token not found, will prompt for authorization")
+                display_info(
+                    f"  i OAuth token not found, will prompt for authorization"
+                )
 
             display_success(f"\n✓ Gmail watcher configuration checked")
 
@@ -751,6 +766,7 @@ def watcher_test_command(ctx: click.Context, name: str):
             # Check Flask
             try:
                 from flask import Flask
+
                 display_success("  ✓ Flask library installed")
             except ImportError:
                 display_error("  ✗ Flask library not installed")
@@ -758,6 +774,7 @@ def watcher_test_command(ctx: click.Context, name: str):
 
             # Check verify token
             import os
+
             verify_token = os.environ.get("WHATSAPP_VERIFY_TOKEN", "")
             if verify_token:
                 display_success(f"  ✓ Verify token configured")
@@ -770,7 +787,9 @@ def watcher_test_command(ctx: click.Context, name: str):
             if app_secret:
                 display_success(f"  ✓ App secret configured")
             else:
-                display_warning("  ! App secret not configured (signature verification disabled)")
+                display_warning(
+                    "  ! App secret not configured (signature verification disabled)"
+                )
                 display_info("    Set WHATSAPP_APP_SECRET environment variable")
 
             # Check access token (for media download)
@@ -778,7 +797,9 @@ def watcher_test_command(ctx: click.Context, name: str):
             if access_token:
                 display_success(f"  ✓ Access token configured (media download enabled)")
             else:
-                display_info("  i Access token not configured (media download disabled)")
+                display_info(
+                    "  i Access token not configured (media download disabled)"
+                )
                 display_info("    Set WHATSAPP_ACCESS_TOKEN environment variable")
 
             port = int(os.environ.get("WHATSAPP_PORT", "5000"))

@@ -11,7 +11,6 @@ from typing import Optional
 
 from ulid import ULID
 
-
 # Context variable for storing current trace ID
 _trace_id_var: ContextVar[Optional[str]] = ContextVar("trace_id", default=None)
 

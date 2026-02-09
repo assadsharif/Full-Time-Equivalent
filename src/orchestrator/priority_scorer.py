@@ -22,7 +22,6 @@ from typing import Optional
 
 from src.orchestrator.models import OrchestratorConfig
 
-
 # ---------------------------------------------------------------------------
 # Keyword → urgency score tables
 # ---------------------------------------------------------------------------
@@ -107,7 +106,11 @@ class PriorityScorer:
                     return 3.0
                 return 2.0
         # "by Friday", "by Monday" heuristic
-        if re.search(r"by\s+(friday|monday|tuesday|wednesday|thursday|saturday|sunday)", text, re.IGNORECASE):
+        if re.search(
+            r"by\s+(friday|monday|tuesday|wednesday|thursday|saturday|sunday)",
+            text,
+            re.IGNORECASE,
+        ):
             return 4.0
         return 1.0
 

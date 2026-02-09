@@ -8,7 +8,6 @@ Constitutional compliance: Section 3 (privacy, secrets never written to disk).
 import re
 from typing import Any
 
-
 # Default secret patterns (can be overridden via config)
 # Patterns with capturing groups: group 1 = key name, group 2 = separator (normalized), group 3 = secret value
 DEFAULT_SECRET_PATTERNS = [
@@ -72,9 +71,7 @@ class SecretRedactor:
         self.redaction_text = redaction_text
 
         # Compile patterns once for performance (hot path optimization)
-        self._compiled_patterns = [
-            re.compile(pattern) for pattern in self.patterns
-        ]
+        self._compiled_patterns = [re.compile(pattern) for pattern in self.patterns]
 
     def redact(self, text: str | Any) -> str:
         """
@@ -164,11 +161,19 @@ class SecretRedactor:
         """
         # Keys that indicate sensitive values
         sensitive_keys = {
-            "api_key", "apikey", "api-key",
-            "password", "passwd", "pwd",
-            "secret", "token", "auth",
-            "private_key", "private-key",
-            "access_key", "secret_key",
+            "api_key",
+            "apikey",
+            "api-key",
+            "password",
+            "passwd",
+            "pwd",
+            "secret",
+            "token",
+            "auth",
+            "private_key",
+            "private-key",
+            "access_key",
+            "secret_key",
         }
 
         redacted = {}
@@ -179,8 +184,11 @@ class SecretRedactor:
             elif isinstance(value, list):
                 # Redact list items, preserving types
                 redacted[key] = [
-                    self.redact_dict(item) if isinstance(item, dict)
-                    else self._redact_value(key, item)
+                    (
+                        self.redact_dict(item)
+                        if isinstance(item, dict)
+                        else self._redact_value(key, item)
+                    )
                     for item in value
                 ]
             else:
@@ -197,11 +205,19 @@ class SecretRedactor:
         """
         # Keys that indicate sensitive values
         sensitive_keys = {
-            "api_key", "apikey", "api-key",
-            "password", "passwd", "pwd",
-            "secret", "token", "auth",
-            "private_key", "private-key",
-            "access_key", "secret_key",
+            "api_key",
+            "apikey",
+            "api-key",
+            "password",
+            "passwd",
+            "pwd",
+            "secret",
+            "token",
+            "auth",
+            "private_key",
+            "private-key",
+            "access_key",
+            "secret_key",
         }
 
         key_lower = key.lower().replace("-", "_")

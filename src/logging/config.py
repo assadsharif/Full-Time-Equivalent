@@ -61,7 +61,9 @@ def from_file(config_path: str | Path) -> LoggerConfig:
     secret_patterns = []
     if "secret_redaction" in data:
         secret_patterns = data["secret_redaction"].get("patterns", [])
-        redaction_text = data["secret_redaction"].get("redaction_text", "***REDACTED***")
+        redaction_text = data["secret_redaction"].get(
+            "redaction_text", "***REDACTED***"
+        )
     else:
         secret_patterns = data.get("secret_patterns", [])
         redaction_text = data.get("redaction_text", "***REDACTED***")
@@ -149,7 +151,11 @@ def from_env(prefix: str = "LOGGING_") -> LoggerConfig:
 
     # Parse boolean flags
     async_enabled = get_env("ASYNC_ENABLED", "true").lower() in ["true", "1", "yes"]
-    compression_enabled = get_env("COMPRESSION_ENABLED", "true").lower() in ["true", "1", "yes"]
+    compression_enabled = get_env("COMPRESSION_ENABLED", "true").lower() in [
+        "true",
+        "1",
+        "yes",
+    ]
 
     # Parse numeric values with defaults
     try:

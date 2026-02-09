@@ -15,7 +15,6 @@ from pathlib import Path
 
 import yaml
 
-
 # ---------------------------------------------------------------------------
 # Result
 # ---------------------------------------------------------------------------
@@ -59,8 +58,11 @@ class ApprovalValidator:
     """Validate approval request files — must have structured frontmatter."""
 
     REQUIRED_FM_KEYS = [
-        "approval_id", "nonce", "approval_status",
-        "created_at", "expires_at",
+        "approval_id",
+        "nonce",
+        "approval_status",
+        "created_at",
+        "expires_at",
     ]
     VALID_STATUSES = {"pending", "approved", "rejected", "timeout"}
 
@@ -83,7 +85,9 @@ class ApprovalValidator:
 
         status = fm.get("approval_status", "")
         if status not in self.VALID_STATUSES:
-            errors.append(f"invalid approval_status '{status}' (expected one of {sorted(self.VALID_STATUSES)})")
+            errors.append(
+                f"invalid approval_status '{status}' (expected one of {sorted(self.VALID_STATUSES)})"
+            )
 
         return ValidationResult(path=path, errors=errors)
 
@@ -139,8 +143,7 @@ class VaultValidator:
             folder_path = self.vault / folder
             if folder_path.exists():
                 results[folder] = [
-                    self._task.validate(md)
-                    for md in sorted(folder_path.glob("*.md"))
+                    self._task.validate(md) for md in sorted(folder_path.glob("*.md"))
                 ]
 
         approvals = self.vault / "Approvals"

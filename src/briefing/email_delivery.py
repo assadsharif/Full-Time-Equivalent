@@ -105,17 +105,25 @@ class EmailDeliveryService:
         try:
             if self._config.use_tls:
                 context = ssl.create_default_context()
-                with smtplib.SMTP(self._config.server, self._config.port, timeout=10) as server:
+                with smtplib.SMTP(
+                    self._config.server, self._config.port, timeout=10
+                ) as server:
                     server.ehlo()
                     server.starttls(context=context)
                     if self._config.username and self._config.password:
                         server.login(self._config.username, self._config.password)
-                    server.sendmail(self._config.from_addr, [recipient], msg.as_string())
+                    server.sendmail(
+                        self._config.from_addr, [recipient], msg.as_string()
+                    )
             else:
-                with smtplib.SMTP(self._config.server, self._config.port, timeout=10) as server:
+                with smtplib.SMTP(
+                    self._config.server, self._config.port, timeout=10
+                ) as server:
                     if self._config.username and self._config.password:
                         server.login(self._config.username, self._config.password)
-                    server.sendmail(self._config.from_addr, [recipient], msg.as_string())
+                    server.sendmail(
+                        self._config.from_addr, [recipient], msg.as_string()
+                    )
             return True
         except Exception:
             return False
@@ -166,12 +174,14 @@ class EmailDeliveryService:
             for h in highlights:
                 lines.append(f"  - {h}")
             lines.append("")
-        lines.extend([
-            "Please review the full briefing for insights and recommendations.",
-            "",
-            "Best regards,",
-            "AI Employee (FTE v1.0)",
-        ])
+        lines.extend(
+            [
+                "Please review the full briefing for insights and recommendations.",
+                "",
+                "Best regards,",
+                "AI Employee (FTE v1.0)",
+            ]
+        )
         return "\n".join(lines)
 
     # ------------------------------------------------------------------
@@ -195,7 +205,9 @@ class EmailDeliveryService:
         if not server:
             return None
 
-        password = os.environ.get("FTE_SMTP_PASSWORD") or smtp_section.get("password") or ""
+        password = (
+            os.environ.get("FTE_SMTP_PASSWORD") or smtp_section.get("password") or ""
+        )
         username = os.environ.get("FTE_SMTP_USERNAME") or smtp_section.get("username")
 
         return SMTPConfig(
@@ -203,6 +215,8 @@ class EmailDeliveryService:
             port=int(smtp_section.get("port", os.environ.get("FTE_SMTP_PORT", "587"))),
             username=username,
             password=password,
-            from_addr=smtp_section.get("from", os.environ.get("FTE_SMTP_FROM", "fte@localhost")),
+            from_addr=smtp_section.get(
+                "from", os.environ.get("FTE_SMTP_FROM", "fte@localhost")
+            ),
             use_tls=smtp_section.get("use_tls", True),
         )

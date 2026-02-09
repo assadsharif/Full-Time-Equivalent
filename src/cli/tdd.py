@@ -29,6 +29,7 @@ def _get_state() -> TDDState:
 # CLI Group
 # ---------------------------------------------------------------------------
 
+
 @click.group(name="tdd")
 def tdd_group():
     """TDD sub-agent — Red/Green/Refactor cycle management."""
@@ -38,6 +39,7 @@ def tdd_group():
 # ---------------------------------------------------------------------------
 # fte tdd init
 # ---------------------------------------------------------------------------
+
 
 @tdd_group.command(name="init")
 @click.pass_context
@@ -59,9 +61,7 @@ def tdd_init(ctx: click.Context):
             created.append(str(tests_dir))
 
         if not conftest.exists():
-            conftest.write_text(
-                '"""Root conftest for pytest."""\n'
-            )
+            conftest.write_text('"""Root conftest for pytest."""\n')
             created.append(str(conftest))
 
         state = _get_state()
@@ -85,6 +85,7 @@ def tdd_init(ctx: click.Context):
 # ---------------------------------------------------------------------------
 # fte tdd red
 # ---------------------------------------------------------------------------
+
 
 @tdd_group.command(name="red")
 @click.argument("test_path")
@@ -110,10 +111,14 @@ def tdd_red(ctx: click.Context, test_path: str):
 
         if result.returncode != 0:
             # Tests failed — correct for RED
-            display_success(f"RED: tests failed as expected ({failed} failed, {errors} errors)")
+            display_success(
+                f"RED: tests failed as expected ({failed} failed, {errors} errors)"
+            )
         else:
             # Tests passed — wrong for RED
-            display_warning("RED: tests passed — you need to write a failing test first!")
+            display_warning(
+                "RED: tests passed — you need to write a failing test first!"
+            )
             raise SystemExit(1)
 
     except SystemExit:
@@ -126,6 +131,7 @@ def tdd_red(ctx: click.Context, test_path: str):
 # ---------------------------------------------------------------------------
 # fte tdd green
 # ---------------------------------------------------------------------------
+
 
 @tdd_group.command(name="green")
 @click.argument("test_path")
@@ -152,7 +158,9 @@ def tdd_green(ctx: click.Context, test_path: str):
         if result.returncode == 0:
             display_success(f"GREEN: all tests passed ({passed} passed)")
         else:
-            display_warning(f"GREEN: tests still failing ({failed} failed, {errors} errors)")
+            display_warning(
+                f"GREEN: tests still failing ({failed} failed, {errors} errors)"
+            )
             raise SystemExit(1)
 
     except SystemExit:
@@ -166,6 +174,7 @@ def tdd_green(ctx: click.Context, test_path: str):
 # fte tdd refactor
 # ---------------------------------------------------------------------------
 
+
 @tdd_group.command(name="refactor")
 @click.option("--cov", is_flag=True, help="Run with coverage report")
 @click.pass_context
@@ -178,7 +187,9 @@ def tdd_refactor(ctx: click.Context, cov: bool):
         state = _get_state()
         state.set_phase("refactor")
 
-        console.print("[bold blue]REFACTOR[/bold blue] phase — running full test suite...")
+        console.print(
+            "[bold blue]REFACTOR[/bold blue] phase — running full test suite..."
+        )
         extra = ["--cov"] if cov else None
         result = _run_pytest(extra_args=extra)
 
@@ -194,7 +205,9 @@ def tdd_refactor(ctx: click.Context, cov: bool):
             state.record_cycle("success")
             state.set_phase("idle")
         else:
-            display_warning(f"REFACTOR: regressions detected ({failed} failed, {errors} errors)")
+            display_warning(
+                f"REFACTOR: regressions detected ({failed} failed, {errors} errors)"
+            )
             raise SystemExit(1)
 
     except SystemExit:
@@ -207,6 +220,7 @@ def tdd_refactor(ctx: click.Context, cov: bool):
 # ---------------------------------------------------------------------------
 # fte tdd cycle
 # ---------------------------------------------------------------------------
+
 
 @tdd_group.command(name="cycle")
 @click.argument("test_path")
@@ -231,7 +245,9 @@ def tdd_cycle(ctx: click.Context, test_path: str):
         state.record_run(passed, failed, errors)
 
         if red_result.returncode == 0:
-            display_warning("Tests passed — RED phase expects failures. Aborting cycle.")
+            display_warning(
+                "Tests passed — RED phase expects failures. Aborting cycle."
+            )
             raise SystemExit(1)
 
         display_success(f"RED: tests failed as expected ({failed} failed)")
@@ -265,7 +281,9 @@ def tdd_cycle(ctx: click.Context, test_path: str):
         state.record_run(passed, failed, errors)
 
         if refactor_result.returncode != 0:
-            display_warning(f"Regressions detected ({failed} failed). Fix before continuing.")
+            display_warning(
+                f"Regressions detected ({failed} failed). Fix before continuing."
+            )
             raise SystemExit(1)
 
         display_success(f"REFACTOR: all tests green ({passed} passed)")
@@ -283,6 +301,7 @@ def tdd_cycle(ctx: click.Context, test_path: str):
 # ---------------------------------------------------------------------------
 # fte tdd status
 # ---------------------------------------------------------------------------
+
 
 @tdd_group.command(name="status")
 @click.pass_context
@@ -324,6 +343,7 @@ def tdd_status(ctx: click.Context):
 # fte tdd watch
 # ---------------------------------------------------------------------------
 
+
 @tdd_group.command(name="watch")
 @click.argument("path", default="tests")
 @click.pass_context
@@ -338,7 +358,9 @@ def tdd_watch(ctx: click.Context, path: str):
             [sys.executable, "-m", "pytest_watch", path],
         )
     except FileNotFoundError:
-        display_warning("pytest-watch not installed. Install with: pip install pytest-watch")
+        display_warning(
+            "pytest-watch not installed. Install with: pip install pytest-watch"
+        )
         raise SystemExit(1)
     except KeyboardInterrupt:
         display_info("Stopped watching.")

@@ -59,8 +59,12 @@ class TddRunTestsInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    target_path: str = Field(..., min_length=1, description="Test file or directory to run")
-    extra_args: Optional[list[str]] = Field(None, description="Additional pytest arguments")
+    target_path: str = Field(
+        ..., min_length=1, description="Test file or directory to run"
+    )
+    extra_args: Optional[list[str]] = Field(
+        None, description="Additional pytest arguments"
+    )
     cwd: Optional[str] = Field(None, description="Working directory for pytest")
 
     @field_validator("target_path")
@@ -74,7 +78,9 @@ class TddRedInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    test_path: str = Field(..., min_length=1, description="Test file to run in RED phase")
+    test_path: str = Field(
+        ..., min_length=1, description="Test file to run in RED phase"
+    )
     state_path: Optional[str] = Field(None, description="Custom TDD state file path")
 
     @field_validator("test_path")
@@ -88,7 +94,9 @@ class TddGreenInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    test_path: str = Field(..., min_length=1, description="Test file to run in GREEN phase")
+    test_path: str = Field(
+        ..., min_length=1, description="Test file to run in GREEN phase"
+    )
     state_path: Optional[str] = Field(None, description="Custom TDD state file path")
 
     @field_validator("test_path")
@@ -112,7 +120,9 @@ class TddInitInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    project_dir: Optional[str] = Field(None, description="Project directory to initialize")
+    project_dir: Optional[str] = Field(
+        None, description="Project directory to initialize"
+    )
 
 
 class TddGenerateScaffoldInput(BaseModel):
@@ -120,9 +130,15 @@ class TddGenerateScaffoldInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    module_path: str = Field(..., min_length=1, description="Path to Python module to scaffold tests for")
-    output_path: Optional[str] = Field(None, description="Optional output path for generated test file")
-    include_hypothesis: bool = Field(False, description="Include hypothesis property-based tests")
+    module_path: str = Field(
+        ..., min_length=1, description="Path to Python module to scaffold tests for"
+    )
+    output_path: Optional[str] = Field(
+        None, description="Optional output path for generated test file"
+    )
+    include_hypothesis: bool = Field(
+        False, description="Include hypothesis property-based tests"
+    )
 
     @field_validator("module_path")
     @classmethod
@@ -145,6 +161,7 @@ class TddValidateCycleInput(BaseModel):
 # Helper: resolve state
 # ---------------------------------------------------------------------------
 
+
 def _get_state(state_path: str | None = None) -> TDDState:
     if state_path:
         return TDDState(state_path=Path(state_path))
@@ -154,6 +171,7 @@ def _get_state(state_path: str | None = None) -> TDDState:
 # ---------------------------------------------------------------------------
 # Tool: tdd_run_tests
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 async def tdd_run_tests(
@@ -167,19 +185,22 @@ async def tdd_run_tests(
     """
     result = run_pytest(target=target_path, extra_args=extra_args, cwd=cwd)
     passed, failed, errors = parse_pytest_summary(result.stdout)
-    return json.dumps({
-        "returncode": result.returncode,
-        "passed": passed,
-        "failed": failed,
-        "errors": errors,
-        "stdout": result.stdout,
-        "stderr": result.stderr,
-    })
+    return json.dumps(
+        {
+            "returncode": result.returncode,
+            "passed": passed,
+            "failed": failed,
+            "errors": errors,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
 # Tool: tdd_red
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 async def tdd_red(
@@ -199,28 +220,33 @@ async def tdd_red(
     state.record_run(passed, failed, errors)
 
     if result.returncode != 0:
-        return json.dumps({
-            "status": "success",
-            "phase": "red",
-            "message": f"RED: tests failed as expected ({failed} failed, {errors} errors)",
-            "passed": passed,
-            "failed": failed,
-            "errors": errors,
-        })
+        return json.dumps(
+            {
+                "status": "success",
+                "phase": "red",
+                "message": f"RED: tests failed as expected ({failed} failed, {errors} errors)",
+                "passed": passed,
+                "failed": failed,
+                "errors": errors,
+            }
+        )
     else:
-        return json.dumps({
-            "status": "error",
-            "phase": "red",
-            "message": "RED: tests passed — you need to write a failing test first!",
-            "passed": passed,
-            "failed": failed,
-            "errors": errors,
-        })
+        return json.dumps(
+            {
+                "status": "error",
+                "phase": "red",
+                "message": "RED: tests passed — you need to write a failing test first!",
+                "passed": passed,
+                "failed": failed,
+                "errors": errors,
+            }
+        )
 
 
 # ---------------------------------------------------------------------------
 # Tool: tdd_green
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 async def tdd_green(
@@ -240,28 +266,33 @@ async def tdd_green(
     state.record_run(passed, failed, errors)
 
     if result.returncode == 0:
-        return json.dumps({
-            "status": "success",
-            "phase": "green",
-            "message": f"GREEN: all tests passed ({passed} passed)",
-            "passed": passed,
-            "failed": failed,
-            "errors": errors,
-        })
+        return json.dumps(
+            {
+                "status": "success",
+                "phase": "green",
+                "message": f"GREEN: all tests passed ({passed} passed)",
+                "passed": passed,
+                "failed": failed,
+                "errors": errors,
+            }
+        )
     else:
-        return json.dumps({
-            "status": "error",
-            "phase": "green",
-            "message": f"GREEN: tests still failing ({failed} failed, {errors} errors)",
-            "passed": passed,
-            "failed": failed,
-            "errors": errors,
-        })
+        return json.dumps(
+            {
+                "status": "error",
+                "phase": "green",
+                "message": f"GREEN: tests still failing ({failed} failed, {errors} errors)",
+                "passed": passed,
+                "failed": failed,
+                "errors": errors,
+            }
+        )
 
 
 # ---------------------------------------------------------------------------
 # Tool: tdd_refactor
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 async def tdd_refactor(
@@ -285,28 +316,33 @@ async def tdd_refactor(
     if result.returncode == 0:
         state.record_cycle("success")
         state.set_phase("idle")
-        return json.dumps({
-            "status": "success",
-            "phase": "refactor",
-            "message": f"REFACTOR: all tests green ({passed} passed)",
-            "passed": passed,
-            "failed": failed,
-            "errors": errors,
-        })
+        return json.dumps(
+            {
+                "status": "success",
+                "phase": "refactor",
+                "message": f"REFACTOR: all tests green ({passed} passed)",
+                "passed": passed,
+                "failed": failed,
+                "errors": errors,
+            }
+        )
     else:
-        return json.dumps({
-            "status": "error",
-            "phase": "refactor",
-            "message": f"REFACTOR: regressions detected ({failed} failed, {errors} errors)",
-            "passed": passed,
-            "failed": failed,
-            "errors": errors,
-        })
+        return json.dumps(
+            {
+                "status": "error",
+                "phase": "refactor",
+                "message": f"REFACTOR: regressions detected ({failed} failed, {errors} errors)",
+                "passed": passed,
+                "failed": failed,
+                "errors": errors,
+            }
+        )
 
 
 # ---------------------------------------------------------------------------
 # Tool: tdd_init
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 async def tdd_init(
@@ -335,16 +371,23 @@ async def tdd_init(
     state = TDDState(state_path=state_path)
     state.reset()
 
-    return json.dumps({
-        "status": "success",
-        "message": "TDD structure initialized" if created else "TDD structure already exists",
-        "created": created,
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "message": (
+                "TDD structure initialized"
+                if created
+                else "TDD structure already exists"
+            ),
+            "created": created,
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
 # Tool: tdd_status
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 async def tdd_status(
@@ -362,6 +405,7 @@ async def tdd_status(
 # Tool: tdd_generate_scaffold
 # ---------------------------------------------------------------------------
 
+
 def _extract_functions(source: str) -> list[dict]:
     """Extract function names and their args from Python source using AST."""
     functions = []
@@ -374,10 +418,7 @@ def _extract_functions(source: str) -> list[dict]:
         if isinstance(node, ast.FunctionDef):
             if node.name.startswith("_"):
                 continue
-            args = [
-                a.arg for a in node.args.args
-                if a.arg != "self"
-            ]
+            args = [a.arg for a in node.args.args if a.arg != "self"]
             functions.append({"name": node.name, "args": args})
     return functions
 
@@ -395,10 +436,12 @@ async def tdd_generate_scaffold(
     """
     path = Path(module_path)
     if not path.exists():
-        return json.dumps({
-            "status": "error",
-            "message": f"Module not found: {module_path}",
-        })
+        return json.dumps(
+            {
+                "status": "error",
+                "message": f"Module not found: {module_path}",
+            }
+        )
 
     source = path.read_text()
     functions = _extract_functions(source)
@@ -421,15 +464,15 @@ async def tdd_generate_scaffold(
         lines.append(f"    \"\"\"Tests for {func['name']}.\"\"\"")
         lines.append("")
         lines.append(f"    def test_{func['name']}_invalid_input_raises(self):")
-        lines.append(f"        \"\"\"Error path: invalid input should raise.\"\"\"")
+        lines.append(f'        """Error path: invalid input should raise."""')
         lines.append(f"        pytest.skip('TODO: implement error-path test')")
         lines.append("")
         lines.append(f"    def test_{func['name']}_edge_case(self):")
-        lines.append(f"        \"\"\"Edge case: boundary conditions.\"\"\"")
+        lines.append(f'        """Edge case: boundary conditions."""')
         lines.append(f"        pytest.skip('TODO: implement edge-case test')")
         lines.append("")
         lines.append(f"    def test_{func['name']}_normal_operation(self):")
-        lines.append(f"        \"\"\"Happy path: valid input returns expected result.\"\"\"")
+        lines.append(f'        """Happy path: valid input returns expected result."""')
         lines.append(f"        pytest.skip('TODO: implement happy-path test')")
         lines.append("")
 
@@ -437,9 +480,13 @@ async def tdd_generate_scaffold(
             arg_strats = ", ".join(f"{a}=st.integers()" for a in func["args"])
             if arg_strats:
                 lines.append(f"    @given({arg_strats})")
-                lines.append(f"    def test_{func['name']}_property(self, {', '.join(func['args'])}):")
-                lines.append(f"        \"\"\"Property-based: hypothesis fuzz test.\"\"\"")
-                lines.append(f"        pytest.skip('TODO: implement property-based test')")
+                lines.append(
+                    f"    def test_{func['name']}_property(self, {', '.join(func['args'])}):"
+                )
+                lines.append(f'        """Property-based: hypothesis fuzz test."""')
+                lines.append(
+                    f"        pytest.skip('TODO: implement property-based test')"
+                )
                 lines.append("")
 
     return "\n".join(lines)
@@ -448,6 +495,7 @@ async def tdd_generate_scaffold(
 # ---------------------------------------------------------------------------
 # Tool: tdd_validate_cycle
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 async def tdd_validate_cycle(
@@ -461,11 +509,13 @@ async def tdd_validate_cycle(
     current = state.phase
     next_valid = PHASE_TRANSITIONS.get(current, [])
 
-    return json.dumps({
-        "valid": True,
-        "current_phase": current,
-        "next_valid_phases": next_valid,
-    })
+    return json.dumps(
+        {
+            "valid": True,
+            "current_phase": current,
+            "next_valid_phases": next_valid,
+        }
+    )
 
 
 # ---------------------------------------------------------------------------

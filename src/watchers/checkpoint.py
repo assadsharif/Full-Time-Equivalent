@@ -100,9 +100,7 @@ class CheckpointManager:
             return checkpoint
 
         except json.JSONDecodeError as e:
-            logger.warning(
-                f"Corrupt checkpoint for {watcher_name}, creating new: {e}"
-            )
+            logger.warning(f"Corrupt checkpoint for {watcher_name}, creating new: {e}")
             return CheckpointData(watcher_name=watcher_name)
         except Exception as e:
             logger.error(f"Error loading checkpoint for {watcher_name}: {e}")
@@ -189,9 +187,11 @@ class CheckpointManager:
         return {
             "watcher_name": checkpoint.watcher_name,
             "last_processed_id": checkpoint.last_processed_id,
-            "last_poll_time": checkpoint.last_poll_time.isoformat()
-            if checkpoint.last_poll_time
-            else None,
+            "last_poll_time": (
+                checkpoint.last_poll_time.isoformat()
+                if checkpoint.last_poll_time
+                else None
+            ),
             "events_processed": checkpoint.events_processed,
             "errors_count": checkpoint.errors_count,
             "error_rate": (

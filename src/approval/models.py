@@ -21,7 +21,7 @@ class ApprovalRequest:
     approval_id: str
     nonce: str
     action_type: str
-    risk_level: str                         # low | medium | high | critical
+    risk_level: str  # low | medium | high | critical
     status: ApprovalStatus
     created_at: datetime
     expires_at: datetime

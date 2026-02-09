@@ -29,7 +29,6 @@ import yaml
 from src.orchestrator.claude_invoker import ClaudeInvoker, InvocationResult
 from src.orchestrator.stop_hook import StopHook
 
-
 # ---------------------------------------------------------------------------
 # Transient-error heuristics (case-insensitive regex on stderr)
 # ---------------------------------------------------------------------------
@@ -63,9 +62,15 @@ class ErrorType:
 _ERROR_TYPE_PATTERNS: dict[str, re.Pattern] = {
     ErrorType.RATE_LIMIT: re.compile(r"rate[\s_-]*limit", re.IGNORECASE),
     ErrorType.TIMEOUT: re.compile(r"timed?\s*out", re.IGNORECASE),
-    ErrorType.CONNECTION: re.compile(r"connection\s+(refused|reset|error)", re.IGNORECASE),
-    ErrorType.SERVICE_UNAVAILABLE: re.compile(r"503|service\s+unavailable", re.IGNORECASE),
-    ErrorType.LOCK_CONTENTION: re.compile(r"lock\s+(acquisition|timeout)", re.IGNORECASE),
+    ErrorType.CONNECTION: re.compile(
+        r"connection\s+(refused|reset|error)", re.IGNORECASE
+    ),
+    ErrorType.SERVICE_UNAVAILABLE: re.compile(
+        r"503|service\s+unavailable", re.IGNORECASE
+    ),
+    ErrorType.LOCK_CONTENTION: re.compile(
+        r"lock\s+(acquisition|timeout)", re.IGNORECASE
+    ),
 }
 
 
@@ -78,10 +83,10 @@ _ERROR_TYPE_PATTERNS: dict[str, re.Pattern] = {
 class RetryPolicy:
     """Configurable retry parameters."""
 
-    max_attempts: int = 3          # consecutive transient failures before giving up
-    base_delay: float = 1.0        # seconds (first backoff step)
-    max_delay: float = 16.0        # seconds (backoff ceiling)
-    jitter: float = 0.2            # ±fraction applied to each delay
+    max_attempts: int = 3  # consecutive transient failures before giving up
+    base_delay: float = 1.0  # seconds (first backoff step)
+    max_delay: float = 16.0  # seconds (backoff ceiling)
+    jitter: float = 0.2  # ±fraction applied to each delay
 
     @classmethod
     def for_error_type(cls, error_type: str) -> "RetryPolicy":
@@ -259,7 +264,9 @@ class PersistenceLoop:
 
             # --- backoff & loop with error-type-specific policy ---
             self._write_checkpoint(task_path, checkpoint)
-            time.sleep(self._backoff_delay(checkpoint.consecutive_retries, retry_policy))
+            time.sleep(
+                self._backoff_delay(checkpoint.consecutive_retries, retry_policy)
+            )
 
         # --- max iterations exceeded ---
         checkpoint.state_data["max_iterations_exceeded"] = True
@@ -302,7 +309,9 @@ class PersistenceLoop:
     # Backoff
     # ------------------------------------------------------------------
 
-    def _backoff_delay(self, attempt: int, policy: Optional[RetryPolicy] = None) -> float:
+    def _backoff_delay(
+        self, attempt: int, policy: Optional[RetryPolicy] = None
+    ) -> float:
         """
         Exponential backoff clamped to max_delay, with ±jitter.
 

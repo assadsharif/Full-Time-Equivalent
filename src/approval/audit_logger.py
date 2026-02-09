@@ -36,14 +36,16 @@ class ApprovalAuditLogger:
         risk_level: str,
     ) -> None:
         """Record an approval-request creation event."""
-        self._write({
-            "event_type": "approval_created",
-            "approval_id": approval_id,
-            "task_id": task_id,
-            "action_type": action_type,
-            "risk_level": risk_level,
-            "status": "pending",
-        })
+        self._write(
+            {
+                "event_type": "approval_created",
+                "approval_id": approval_id,
+                "task_id": task_id,
+                "action_type": action_type,
+                "risk_level": risk_level,
+                "status": "pending",
+            }
+        )
 
     def log_approved(
         self,
@@ -54,15 +56,17 @@ class ApprovalAuditLogger:
         approver: Optional[str] = None,
     ) -> None:
         """Record an approval event."""
-        self._write({
-            "event_type": "approval_approved",
-            "approval_id": approval_id,
-            "task_id": task_id,
-            "action_type": action_type,
-            "risk_level": risk_level,
-            "status": "approved",
-            "approver": approver,
-        })
+        self._write(
+            {
+                "event_type": "approval_approved",
+                "approval_id": approval_id,
+                "task_id": task_id,
+                "action_type": action_type,
+                "risk_level": risk_level,
+                "status": "approved",
+                "approver": approver,
+            }
+        )
 
     def log_rejected(
         self,
@@ -74,16 +78,18 @@ class ApprovalAuditLogger:
         approver: Optional[str] = None,
     ) -> None:
         """Record a rejection event."""
-        self._write({
-            "event_type": "approval_rejected",
-            "approval_id": approval_id,
-            "task_id": task_id,
-            "action_type": action_type,
-            "risk_level": risk_level,
-            "status": "rejected",
-            "reason": reason,
-            "approver": approver,
-        })
+        self._write(
+            {
+                "event_type": "approval_rejected",
+                "approval_id": approval_id,
+                "task_id": task_id,
+                "action_type": action_type,
+                "risk_level": risk_level,
+                "status": "rejected",
+                "reason": reason,
+                "approver": approver,
+            }
+        )
 
     def log_timeout(
         self,
@@ -93,14 +99,16 @@ class ApprovalAuditLogger:
         risk_level: str,
     ) -> None:
         """Record a timeout event."""
-        self._write({
-            "event_type": "approval_timeout",
-            "approval_id": approval_id,
-            "task_id": task_id,
-            "action_type": action_type,
-            "risk_level": risk_level,
-            "status": "timeout",
-        })
+        self._write(
+            {
+                "event_type": "approval_timeout",
+                "approval_id": approval_id,
+                "task_id": task_id,
+                "action_type": action_type,
+                "risk_level": risk_level,
+                "status": "timeout",
+            }
+        )
 
     # ------------------------------------------------------------------
     # Internal

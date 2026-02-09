@@ -93,6 +93,7 @@ class TelemetryCollector:
     def _generate_session_id(self) -> str:
         """Generate unique session ID for this CLI invocation."""
         import uuid
+
         return str(uuid.uuid4())
 
     def record_command(
@@ -101,7 +102,7 @@ class TelemetryCollector:
         duration_ms: Optional[float] = None,
         success: bool = True,
         error_type: Optional[str] = None,
-        metadata: Optional[Dict] = None
+        metadata: Optional[Dict] = None,
     ):
         """
         Record a command execution.
@@ -132,10 +133,7 @@ class TelemetryCollector:
         logger.debug(f"Telemetry: Recorded command '{command}'")
 
     def record_feature_use(
-        self,
-        feature: str,
-        action: str,
-        metadata: Optional[Dict] = None
+        self, feature: str, action: str, metadata: Optional[Dict] = None
     ):
         """
         Record feature usage.
@@ -160,12 +158,7 @@ class TelemetryCollector:
         self.events.append(event)
         logger.debug(f"Telemetry: Recorded feature use '{feature}.{action}'")
 
-    def record_performance(
-        self,
-        metric: str,
-        value: float,
-        unit: str = "ms"
-    ):
+    def record_performance(self, metric: str, value: float, unit: str = "ms"):
         """
         Record a performance metric.
 
@@ -187,7 +180,9 @@ class TelemetryCollector:
         }
 
         self.events.append(event)
-        logger.debug(f"Telemetry: Recorded performance metric '{metric}': {value}{unit}")
+        logger.debug(
+            f"Telemetry: Recorded performance metric '{metric}': {value}{unit}"
+        )
 
     def flush(self):
         """Write collected events to disk."""
@@ -307,7 +302,9 @@ def get_telemetry() -> TelemetryCollector:
     return _telemetry
 
 
-def track_command(command: str, duration_ms: Optional[float] = None, success: bool = True):
+def track_command(
+    command: str, duration_ms: Optional[float] = None, success: bool = True
+):
     """
     Convenience function to track command execution.
 
@@ -381,7 +378,7 @@ class TelemetryContext:
             self.command,
             duration_ms=duration_ms,
             success=self.success,
-            error_type=self.error_type
+            error_type=self.error_type,
         )
 
         # Don't suppress exceptions
@@ -389,6 +386,7 @@ class TelemetryContext:
 
 
 # Privacy and transparency functions
+
 
 def get_telemetry_status() -> Dict:
     """
@@ -432,11 +430,13 @@ def print_telemetry_info():
     status = get_telemetry_status()
 
     # Status panel
-    enabled_text = "[green]Enabled ✓[/green]" if status["enabled"] else "[red]Disabled ✗[/red]"
+    enabled_text = (
+        "[green]Enabled ✓[/green]" if status["enabled"] else "[red]Disabled ✗[/red]"
+    )
     panel = Panel(
         f"Telemetry Status: {enabled_text}",
         title="[bold]FTE Telemetry[/bold]",
-        border_style="blue"
+        border_style="blue",
     )
     console.print(panel)
 

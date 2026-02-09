@@ -32,7 +32,14 @@ mcp = FastMCP("openai_agents_mcp")
 # Constants
 # ---------------------------------------------------------------------------
 
-VALID_MODELS = ("gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo", "o1", "o1-mini")
+VALID_MODELS = (
+    "gpt-4o",
+    "gpt-4o-mini",
+    "gpt-4-turbo",
+    "gpt-3.5-turbo",
+    "o1",
+    "o1-mini",
+)
 VALID_SESSION_TYPES = ("memory", "sqlite", "redis")
 VALID_RUNNER_MODES = ("sync", "async", "stream")
 VALID_GUARDRAIL_TYPES = ("input", "output")
@@ -136,35 +143,35 @@ async def {name}({param}: str) -> bool:
 
 SESSION_TEMPLATES = {
     "memory": "# In-memory session (development only)\nsession = None  # Default in-memory",
-    "sqlite": '''from agents.sessions import SQLiteSession
+    "sqlite": """from agents.sessions import SQLiteSession
 
 session = SQLiteSession("{db_path}")
-''',
-    "redis": '''from agents.sessions import RedisSession
+""",
+    "redis": """from agents.sessions import RedisSession
 
 session = RedisSession(url="{redis_url}", session_id="{session_id}")
-''',
+""",
 }
 
 RUNNER_TEMPLATES = {
-    "sync": '''from agents import Runner
+    "sync": """from agents import Runner
 
 result = Runner.run_sync({agent}, "{prompt}")
 print(result.final_output)
-''',
-    "async": '''from agents import Runner
+""",
+    "async": """from agents import Runner
 
 async def run_agent():
     result = await Runner.run({agent}, "{prompt}", session=session)
     return result.final_output
-''',
-    "stream": '''from agents import Runner
+""",
+    "stream": """from agents import Runner
 
 async def stream_agent():
     async for event in Runner.run_stream({agent}, "{prompt}"):
         if event.type == "text_delta":
             print(event.text, end="", flush=True)
-''',
+""",
 }
 
 MCP_INTEGRATION_TEMPLATE = '''from agents import Agent
@@ -215,13 +222,23 @@ _CFG = ConfigDict(str_strip_whitespace=True, extra="forbid")
 class AgentInput(BaseModel):
     model_config = _CFG
     name: str = Field(..., min_length=1, max_length=50, description="Agent name")
-    instructions: str = Field(..., min_length=10, max_length=2000, description="System instructions")
+    instructions: str = Field(
+        ..., min_length=10, max_length=2000, description="System instructions"
+    )
     model: str = Field(default="gpt-4o", description="LLM model")
     tools: list[str] = Field(default_factory=list, description="Tool function names")
-    output_type: Optional[str] = Field(default=None, description="Pydantic model name for structured output")
-    handoffs: list[str] = Field(default_factory=list, description="Agent names for handoffs")
-    input_guardrails: list[str] = Field(default_factory=list, description="Input guardrail function names")
-    output_guardrails: list[str] = Field(default_factory=list, description="Output guardrail function names")
+    output_type: Optional[str] = Field(
+        default=None, description="Pydantic model name for structured output"
+    )
+    handoffs: list[str] = Field(
+        default_factory=list, description="Agent names for handoffs"
+    )
+    input_guardrails: list[str] = Field(
+        default_factory=list, description="Input guardrail function names"
+    )
+    output_guardrails: list[str] = Field(
+        default_factory=list, description="Output guardrail function names"
+    )
 
     @field_validator("name")
     @classmethod
@@ -241,8 +258,14 @@ class AgentInput(BaseModel):
 class ToolInput(BaseModel):
     model_config = _CFG
     name: str = Field(..., min_length=1, max_length=50, description="Function name")
-    description: str = Field(..., min_length=10, max_length=500, description="Tool description")
-    params: list[dict] = Field(..., min_length=1, description="Parameters [{name, type, description, default?}]")
+    description: str = Field(
+        ..., min_length=10, max_length=500, description="Tool description"
+    )
+    params: list[dict] = Field(
+        ...,
+        min_length=1,
+        description="Parameters [{name, type, description, default?}]",
+    )
     return_type: str = Field(default="str", description="Return type annotation")
     body: str = Field(default="    pass", description="Function body")
 
@@ -257,16 +280,26 @@ class ToolInput(BaseModel):
 class HandoffInput(BaseModel):
     model_config = _CFG
     main_agent: str = Field(..., description="Main agent name")
-    main_instructions: str = Field(..., min_length=10, description="Main agent instructions")
-    delegate_agents: list[dict] = Field(..., min_length=1, description="Agents to delegate to [{name, instructions}]")
+    main_instructions: str = Field(
+        ..., min_length=10, description="Main agent instructions"
+    )
+    delegate_agents: list[dict] = Field(
+        ..., min_length=1, description="Agents to delegate to [{name, instructions}]"
+    )
 
 
 class GuardrailInput(BaseModel):
     model_config = _CFG
-    name: str = Field(..., min_length=1, max_length=50, description="Guardrail function name")
+    name: str = Field(
+        ..., min_length=1, max_length=50, description="Guardrail function name"
+    )
     guardrail_type: str = Field(..., description="input or output")
-    description: str = Field(..., min_length=10, description="What the guardrail checks")
-    body: str = Field(default="    return True", description="Function body returning bool")
+    description: str = Field(
+        ..., min_length=10, description="What the guardrail checks"
+    )
+    body: str = Field(
+        default="    return True", description="Function body returning bool"
+    )
 
     @field_validator("guardrail_type")
     @classmethod
@@ -280,7 +313,9 @@ class SessionInput(BaseModel):
     model_config = _CFG
     session_type: str = Field(default="sqlite", description="memory, sqlite, or redis")
     db_path: str = Field(default="conversations.db", description="SQLite database path")
-    redis_url: str = Field(default="redis://localhost:6379", description="Redis connection URL")
+    redis_url: str = Field(
+        default="redis://localhost:6379", description="Redis connection URL"
+    )
     session_id: str = Field(default="default", description="Session identifier")
 
     @field_validator("session_type")
@@ -293,8 +328,12 @@ class SessionInput(BaseModel):
 
 class StructuredOutputInput(BaseModel):
     model_config = _CFG
-    class_name: str = Field(..., min_length=1, max_length=50, description="Pydantic model class name")
-    fields: list[dict] = Field(..., min_length=1, description="Fields [{name, type, description?}]")
+    class_name: str = Field(
+        ..., min_length=1, max_length=50, description="Pydantic model class name"
+    )
+    fields: list[dict] = Field(
+        ..., min_length=1, description="Fields [{name, type, description?}]"
+    )
     agent_name: str = Field(..., description="Agent name")
     instructions: str = Field(..., min_length=10, description="Agent instructions")
     model: str = Field(default="gpt-4o", description="LLM model")
@@ -312,7 +351,9 @@ class RunnerInput(BaseModel):
     mode: str = Field(default="sync", description="sync, async, or stream")
     agent_var: str = Field(default="agent", description="Agent variable name")
     prompt: str = Field(default="Hello!", description="Initial prompt")
-    include_session: bool = Field(default=False, description="Include session parameter")
+    include_session: bool = Field(
+        default=False, description="Include session parameter"
+    )
 
     @field_validator("mode")
     @classmethod
@@ -341,10 +382,16 @@ class ScaffoldInput(BaseModel):
     agent_name: str = Field(..., description="Main agent name")
     instructions: str = Field(..., min_length=10, description="Agent instructions")
     model: str = Field(default="gpt-4o", description="LLM model")
-    tools: list[dict] = Field(default_factory=list, description="Tools [{name, description, params}]")
-    output_type: Optional[dict] = Field(default=None, description="Structured output {class_name, fields}")
+    tools: list[dict] = Field(
+        default_factory=list, description="Tools [{name, description, params}]"
+    )
+    output_type: Optional[dict] = Field(
+        default=None, description="Structured output {class_name, fields}"
+    )
     session_type: str = Field(default="sqlite", description="Session persistence type")
-    include_guardrails: bool = Field(default=True, description="Include basic guardrails")
+    include_guardrails: bool = Field(
+        default=True, description="Include basic guardrails"
+    )
     runner_mode: str = Field(default="async", description="Runner execution mode")
 
 
@@ -365,7 +412,9 @@ def _gen_agent(inp: AgentInput) -> str:
     if inp.input_guardrails:
         guardrails_str += f"\n    input_guardrails=[{', '.join(inp.input_guardrails)}],"
     if inp.output_guardrails:
-        guardrails_str += f"\n    output_guardrails=[{', '.join(inp.output_guardrails)}],"
+        guardrails_str += (
+            f"\n    output_guardrails=[{', '.join(inp.output_guardrails)}],"
+        )
 
     return AGENT_TEMPLATE.format(
         name=inp.name,
@@ -391,7 +440,11 @@ def _gen_tool(inp: ToolInput) -> str:
         pdefault = p.get("default")
 
         if pdefault is not None:
-            params_list.append(f'{pname}: {ptype} = "{pdefault}"' if isinstance(pdefault, str) else f"{pname}: {ptype} = {pdefault}")
+            params_list.append(
+                f'{pname}: {ptype} = "{pdefault}"'
+                if isinstance(pdefault, str)
+                else f"{pname}: {ptype} = {pdefault}"
+            )
         else:
             params_list.append(f"{pname}: {ptype}")
 
@@ -451,7 +504,9 @@ def _gen_session(inp: SessionInput) -> str:
     elif inp.session_type == "sqlite":
         return SESSION_TEMPLATES["sqlite"].format(db_path=inp.db_path)
     else:
-        return SESSION_TEMPLATES["redis"].format(redis_url=inp.redis_url, session_id=inp.session_id)
+        return SESSION_TEMPLATES["redis"].format(
+            redis_url=inp.redis_url, session_id=inp.session_id
+        )
 
 
 def _gen_structured(inp: StructuredOutputInput) -> str:
@@ -462,7 +517,7 @@ def _gen_structured(inp: StructuredOutputInput) -> str:
         ftype = f.get("type", "str")
         fdesc = f.get("description")
         if fdesc:
-            field_lines.append(f'    {fname}: {ftype}  # {fdesc}')
+            field_lines.append(f"    {fname}: {ftype}  # {fdesc}")
         else:
             field_lines.append(f"    {fname}: {ftype}")
 
@@ -509,20 +564,23 @@ def _detect_antipatterns(code: str, include_fixes: bool) -> list[dict]:
 
     # Check for missing docstrings
     if re.search(r'@function_tool\s*\ndef\s+\w+\([^)]*\)[^:]*:\s*\n\s*[^"\']', code):
-        entry = {"pattern": "missing-tool-docstring", **ANTIPATTERNS["missing-tool-docstring"]}
+        entry = {
+            "pattern": "missing-tool-docstring",
+            **ANTIPATTERNS["missing-tool-docstring"],
+        }
         if not include_fixes:
             del entry["fix"]
         findings.append(entry)
 
     # Check for no guardrails
-    if re.search(r'Agent\s*\([^)]*\)', code) and "guardrails" not in code.lower():
+    if re.search(r"Agent\s*\([^)]*\)", code) and "guardrails" not in code.lower():
         entry = {"pattern": "no-guardrails", **ANTIPATTERNS["no-guardrails"]}
         if not include_fixes:
             del entry["fix"]
         findings.append(entry)
 
     # Check for run_sync in async
-    if re.search(r'async\s+def.*run_sync', code, re.DOTALL):
+    if re.search(r"async\s+def.*run_sync", code, re.DOTALL):
         entry = {"pattern": "run-sync-in-async", **ANTIPATTERNS["run-sync-in-async"]}
         if not include_fixes:
             del entry["fix"]
@@ -557,15 +615,17 @@ def _gen_scaffold(inp: ScaffoldInput) -> dict:
         field_lines = []
         for f in inp.output_type.get("fields", []):
             field_lines.append(f"    {f['name']}: {f.get('type', 'str')}")
-        sections["output_type"] = f'''class {inp.output_type["class_name"]}(BaseModel):
+        sections["output_type"] = f"""class {inp.output_type["class_name"]}(BaseModel):
 {chr(10).join(field_lines)}
-'''
+"""
 
     # Tools
     if inp.tools:
         tool_codes = []
         for t in inp.tools:
-            params = t.get("params", [{"name": "query", "type": "str", "description": "Input"}])
+            params = t.get(
+                "params", [{"name": "query", "type": "str", "description": "Input"}]
+            )
             tool_inp = ToolInput(
                 name=t["name"],
                 description=t.get("description", f"Perform {t['name']} operation"),

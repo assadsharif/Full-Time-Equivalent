@@ -25,9 +25,9 @@ class LogLevel(IntEnum):
 class MetricType(Enum):
     """Types of metrics that can be logged."""
 
-    COUNTER = "counter"      # Incrementing count (e.g., requests_total)
-    GAUGE = "gauge"          # Point-in-time value (e.g., queue_size)
-    DURATION = "duration"    # Time measurement (e.g., operation_duration_ms)
+    COUNTER = "counter"  # Incrementing count (e.g., requests_total)
+    GAUGE = "gauge"  # Point-in-time value (e.g., queue_size)
+    DURATION = "duration"  # Time measurement (e.g., operation_duration_ms)
     HISTOGRAM = "histogram"  # Distribution of values (e.g., response_time_buckets)
 
 
@@ -39,10 +39,10 @@ class StackFrame:
     Constitutional compliance: Section 9 (capture full error context).
     """
 
-    file: str                    # Source file path (relative)
-    line: int                    # Line number
-    function: str                # Function name
-    code: Optional[str] = None   # Source code line
+    file: str  # Source file path (relative)
+    line: int  # Line number
+    function: str  # Function name
+    code: Optional[str] = None  # Source code line
 
 
 @dataclass(frozen=True)
@@ -54,10 +54,10 @@ class ExceptionInfo:
     Constitutional compliance: Section 9 (errors never hidden).
     """
 
-    type: str                                 # Exception class name
-    message: str                              # Exception message
-    stack_trace: list[StackFrame]             # Full stack trace
-    cause: Optional["ExceptionInfo"] = None   # Chained exception (__cause__)
+    type: str  # Exception class name
+    message: str  # Exception message
+    stack_trace: list[StackFrame]  # Full stack trace
+    cause: Optional["ExceptionInfo"] = None  # Chained exception (__cause__)
 
 
 @dataclass(frozen=True)
@@ -78,16 +78,16 @@ class LogEntry:
     - duration_ms: non-negative if present
     """
 
-    trace_id: str                              # ULID for correlation
-    timestamp: datetime                        # When log was created (UTC)
-    level: LogLevel                            # Log severity level
-    module: str                                # Python module name
-    message: str                               # Human-readable log message (redacted)
-    function: Optional[str] = None             # Function name where log originated
-    line_number: Optional[int] = None          # Source code line number
-    context: Optional[dict] = None             # Structured context data
+    trace_id: str  # ULID for correlation
+    timestamp: datetime  # When log was created (UTC)
+    level: LogLevel  # Log severity level
+    module: str  # Python module name
+    message: str  # Human-readable log message (redacted)
+    function: Optional[str] = None  # Function name where log originated
+    line_number: Optional[int] = None  # Source code line number
+    context: Optional[dict] = None  # Structured context data
     exception: Optional[ExceptionInfo] = None  # Exception details if error
-    duration_ms: Optional[float] = None        # Operation duration in milliseconds
+    duration_ms: Optional[float] = None  # Operation duration in milliseconds
     tags: list[str] = field(default_factory=list)  # Tags for categorization
 
 
@@ -100,12 +100,12 @@ class MetricEntry:
     Constitutional compliance: Section 8 (structured logging).
     """
 
-    trace_id: str                         # Correlation ID (ULID)
-    timestamp: datetime                   # When metric was recorded (UTC)
-    metric_name: str                      # Metric identifier (e.g., "file_operation.duration")
-    metric_type: MetricType               # Type of metric
-    value: float                          # Numeric value
-    unit: str                             # Unit of measurement (e.g., "milliseconds")
+    trace_id: str  # Correlation ID (ULID)
+    timestamp: datetime  # When metric was recorded (UTC)
+    metric_name: str  # Metric identifier (e.g., "file_operation.duration")
+    metric_type: MetricType  # Type of metric
+    value: float  # Numeric value
+    unit: str  # Unit of measurement (e.g., "milliseconds")
     tags: dict[str, str] = field(default_factory=dict)  # Metric dimensions
 
 
@@ -118,18 +118,22 @@ class LoggerConfig:
     Constitutional compliance: Section 3 (local-first, privacy).
     """
 
-    log_dir: Path = Path("./Logs")                # Directory for log files
-    level: LogLevel = LogLevel.INFO               # Global minimum log level
-    module_levels: dict[str, LogLevel] = field(default_factory=dict)  # Per-module overrides
-    format: str = "json"                          # Output format (json, console, hybrid)
-    async_enabled: bool = True                    # Use async logging queue
-    buffer_size: int = 1000                       # Max entries in async queue
-    flush_interval_s: float = 1.0                 # Auto-flush interval in seconds
-    retention_days: int = 30                      # Log retention period
-    compression_enabled: bool = True              # Compress logs older than 7 days
-    max_file_size_mb: int = 100                   # Max size before rotation
-    secret_patterns: list[str] = field(default_factory=list)  # Regex patterns for secrets
-    redaction_text: str = "***REDACTED***"        # Replacement for secrets
+    log_dir: Path = Path("./Logs")  # Directory for log files
+    level: LogLevel = LogLevel.INFO  # Global minimum log level
+    module_levels: dict[str, LogLevel] = field(
+        default_factory=dict
+    )  # Per-module overrides
+    format: str = "json"  # Output format (json, console, hybrid)
+    async_enabled: bool = True  # Use async logging queue
+    buffer_size: int = 1000  # Max entries in async queue
+    flush_interval_s: float = 1.0  # Auto-flush interval in seconds
+    retention_days: int = 30  # Log retention period
+    compression_enabled: bool = True  # Compress logs older than 7 days
+    max_file_size_mb: int = 100  # Max size before rotation
+    secret_patterns: list[str] = field(
+        default_factory=list
+    )  # Regex patterns for secrets
+    redaction_text: str = "***REDACTED***"  # Replacement for secrets
 
 
 @dataclass
@@ -141,14 +145,14 @@ class LogQuery:
     Constitutional compliance: Section 2 (queries read from disk).
     """
 
-    start_time: Optional[datetime] = None          # Filter logs after this time
-    end_time: Optional[datetime] = None            # Filter logs before this time
-    levels: Optional[list[LogLevel]] = None        # Filter by log levels
-    modules: Optional[list[str]] = None            # Filter by modules
-    trace_id: Optional[str] = None                 # Filter by trace ID
-    search_text: Optional[str] = None              # Full-text search in message
-    tags: Optional[list[str]] = None               # Filter by tags (AND logic)
-    limit: int = 1000                              # Max results to return
-    offset: int = 0                                # Skip first N results
-    order_by: str = "timestamp"                    # Sort field
-    order_dir: str = "desc"                        # Sort direction (asc/desc)
+    start_time: Optional[datetime] = None  # Filter logs after this time
+    end_time: Optional[datetime] = None  # Filter logs before this time
+    levels: Optional[list[LogLevel]] = None  # Filter by log levels
+    modules: Optional[list[str]] = None  # Filter by modules
+    trace_id: Optional[str] = None  # Filter by trace ID
+    search_text: Optional[str] = None  # Full-text search in message
+    tags: Optional[list[str]] = None  # Filter by tags (AND logic)
+    limit: int = 1000  # Max results to return
+    offset: int = 0  # Skip first N results
+    order_by: str = "timestamp"  # Sort field
+    order_dir: str = "desc"  # Sort direction (asc/desc)

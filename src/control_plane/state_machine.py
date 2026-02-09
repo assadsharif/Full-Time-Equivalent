@@ -53,44 +53,40 @@ class StateMachine:
             WorkflowState.INBOX: {
                 WorkflowState.NEEDS_ACTION,
             },
-
             # Needs_Action: Can move to Plans (start planning)
             WorkflowState.NEEDS_ACTION: {
                 WorkflowState.PLANS,
             },
-
             # Plans: Can move to Pending_Approval (ready for review)
             #        or back to Needs_Action (clarifications needed)
             WorkflowState.PLANS: {
                 WorkflowState.PENDING_APPROVAL,
                 WorkflowState.NEEDS_ACTION,
             },
-
             # Pending_Approval: Can be Approved or Rejected (human decision)
             # Constitutional requirement (Section 7): Human approval required
             WorkflowState.PENDING_APPROVAL: {
                 WorkflowState.APPROVED,
                 WorkflowState.REJECTED,
             },
-
             # Approved: Can move to Done (execution succeeded)
             #           or to Rejected (execution failed)
             WorkflowState.APPROVED: {
                 WorkflowState.DONE,
                 WorkflowState.REJECTED,
             },
-
             # Rejected: Can move back to Inbox (retry with revised approach)
             WorkflowState.REJECTED: {
                 WorkflowState.INBOX,
             },
-
             # Done: Terminal state - no transitions allowed
             # Constitutional requirement (Section 13): Done is complete
             WorkflowState.DONE: set(),
         }
 
-    def validate_transition(self, from_state: WorkflowState, to_state: WorkflowState) -> bool:
+    def validate_transition(
+        self, from_state: WorkflowState, to_state: WorkflowState
+    ) -> bool:
         """
         Validate whether a state transition is allowed.
 
@@ -111,11 +107,7 @@ class StateMachine:
         return to_state in valid_targets
 
     def transition(
-        self,
-        task: TaskFile,
-        to_state: WorkflowState,
-        reason: str,
-        actor: str
+        self, task: TaskFile, to_state: WorkflowState, reason: str, actor: str
     ) -> TaskFile:
         """
         Perform state transition for a task.
@@ -174,14 +166,13 @@ class StateMachine:
                 last_error = e
 
                 # Check error type to determine if we should retry
-                is_permission_error = (
-                    isinstance(e.__cause__, PermissionError) or
-                    'Permission denied' in str(e)
-                )
+                is_permission_error = isinstance(
+                    e.__cause__, PermissionError
+                ) or "Permission denied" in str(e)
                 is_disk_full = (
-                    (isinstance(e.__cause__, OSError) and e.__cause__.errno == 28) or
-                    'No space left on device' in str(e) or
-                    '[Errno 28]' in str(e)
+                    (isinstance(e.__cause__, OSError) and e.__cause__.errno == 28)
+                    or "No space left on device" in str(e)
+                    or "[Errno 28]" in str(e)
                 )
 
                 # Don't retry disk full or permission errors
@@ -202,10 +193,9 @@ class StateMachine:
             e = last_error
 
             # Check if this is a permission error
-            is_permission_error = (
-                isinstance(e.__cause__, PermissionError) or
-                'Permission denied' in str(e)
-            )
+            is_permission_error = isinstance(
+                e.__cause__, PermissionError
+            ) or "Permission denied" in str(e)
 
             if is_permission_error:
                 # T039: Permission errors → move to /Rejected if possible
@@ -232,7 +222,7 @@ class StateMachine:
                         reason=f"Permission error: {reason}",
                         actor=actor,
                         logged=True,
-                        error=f"Permission denied - moved to Rejected: {str(e)}"
+                        error=f"Permission denied - moved to Rejected: {str(e)}",
                     )
                     self.audit_logger.log_transition(rejection_transition)
 
@@ -246,7 +236,9 @@ class StateMachine:
             # Log failed transition at CRITICAL level
             # (disk full, permission error that couldn't be salvaged, or transient error after all retries)
             # Task remains in original state (file not moved)
-            error_msg = f"CRITICAL: File operation failed after {attempt} attempt(s) - {str(e)}"
+            error_msg = (
+                f"CRITICAL: File operation failed after {attempt} attempt(s) - {str(e)}"
+            )
             failed_transition = StateTransition(
                 transition_id=str(uuid.uuid4()),
                 task_id=task.id,
@@ -256,7 +248,7 @@ class StateMachine:
                 reason=reason,
                 actor=actor,
                 logged=True,
-                error=error_msg
+                error=error_msg,
             )
             self.audit_logger.log_transition(failed_transition)
 
@@ -285,7 +277,7 @@ class StateMachine:
             reason=reason,
             actor=actor,
             logged=True,
-            error=None
+            error=None,
         )
 
         # Log the successful transition

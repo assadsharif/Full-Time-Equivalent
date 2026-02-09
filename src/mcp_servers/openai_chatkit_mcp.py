@@ -96,7 +96,7 @@ ANTIPATTERNS: dict[str, dict] = {
 # Code templates
 # ---------------------------------------------------------------------------
 
-PROVIDER_TEMPLATE = '''import {{ ChatKitProvider }} from '@openai/chatkit-react';
+PROVIDER_TEMPLATE = """import {{ ChatKitProvider }} from '@openai/chatkit-react';
 
 function App() {{
   return (
@@ -110,9 +110,9 @@ function App() {{
 }}
 
 export default App;
-'''
+"""
 
-HOOK_TEMPLATE = '''import {{ useChatKit }} from '@openai/chatkit-react';
+HOOK_TEMPLATE = """import {{ useChatKit }} from '@openai/chatkit-react';
 
 function ChatComponent() {{
   const {{
@@ -130,9 +130,9 @@ function ChatComponent() {{
     // Your JSX here
   );
 }}
-'''
+"""
 
-WINDOW_TEMPLATE = '''import {{ ChatWindow }} from '@openai/chatkit-react';
+WINDOW_TEMPLATE = """import {{ ChatWindow }} from '@openai/chatkit-react';
 
 function Chat() {{
   return (
@@ -143,9 +143,9 @@ function Chat() {{
 }}
 
 export default Chat;
-'''
+"""
 
-CUSTOM_UI_TEMPLATE = '''import {{ useState, FormEvent }} from 'react';
+CUSTOM_UI_TEMPLATE = """import {{ useState, FormEvent }} from 'react';
 import {{ useChatKit }} from '@openai/chatkit-react';
 
 function CustomChat() {{
@@ -196,9 +196,9 @@ function CustomChat() {{
 }}
 
 export default CustomChat;
-'''
+"""
 
-BACKEND_OPENAI_HOSTED_TEMPLATE = '''import {{ ChatKit }} from '@openai/chatkit';
+BACKEND_OPENAI_HOSTED_TEMPLATE = """import {{ ChatKit }} from '@openai/chatkit';
 
 const chatkit = new ChatKit({{
   apiKey: process.env.OPENAI_API_KEY!,
@@ -221,9 +221,9 @@ export async function createSession(req: Request, res: Response) {{
     res.status(500).json({{ error: 'Failed to create session' }});
   }}
 }}
-'''
+"""
 
-BACKEND_SELF_HOSTED_TEMPLATE = '''from fastapi import FastAPI, HTTPException
+BACKEND_SELF_HOSTED_TEMPLATE = """from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from openai_chatkit import ChatKitServer
 import os
@@ -257,9 +257,9 @@ async def chat(request: ChatRequest):
 async def create_session():
     session = await chatkit.create_session()
     return {{"clientSecret": session.client_secret, "sessionId": session.id}}
-'''
+"""
 
-THEME_TEMPLATE = '''const theme = {{
+THEME_TEMPLATE = """const theme = {{
   primaryColor: '{primary_color}',
   backgroundColor: '{background_color}',
   textColor: '{text_color}',
@@ -278,9 +278,9 @@ THEME_TEMPLATE = '''const theme = {{
 }};
 
 <ChatWindow theme={{theme}} />
-'''
+"""
 
-ERROR_BOUNDARY_TEMPLATE = '''import {{ Component, ReactNode }} from 'react';
+ERROR_BOUNDARY_TEMPLATE = """import {{ Component, ReactNode }} from 'react';
 
 interface Props {{
   children: ReactNode;
@@ -331,9 +331,9 @@ export default ChatErrorBoundary;
 //     <ChatWindow />
 //   </ChatKitProvider>
 // </ChatErrorBoundary>
-'''
+"""
 
-STREAMING_TEMPLATE = '''<ChatKitProvider
+STREAMING_TEMPLATE = """<ChatKitProvider
   sessionEndpoint="/api/session"
   config={{{{
     streaming: true,
@@ -355,7 +355,7 @@ STREAMING_TEMPLATE = '''<ChatKitProvider
 >
   <ChatWindow />
 </ChatKitProvider>
-'''
+"""
 
 # ---------------------------------------------------------------------------
 # Pydantic input models
@@ -366,7 +366,9 @@ _CFG = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 class ProviderInput(BaseModel):
     model_config = _CFG
-    session_endpoint: str = Field(default="/api/session", description="Backend session endpoint")
+    session_endpoint: str = Field(
+        default="/api/session", description="Backend session endpoint"
+    )
     streaming: bool = Field(default=True, description="Enable streaming responses")
     debug: bool = Field(default=False, description="Enable debug mode")
 
@@ -378,24 +380,38 @@ class HookInput(BaseModel):
 
 class WindowInput(BaseModel):
     model_config = _CFG
-    show_tool_calls: bool = Field(default=True, description="Display agent tool invocations")
+    show_tool_calls: bool = Field(
+        default=True, description="Display agent tool invocations"
+    )
     show_timestamps: bool = Field(default=False, description="Show message timestamps")
-    placeholder: str = Field(default="Ask anything...", description="Input placeholder text")
+    placeholder: str = Field(
+        default="Ask anything...", description="Input placeholder text"
+    )
     streaming: bool = Field(default=True, description="Enable streaming")
 
 
 class CustomUIInput(BaseModel):
     model_config = _CFG
-    container_class: str = Field(default="chat-container", description="Container CSS class")
-    messages_class: str = Field(default="messages", description="Messages container CSS class")
+    container_class: str = Field(
+        default="chat-container", description="Container CSS class"
+    )
+    messages_class: str = Field(
+        default="messages", description="Messages container CSS class"
+    )
     form_class: str = Field(default="chat-form", description="Form CSS class")
-    placeholder: str = Field(default="Type a message...", description="Input placeholder")
+    placeholder: str = Field(
+        default="Type a message...", description="Input placeholder"
+    )
 
 
 class BackendInput(BaseModel):
     model_config = _CFG
-    backend_type: str = Field(default="openai-hosted", description="openai-hosted or self-hosted")
-    language: str = Field(default="typescript", description="typescript, javascript, or python")
+    backend_type: str = Field(
+        default="openai-hosted", description="openai-hosted or self-hosted"
+    )
+    language: str = Field(
+        default="typescript", description="typescript, javascript, or python"
+    )
 
     @field_validator("backend_type")
     @classmethod
@@ -419,10 +435,18 @@ class ThemeInput(BaseModel):
     text_color: str = Field(default="#1c1e21", description="Text color")
     font_family: str = Field(default="Inter, sans-serif", description="Font family")
     border_radius: str = Field(default="8px", description="Border radius")
-    user_bubble_bg: str = Field(default="#1877f2", description="User message background")
-    user_bubble_text: str = Field(default="#ffffff", description="User message text color")
-    assistant_bubble_bg: str = Field(default="#f0f2f5", description="Assistant message background")
-    assistant_bubble_text: str = Field(default="#1c1e21", description="Assistant message text color")
+    user_bubble_bg: str = Field(
+        default="#1877f2", description="User message background"
+    )
+    user_bubble_text: str = Field(
+        default="#ffffff", description="User message text color"
+    )
+    assistant_bubble_bg: str = Field(
+        default="#f0f2f5", description="Assistant message background"
+    )
+    assistant_bubble_text: str = Field(
+        default="#1c1e21", description="Assistant message text color"
+    )
 
 
 class DetectAntipatternsInput(BaseModel):
@@ -434,9 +458,13 @@ class DetectAntipatternsInput(BaseModel):
 class ScaffoldInput(BaseModel):
     model_config = _CFG
     backend_type: str = Field(default="openai-hosted", description="Backend type")
-    include_custom_ui: bool = Field(default=False, description="Include custom UI instead of ChatWindow")
+    include_custom_ui: bool = Field(
+        default=False, description="Include custom UI instead of ChatWindow"
+    )
     include_theme: bool = Field(default=True, description="Include theme configuration")
-    include_error_boundary: bool = Field(default=True, description="Include error boundary")
+    include_error_boundary: bool = Field(
+        default=True, description="Include error boundary"
+    )
     streaming: bool = Field(default=True, description="Enable streaming")
 
     @field_validator("backend_type")
@@ -481,7 +509,7 @@ def _gen_hook(inp: HookInput) -> str:
     """Generate useChatKit hook usage."""
     example = ""
     if inp.include_example:
-        example = '''  // Example: Send message on form submit
+        example = """  // Example: Send message on form submit
   const handleSubmit = async (text: string) => {
     if (isLoading) return;
     try {
@@ -489,7 +517,7 @@ def _gen_hook(inp: HookInput) -> str:
     } catch (err) {
       console.error('Send failed:', err);
     }
-  };'''
+  };"""
 
     return HOOK_TEMPLATE.format(usage_example=example)
 
@@ -551,21 +579,33 @@ def _detect_antipatterns(code: str, include_fixes: bool) -> list[dict]:
     findings = []
 
     # Check for exposed API key
-    if re.search(r'apiKey\s*[=:]\s*["\'][^"\']+["\']', code) and "process.env" not in code:
+    if (
+        re.search(r'apiKey\s*[=:]\s*["\'][^"\']+["\']', code)
+        and "process.env" not in code
+    ):
         entry = {"pattern": "exposed-api-key", **ANTIPATTERNS["exposed-api-key"]}
         if not include_fixes:
             del entry["fix"]
         findings.append(entry)
 
     # Check for client-side session creation
-    if re.search(r'chatkit\.sessions\.create', code, re.IGNORECASE) and ("useState" in code or "useEffect" in code):
-        entry = {"pattern": "client-side-session", **ANTIPATTERNS["client-side-session"]}
+    if re.search(r"chatkit\.sessions\.create", code, re.IGNORECASE) and (
+        "useState" in code or "useEffect" in code
+    ):
+        entry = {
+            "pattern": "client-side-session",
+            **ANTIPATTERNS["client-side-session"],
+        }
         if not include_fixes:
             del entry["fix"]
         findings.append(entry)
 
     # Check for missing error boundary
-    if "ChatKitProvider" in code and "ErrorBoundary" not in code and "error" not in code.lower():
+    if (
+        "ChatKitProvider" in code
+        and "ErrorBoundary" not in code
+        and "error" not in code.lower()
+    ):
         entry = {"pattern": "no-error-boundary", **ANTIPATTERNS["no-error-boundary"]}
         if not include_fixes:
             del entry["fix"]
@@ -580,14 +620,20 @@ def _detect_antipatterns(code: str, include_fixes: bool) -> list[dict]:
 
     # Check for hardcoded workflow ID
     if re.search(r'workflow_id\s*[=:]\s*["\'][^"\']+["\']', code):
-        entry = {"pattern": "hardcoded-workflow-id", **ANTIPATTERNS["hardcoded-workflow-id"]}
+        entry = {
+            "pattern": "hardcoded-workflow-id",
+            **ANTIPATTERNS["hardcoded-workflow-id"],
+        }
         if not include_fixes:
             del entry["fix"]
         findings.append(entry)
 
     # Check for missing loading state
     if "useChatKit" in code and "isLoading" not in code:
-        entry = {"pattern": "missing-loading-state", **ANTIPATTERNS["missing-loading-state"]}
+        entry = {
+            "pattern": "missing-loading-state",
+            **ANTIPATTERNS["missing-loading-state"],
+        }
         if not include_fixes:
             del entry["fix"]
         findings.append(entry)
@@ -633,7 +679,7 @@ def _gen_scaffold(inp: ScaffoldInput) -> dict:
         sections["ui"] = _gen_window(window_inp)
 
     # App wrapper
-    sections["app"] = '''import ChatErrorBoundary from './ChatErrorBoundary';
+    sections["app"] = """import ChatErrorBoundary from './ChatErrorBoundary';
 import { ChatKitProvider } from '@openai/chatkit-react';
 import Chat from './Chat';
 
@@ -648,7 +694,7 @@ function App() {
 }
 
 export default App;
-'''
+"""
 
     return sections
 
@@ -665,7 +711,9 @@ async def chatkit_generate_provider(
     debug: bool = False,
 ) -> str:
     """Generate ChatKitProvider setup code. Returns TypeScript/React code."""
-    inp = ProviderInput(session_endpoint=session_endpoint, streaming=streaming, debug=debug)
+    inp = ProviderInput(
+        session_endpoint=session_endpoint, streaming=streaming, debug=debug
+    )
     return json.dumps({"code": _gen_provider(inp)})
 
 

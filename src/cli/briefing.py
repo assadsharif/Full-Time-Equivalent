@@ -83,7 +83,9 @@ def calculate_date_range(days: int = 7) -> tuple:
     return start_date, end_date
 
 
-def scan_done_folder(vault_path: Path, start_date: datetime, end_date: datetime) -> List[Dict]:
+def scan_done_folder(
+    vault_path: Path, start_date: datetime, end_date: datetime
+) -> List[Dict]:
     """
     Scan /Done folder for completed tasks in date range.
 
@@ -109,8 +111,8 @@ def scan_done_folder(vault_path: Path, start_date: datetime, end_date: datetime)
             content = task_file.read_text()
 
             # Extract basic info
-            lines = content.split('\n')
-            title = lines[0].strip('# ') if lines else task_file.stem
+            lines = content.split("\n")
+            title = lines[0].strip("# ") if lines else task_file.stem
 
             # Get modification time as proxy for completion time
             # In production, would parse YAML frontmatter for completion_date
@@ -126,13 +128,15 @@ def scan_done_folder(vault_path: Path, start_date: datetime, end_date: datetime)
                 elif "priority: low" in content_lower or "[low]" in content_lower:
                     priority = "low"
 
-                completed_tasks.append({
-                    "file": task_file,
-                    "title": title,
-                    "completed_at": mtime,
-                    "priority": priority,
-                    "content": content,
-                })
+                completed_tasks.append(
+                    {
+                        "file": task_file,
+                        "title": title,
+                        "completed_at": mtime,
+                        "priority": priority,
+                        "content": content,
+                    }
+                )
 
         except Exception:
             # Skip files that can't be parsed
@@ -144,7 +148,9 @@ def scan_done_folder(vault_path: Path, start_date: datetime, end_date: datetime)
     return completed_tasks
 
 
-def generate_briefing_content(tasks: List[Dict], start_date: datetime, end_date: datetime) -> str:
+def generate_briefing_content(
+    tasks: List[Dict], start_date: datetime, end_date: datetime
+) -> str:
     """
     Generate briefing content from tasks.
 
@@ -170,14 +176,14 @@ def generate_briefing_content(tasks: List[Dict], start_date: datetime, end_date:
     else:
         tasks_lines = []
         for task in tasks:
-            priority_emoji = {
-                "high": "🔴",
-                "medium": "🟡",
-                "low": "🟢"
-            }.get(task["priority"], "⚪")
+            priority_emoji = {"high": "🔴", "medium": "🟡", "low": "🟢"}.get(
+                task["priority"], "⚪"
+            )
 
             completed_date = task["completed_at"].strftime("%Y-%m-%d")
-            tasks_lines.append(f"- {priority_emoji} **{task['title']}** ({completed_date})")
+            tasks_lines.append(
+                f"- {priority_emoji} **{task['title']}** ({completed_date})"
+            )
 
         tasks_list = "\n".join(tasks_lines)
 
@@ -278,7 +284,7 @@ def generate_pdf(markdown_path: Path, pdf_path: Path) -> None:
 """
 
         # Create temporary HTML file
-        html_path = markdown_path.with_suffix('.html')
+        html_path = markdown_path.with_suffix(".html")
         html_path.write_text(html_content)
 
         # Run wkhtmltopdf
@@ -367,7 +373,9 @@ def open_briefing(briefing_path: Path) -> None:
     viewer = detect_markdown_viewer()
 
     if not viewer:
-        raise BriefingError("No markdown viewer found. Install typora, obsidian, or use cat.")
+        raise BriefingError(
+            "No markdown viewer found. Install typora, obsidian, or use cat."
+        )
 
     try:
         if viewer == "cat":
@@ -383,6 +391,7 @@ def open_briefing(briefing_path: Path) -> None:
 
 
 # CLI Commands
+
 
 @click.group(name="briefing")
 def briefing_group():
@@ -472,7 +481,7 @@ def briefing_generate_command(
             if pdf:
                 if check_wkhtmltopdf_installed():
                     progress.update(task_id, description="Generating PDF...")
-                    pdf_path = briefing_path.with_suffix('.pdf')
+                    pdf_path = briefing_path.with_suffix(".pdf")
                     try:
                         generate_pdf(briefing_path, pdf_path)
                         progress.stop()
@@ -482,7 +491,9 @@ def briefing_generate_command(
                         display_warning(f"PDF generation failed: {e}")
                 else:
                     progress.stop()
-                    display_warning("wkhtmltopdf not installed. Skipping PDF generation.")
+                    display_warning(
+                        "wkhtmltopdf not installed. Skipping PDF generation."
+                    )
                     display_info("Install with: apt-get install wkhtmltopdf")
 
         # Email delivery (optional)
@@ -499,7 +510,9 @@ def briefing_generate_command(
                 pdf_candidate = briefing_path.with_suffix(".pdf")
                 if pdf_candidate.exists():
                     attachment = pdf_candidate
-            if email_svc.send_briefing_email(email, attachment, start_date, end_date, highlights):
+            if email_svc.send_briefing_email(
+                email, attachment, start_date, end_date, highlights
+            ):
                 display_success(f"Briefing emailed to: {email}")
             else:
                 display_warning("Email delivery failed or SMTP not configured")
@@ -510,7 +523,9 @@ def briefing_generate_command(
 
         display_success(f"\n✓ Briefing generated successfully")
         display_info(f"Location: {briefing_path}")
-        display_info(f"Period: {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
+        display_info(
+            f"Period: {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}"
+        )
         display_info(f"Tasks included: {len(tasks)}")
         display_info(f"\nView briefing: fte briefing view")
 

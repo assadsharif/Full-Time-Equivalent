@@ -27,7 +27,6 @@ from cli.utils import (
     resolve_vault_path,
 )
 
-
 console = Console()
 
 
@@ -133,9 +132,13 @@ def check_watcher_status() -> Dict[str, Dict[str, any]]:
                 process_name = process.get("name", "")
                 if "watcher" in process_name.lower():
                     # Extract watcher name (e.g., "gmail-watcher" -> "gmail")
-                    watcher_name = process_name.replace("-watcher", "").replace("_watcher", "")
+                    watcher_name = process_name.replace("-watcher", "").replace(
+                        "_watcher", ""
+                    )
                     if watcher_name in watchers:
-                        watchers[watcher_name]["status"] = process.get("pm2_env", {}).get("status", "unknown")
+                        watchers[watcher_name]["status"] = process.get(
+                            "pm2_env", {}
+                        ).get("status", "unknown")
                         watchers[watcher_name]["pid"] = process.get("pid")
                         watchers[watcher_name]["pm2_available"] = True
 
@@ -171,7 +174,7 @@ def check_mcp_status() -> Dict[str, Dict[str, any]]:
         try:
             import yaml
 
-            with open(registry_path, 'r') as f:
+            with open(registry_path, "r") as f:
                 registry_data = yaml.safe_load(f)
 
             if registry_data and "servers" in registry_data:
@@ -260,18 +263,26 @@ def display_status_overview(
         for folder, count in task_counts.items():
             vault_content.append(f"  {folder}: {count}")
     else:
-        vault_content.append(f"[red]✗[/red] Path: {vault_status.get('path', 'unknown')}")
-        vault_content.append(f"[red]✗[/red] Status: {vault_status.get('error', 'Invalid')}")
+        vault_content.append(
+            f"[red]✗[/red] Path: {vault_status.get('path', 'unknown')}"
+        )
+        vault_content.append(
+            f"[red]✗[/red] Status: {vault_status.get('error', 'Invalid')}"
+        )
         vault_content.append("\n[yellow]→[/yellow] Run 'fte vault init' to initialize")
 
-    console.print(Panel(
-        "\n".join(vault_content),
-        title="[bold blue]Vault Status[/bold blue]",
-        border_style="blue"
-    ))
+    console.print(
+        Panel(
+            "\n".join(vault_content),
+            title="[bold blue]Vault Status[/bold blue]",
+            border_style="blue",
+        )
+    )
 
     # Watcher Status Table
-    watcher_table = Table(title="Watcher Status", show_header=True, header_style="bold cyan")
+    watcher_table = Table(
+        title="Watcher Status", show_header=True, header_style="bold cyan"
+    )
     watcher_table.add_column("Watcher", style="cyan")
     watcher_table.add_column("Status", style="white")
     watcher_table.add_column("PID", style="white")
@@ -294,13 +305,15 @@ def display_status_overview(
             watcher_name.capitalize(),
             status_display,
             pid,
-            last_start[:19] if last_start != "-" else "-"
+            last_start[:19] if last_start != "-" else "-",
         )
 
     console.print(watcher_table)
 
     # MCP Server Status Table
-    mcp_table = Table(title="MCP Server Status", show_header=True, header_style="bold magenta")
+    mcp_table = Table(
+        title="MCP Server Status", show_header=True, header_style="bold magenta"
+    )
     mcp_table.add_column("Server", style="magenta")
     mcp_table.add_column("URL", style="white")
     mcp_table.add_column("Status", style="white")
@@ -313,11 +326,7 @@ def display_status_overview(
             else:
                 status_display = f"[yellow]?[/yellow] {status}"
 
-            mcp_table.add_row(
-                server["name"],
-                server["url"],
-                status_display
-            )
+            mcp_table.add_row(server["name"], server["url"], status_display)
     else:
         mcp_table.add_row("[dim]No servers configured[/dim]", "-", "-")
 
@@ -328,16 +337,22 @@ def display_status_overview(
     approval_count = approval_status.get("count", 0)
 
     if approval_count > 0:
-        approval_content.append(f"[yellow]⚠[/yellow] Pending Approvals: [bold]{approval_count}[/bold]")
-        approval_content.append("\n[yellow]→[/yellow] Run 'fte approval pending' to view")
+        approval_content.append(
+            f"[yellow]⚠[/yellow] Pending Approvals: [bold]{approval_count}[/bold]"
+        )
+        approval_content.append(
+            "\n[yellow]→[/yellow] Run 'fte approval pending' to view"
+        )
     else:
         approval_content.append(f"[green]✓[/green] No pending approvals")
 
-    console.print(Panel(
-        "\n".join(approval_content),
-        title="[bold yellow]Approvals[/bold yellow]",
-        border_style="yellow"
-    ))
+    console.print(
+        Panel(
+            "\n".join(approval_content),
+            title="[bold yellow]Approvals[/bold yellow]",
+            border_style="yellow",
+        )
+    )
 
 
 @click.command(name="status")
@@ -353,11 +368,7 @@ def display_status_overview(
     help="Output status as JSON",
 )
 @click.pass_context
-def status_command(
-    ctx: click.Context,
-    vault_path: Optional[Path],
-    output_json: bool
-):
+def status_command(ctx: click.Context, vault_path: Optional[Path], output_json: bool):
     """
     Show comprehensive system status.
 
@@ -388,6 +399,7 @@ def status_command(
         # Output format
         if output_json:
             import json
+
             status_data = {
                 "vault": vault_status,
                 "watchers": watcher_status,
@@ -397,10 +409,7 @@ def status_command(
             console.print_json(json.dumps(status_data, indent=2))
         else:
             display_status_overview(
-                vault_status,
-                watcher_status,
-                mcp_status,
-                approval_status
+                vault_status, watcher_status, mcp_status, approval_status
             )
 
         # Exit with error if vault is invalid

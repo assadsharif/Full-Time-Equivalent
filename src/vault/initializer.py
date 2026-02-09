@@ -154,7 +154,11 @@ def _render_dashboard(vault_path: Path) -> str:
     """Render Dashboard.md with current folder counts."""
     rows = []
     for folder in CORE_FOLDERS:
-        count = sum(1 for _ in (vault_path / folder).glob("*.md")) if (vault_path / folder).exists() else 0
+        count = (
+            sum(1 for _ in (vault_path / folder).glob("*.md"))
+            if (vault_path / folder).exists()
+            else 0
+        )
         rows.append(f"| {folder:<16} | {count} |")
 
     return (
@@ -162,9 +166,7 @@ def _render_dashboard(vault_path: Path) -> str:
         f"*Last updated: {date.today().isoformat()}*\n\n"
         "## Vault Status\n\n"
         "| Folder           | Files |\n"
-        "|------------------|-------|\n"
-        + "\n".join(rows)
-        + "\n\n"
+        "|------------------|-------|\n" + "\n".join(rows) + "\n\n"
         "## Recent Activity\n\n"
         "*No activity recorded yet.*\n\n"
         "## Pending Approvals\n\n"

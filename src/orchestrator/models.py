@@ -10,7 +10,6 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional
 
-
 # ---------------------------------------------------------------------------
 # Task state machine
 # ---------------------------------------------------------------------------
@@ -37,11 +36,11 @@ class OrchestratorConfig:
     """Runtime configuration loaded from YAML or constructed programmatically."""
 
     vault_path: Path = field(default_factory=lambda: Path.home() / "AI_Employee_Vault")
-    poll_interval: int = 30                   # seconds between discovery sweeps
-    max_concurrent_tasks: int = 5             # parallel Claude invocations
-    claude_timeout: int = 3600                # seconds per Claude invocation
-    stop_hook_file: str = ".claude_stop"      # filename in vault root
-    max_iterations: int = 100                 # Ralph Wiggum bound per task
+    poll_interval: int = 30  # seconds between discovery sweeps
+    max_concurrent_tasks: int = 5  # parallel Claude invocations
+    claude_timeout: int = 3600  # seconds per Claude invocation
+    stop_hook_file: str = ".claude_stop"  # filename in vault root
+    max_iterations: int = 100  # Ralph Wiggum bound per task
 
     # Priority weights (must sum to 1.0)
     urgency_weight: float = 0.4
@@ -49,32 +48,48 @@ class OrchestratorConfig:
     sender_weight: float = 0.3
 
     # VIP sender list (scores sender_importance = 5)
-    vip_senders: list = field(default_factory=lambda: [
-        "ceo@company.com",
-        "board@company.com",
-    ])
+    vip_senders: list = field(
+        default_factory=lambda: [
+            "ceo@company.com",
+            "board@company.com",
+        ]
+    )
 
     # Approval-required action keywords
-    approval_keywords: list = field(default_factory=lambda: [
-        "deploy", "production", "delete", "payment", "wire",
-        "send email", "execute", "remove",
-    ])
+    approval_keywords: list = field(
+        default_factory=lambda: [
+            "deploy",
+            "production",
+            "delete",
+            "payment",
+            "wire",
+            "send email",
+            "execute",
+            "remove",
+        ]
+    )
 
     # Persistence-loop retry policy (Plan 04)
     retry_max_attempts: int = 3
-    retry_base_delay: float = 1.0      # seconds
-    retry_max_delay: float = 16.0      # seconds
-    retry_jitter: float = 0.2          # ±fraction
+    retry_base_delay: float = 1.0  # seconds
+    retry_max_delay: float = 16.0  # seconds
+    retry_jitter: float = 0.2  # ±fraction
 
     # Webhook notifications (Phase 7 T046)
     notifications_enabled: bool = False
     notification_webhook_url: Optional[str] = None
-    notification_events: list[str] = field(default_factory=lambda: [
-        "task_failed", "health_degraded", "orchestrator_stopped"
-    ])
+    notification_events: list[str] = field(
+        default_factory=lambda: [
+            "task_failed",
+            "health_degraded",
+            "orchestrator_stopped",
+        ]
+    )
 
     @classmethod
-    def from_yaml(cls, path: Path, vault_path_override: Optional[Path] = None) -> "OrchestratorConfig":
+    def from_yaml(
+        cls, path: Path, vault_path_override: Optional[Path] = None
+    ) -> "OrchestratorConfig":
         """Load config from YAML file. Falls back to defaults if file missing."""
         import yaml  # noqa: E402  (lazy import — yaml is optional at module level)
 
@@ -103,7 +118,9 @@ class OrchestratorConfig:
             urgency_weight=prio.get("urgency", 0.4),
             deadline_weight=prio.get("deadline", 0.3),
             sender_weight=prio.get("sender", 0.3),
-            vip_senders=raw.get("vip_senders", ["ceo@company.com", "board@company.com"]),
+            vip_senders=raw.get(
+                "vip_senders", ["ceo@company.com", "board@company.com"]
+            ),
             approval_keywords=raw.get("approval_keywords", cls.approval_keywords),
             retry_max_attempts=raw.get("retry", {}).get("max_attempts", 3),
             retry_base_delay=raw.get("retry", {}).get("base_delay", 1.0),
@@ -145,7 +162,7 @@ class LoopExit:
     """Record of how and why the orchestrator loop exited for a task."""
 
     task_path: Path
-    reason: str                                  # done | hard_failure | max_iterations | stop_hook | interrupted
+    reason: str  # done | hard_failure | max_iterations | stop_hook | interrupted
     success: bool
     iteration_count: int
     duration_seconds: float

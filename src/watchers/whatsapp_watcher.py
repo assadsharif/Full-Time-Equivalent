@@ -126,12 +126,17 @@ class WhatsAppWatcher(BaseWatcher):
         self.host = host
         self.download_media = download_media
         self.max_media_size = max_media_size
+
         # Normalize phone numbers on storage so comparison with normalized input works
         def _normalize(number: str) -> str:
             return number.lstrip("+").replace("-", "").replace(" ", "")
 
-        self.sender_whitelist = set(_normalize(n) for n in sender_whitelist) if sender_whitelist else None
-        self.sender_blacklist = set(_normalize(n) for n in sender_blacklist) if sender_blacklist else set()
+        self.sender_whitelist = (
+            set(_normalize(n) for n in sender_whitelist) if sender_whitelist else None
+        )
+        self.sender_blacklist = (
+            set(_normalize(n) for n in sender_blacklist) if sender_blacklist else set()
+        )
 
         # Initialize helpers
         self.formatter = MarkdownFormatter()
@@ -181,18 +186,24 @@ class WhatsAppWatcher(BaseWatcher):
 
         # Check blacklist
         if normalized in self.sender_blacklist:
-            logger.debug(f"Sender {self.pii_redactor.redact(phone_number).text} is blacklisted")
+            logger.debug(
+                f"Sender {self.pii_redactor.redact(phone_number).text} is blacklisted"
+            )
             return False
 
         # Check whitelist (if configured)
         if self.sender_whitelist:
             if normalized not in self.sender_whitelist:
-                logger.debug(f"Sender {self.pii_redactor.redact(phone_number).text} not in whitelist")
+                logger.debug(
+                    f"Sender {self.pii_redactor.redact(phone_number).text} not in whitelist"
+                )
                 return False
 
         return True
 
-    def _download_media(self, media_id: str, mime_type: str, message_id: str) -> Optional[Path]:
+    def _download_media(
+        self, media_id: str, mime_type: str, message_id: str
+    ) -> Optional[Path]:
         """
         Download media from WhatsApp API.
 
@@ -332,7 +343,9 @@ class WhatsAppWatcher(BaseWatcher):
             elif message_type == "document":
                 has_media = True
                 doc_data = message.get("document", {})
-                body = doc_data.get("caption", f"[Document: {doc_data.get('filename', 'unknown')}]")
+                body = doc_data.get(
+                    "caption", f"[Document: {doc_data.get('filename', 'unknown')}]"
+                )
                 if self.download_media:
                     media_path = self._download_media(
                         doc_data.get("id", ""),
@@ -476,15 +489,19 @@ class WhatsAppWatcher(BaseWatcher):
         def health_check():
             """Health check endpoint."""
             checkpoint = self.load_checkpoint()
-            return jsonify({
-                "status": "healthy",
-                "watcher": "whatsapp",
-                "events_processed": checkpoint.events_processed,
-                "errors_count": checkpoint.errors_count,
-                "last_poll_time": checkpoint.last_poll_time.isoformat()
-                if checkpoint.last_poll_time
-                else None,
-            })
+            return jsonify(
+                {
+                    "status": "healthy",
+                    "watcher": "whatsapp",
+                    "events_processed": checkpoint.events_processed,
+                    "errors_count": checkpoint.errors_count,
+                    "last_poll_time": (
+                        checkpoint.last_poll_time.isoformat()
+                        if checkpoint.last_poll_time
+                        else None
+                    ),
+                }
+            )
 
         return app
 

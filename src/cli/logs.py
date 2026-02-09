@@ -17,7 +17,10 @@ from typing import Optional
 try:
     import click
 except ImportError:
-    print("Error: click library not installed. Install with: pip install click>=8.0.0", file=sys.stderr)
+    print(
+        "Error: click library not installed. Install with: pip install click>=8.0.0",
+        file=sys.stderr,
+    )
     sys.exit(1)
 
 from ..logging.models import LogLevel, LogQuery
@@ -36,27 +39,26 @@ def logs_cli():
 
 @logs_cli.command(name="tail")
 @click.option(
-    "--lines", "-n",
+    "--lines",
+    "-n",
     type=int,
     default=10,
-    help="Number of lines to display (default: 10)"
+    help="Number of lines to display (default: 10)",
 )
 @click.option(
-    "--follow", "-f",
-    is_flag=True,
-    help="Follow log file (not implemented yet)"
+    "--follow", "-f", is_flag=True, help="Follow log file (not implemented yet)"
 )
 @click.option(
     "--log-dir",
     type=click.Path(exists=True, file_okay=False, path_type=Path),
     default="./Logs",
-    help="Log directory (default: ./Logs)"
+    help="Log directory (default: ./Logs)",
 )
 @click.option(
     "--format",
     type=click.Choice(["json", "table", "csv"], case_sensitive=False),
     default="table",
-    help="Output format (default: table)"
+    help="Output format (default: table)",
 )
 def tail_command(lines: int, follow: bool, log_dir: Path, format: str):
     """
@@ -74,11 +76,7 @@ def tail_command(lines: int, follow: bool, log_dir: Path, format: str):
     try:
         with QueryService(log_dir) as service:
             # Query most recent logs
-            params = LogQuery(
-                limit=lines,
-                order_by="timestamp",
-                order_dir="desc"
-            )
+            params = LogQuery(limit=lines, order_by="timestamp", order_dir="desc")
 
             results = service.query(params, format=format)
 
@@ -87,7 +85,9 @@ def tail_command(lines: int, follow: bool, log_dir: Path, format: str):
             else:
                 # If results are LogEntry objects, format them
                 for entry in results:
-                    click.echo(f"[{entry.timestamp}] [{entry.level.name}] {entry.module}: {entry.message}")
+                    click.echo(
+                        f"[{entry.timestamp}] [{entry.level.name}] {entry.module}: {entry.message}"
+                    )
 
     except Exception as e:
         click.echo(f"Error: {e}", err=True)
@@ -96,47 +96,38 @@ def tail_command(lines: int, follow: bool, log_dir: Path, format: str):
 
 @logs_cli.command(name="query")
 @click.option(
-    "--level", "-l",
-    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False),
+    "--level",
+    "-l",
+    type=click.Choice(
+        ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False
+    ),
     multiple=True,
-    help="Filter by log level (can specify multiple)"
+    help="Filter by log level (can specify multiple)",
 )
 @click.option(
-    "--module", "-m",
-    multiple=True,
-    help="Filter by module (can specify multiple)"
+    "--module", "-m", multiple=True, help="Filter by module (can specify multiple)"
 )
-@click.option(
-    "--trace-id", "-t",
-    help="Filter by trace ID"
-)
+@click.option("--trace-id", "-t", help="Filter by trace ID")
 @click.option(
     "--start",
     type=str,
-    help="Start time (ISO format: 2026-01-28T00:00:00 or relative: 1h, 1d)"
+    help="Start time (ISO format: 2026-01-28T00:00:00 or relative: 1h, 1d)",
 )
+@click.option("--end", type=str, help="End time (ISO format or relative)")
 @click.option(
-    "--end",
-    type=str,
-    help="End time (ISO format or relative)"
-)
-@click.option(
-    "--limit",
-    type=int,
-    default=100,
-    help="Max results to return (default: 100)"
+    "--limit", type=int, default=100, help="Max results to return (default: 100)"
 )
 @click.option(
     "--log-dir",
     type=click.Path(exists=True, file_okay=False, path_type=Path),
     default="./Logs",
-    help="Log directory (default: ./Logs)"
+    help="Log directory (default: ./Logs)",
 )
 @click.option(
     "--format",
     type=click.Choice(["json", "table", "csv"], case_sensitive=False),
     default="table",
-    help="Output format (default: table)"
+    help="Output format (default: table)",
 )
 def query_command(
     level: tuple,
@@ -146,7 +137,7 @@ def query_command(
     end: Optional[str],
     limit: int,
     log_dir: Path,
-    format: str
+    format: str,
 ):
     """
     Query logs with filters.
@@ -172,7 +163,7 @@ def query_command(
             levels=levels,
             modules=list(module) if module else None,
             trace_id=trace_id,
-            limit=limit
+            limit=limit,
         )
 
         with QueryService(log_dir) as service:
@@ -183,7 +174,9 @@ def query_command(
             else:
                 # Format LogEntry objects
                 for entry in results:
-                    click.echo(f"[{entry.timestamp}] [{entry.level.name}] {entry.module}: {entry.message}")
+                    click.echo(
+                        f"[{entry.timestamp}] [{entry.level.name}] {entry.module}: {entry.message}"
+                    )
 
     except Exception as e:
         click.echo(f"Error: {e}", err=True)
@@ -192,33 +185,22 @@ def query_command(
 
 @logs_cli.command(name="search")
 @click.argument("search_term")
+@click.option("--case-sensitive", "-c", is_flag=True, help="Case-sensitive search")
+@click.option("--last", type=str, help="Search in last N time (e.g., 1h, 1d, 1w)")
 @click.option(
-    "--case-sensitive", "-c",
-    is_flag=True,
-    help="Case-sensitive search"
-)
-@click.option(
-    "--last",
-    type=str,
-    help="Search in last N time (e.g., 1h, 1d, 1w)"
-)
-@click.option(
-    "--limit",
-    type=int,
-    default=100,
-    help="Max results to return (default: 100)"
+    "--limit", type=int, default=100, help="Max results to return (default: 100)"
 )
 @click.option(
     "--log-dir",
     type=click.Path(exists=True, file_okay=False, path_type=Path),
     default="./Logs",
-    help="Log directory (default: ./Logs)"
+    help="Log directory (default: ./Logs)",
 )
 @click.option(
     "--format",
     type=click.Choice(["json", "table", "csv"], case_sensitive=False),
     default="table",
-    help="Output format (default: table)"
+    help="Output format (default: table)",
 )
 def search_command(
     search_term: str,
@@ -226,7 +208,7 @@ def search_command(
     last: Optional[str],
     limit: int,
     log_dir: Path,
-    format: str
+    format: str,
 ):
     """
     Full-text search in log messages.
@@ -248,7 +230,7 @@ def search_command(
                     start_time=start_time,
                     end_time=end_time,
                     search_text=search_term,
-                    limit=limit
+                    limit=limit,
                 )
 
                 results = service.query(params, format=format)
@@ -256,16 +238,11 @@ def search_command(
                 # Use search_text() method
                 if format == "dict":
                     results = service.search_text(
-                        search_term,
-                        case_sensitive=case_sensitive,
-                        limit=limit
+                        search_term, case_sensitive=case_sensitive, limit=limit
                     )
                 else:
                     # For other formats, use query with search_text
-                    params = LogQuery(
-                        search_text=search_term,
-                        limit=limit
-                    )
+                    params = LogQuery(search_text=search_term, limit=limit)
                     results = service.query(params, format=format)
 
             if isinstance(results, str):
@@ -278,10 +255,13 @@ def search_command(
                     if not case_sensitive:
                         # Simple highlight (could be improved)
                         import re
+
                         pattern = re.compile(re.escape(search_term), re.IGNORECASE)
                         message = pattern.sub(f"**{search_term}**", message)
 
-                    click.echo(f"[{entry.timestamp}] [{entry.level.name}] {entry.module}: {message}")
+                    click.echo(
+                        f"[{entry.timestamp}] [{entry.level.name}] {entry.module}: {message}"
+                    )
 
     except Exception as e:
         click.echo(f"Error: {e}", err=True)
@@ -302,7 +282,7 @@ def _parse_time(time_str: str) -> datetime:
         ValueError: If time format invalid
     """
     # Try relative time first (e.g., "1h", "2d")
-    if time_str[-1] in ['h', 'd', 'w', 'm']:
+    if time_str[-1] in ["h", "d", "w", "m"]:
         delta = _parse_relative_time(time_str)
         return datetime.now(timezone.utc) - delta
 
@@ -341,13 +321,13 @@ def _parse_relative_time(relative_str: str) -> timedelta:
         value = int(relative_str[:-1])
         unit = relative_str[-1]
 
-        if unit == 'm':
+        if unit == "m":
             return timedelta(minutes=value)
-        elif unit == 'h':
+        elif unit == "h":
             return timedelta(hours=value)
-        elif unit == 'd':
+        elif unit == "d":
             return timedelta(days=value)
-        elif unit == 'w':
+        elif unit == "w":
             return timedelta(weeks=value)
         else:
             raise ValueError(f"Unknown time unit: {unit}")

@@ -36,17 +36,19 @@ class SecurityAuditLogger:
         duration_ms: Optional[int] = None,
     ) -> None:
         """Record an MCP action regardless of success or failure."""
-        self._append(SecurityEvent(
-            event_type="mcp_action",
-            mcp_server=mcp_server,
-            action=action,
-            approved=approved,
-            approval_id=approval_id,
-            nonce=nonce,
-            risk_level=risk_level,
-            result=result,
-            duration_ms=duration_ms,
-        ))
+        self._append(
+            SecurityEvent(
+                event_type="mcp_action",
+                mcp_server=mcp_server,
+                action=action,
+                approved=approved,
+                approval_id=approval_id,
+                nonce=nonce,
+                risk_level=risk_level,
+                result=result,
+                duration_ms=duration_ms,
+            )
+        )
 
     def log_credential_access(
         self,
@@ -55,15 +57,17 @@ class SecurityAuditLogger:
         username: str,
     ) -> None:
         """Record a credential-vault operation (always CRITICAL)."""
-        self._append(SecurityEvent(
-            event_type="credential_access",
-            risk_level=RiskLevel.CRITICAL,
-            details={
-                "service": service,
-                "operation": operation,
-                "username": username,
-            },
-        ))
+        self._append(
+            SecurityEvent(
+                event_type="credential_access",
+                risk_level=RiskLevel.CRITICAL,
+                details={
+                    "service": service,
+                    "operation": operation,
+                    "username": username,
+                },
+            )
+        )
 
     def log_scan_result(
         self,
@@ -71,15 +75,17 @@ class SecurityAuditLogger:
         findings: list[dict],
     ) -> None:
         """Record a secrets-scan outcome."""
-        self._append(SecurityEvent(
-            event_type="scan_result",
-            risk_level=RiskLevel.HIGH if findings else RiskLevel.LOW,
-            details={
-                "target": scan_target,
-                "finding_count": len(findings),
-                "findings": findings,
-            },
-        ))
+        self._append(
+            SecurityEvent(
+                event_type="scan_result",
+                risk_level=RiskLevel.HIGH if findings else RiskLevel.LOW,
+                details={
+                    "target": scan_target,
+                    "finding_count": len(findings),
+                    "findings": findings,
+                },
+            )
+        )
 
     # ------------------------------------------------------------------
     # Query

@@ -22,7 +22,6 @@ from typing import Any, Optional
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-
 # =============================================================================
 # MCP Server Instance
 # =============================================================================
@@ -62,17 +61,29 @@ class FieldDefinition(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     name: str = Field(..., min_length=1, description="Field name")
-    type: str = Field(..., min_length=1, description="Python type (str, int, float, bool, datetime)")
+    type: str = Field(
+        ..., min_length=1, description="Python type (str, int, float, bool, datetime)"
+    )
     optional: bool = Field(default=False, description="Whether field is Optional")
     default: Optional[Any] = Field(default=None, description="Default value")
     primary_key: bool = Field(default=False, description="Is primary key")
-    foreign_key: Optional[str] = Field(default=None, description="Foreign key reference (table.column)")
+    foreign_key: Optional[str] = Field(
+        default=None, description="Foreign key reference (table.column)"
+    )
     unique: bool = Field(default=False, description="Unique constraint")
     index: bool = Field(default=False, description="Create index")
-    max_length: Optional[int] = Field(default=None, description="Max length for strings")
-    min_length: Optional[int] = Field(default=None, description="Min length for strings")
-    ge: Optional[int] = Field(default=None, description="Greater than or equal (for numbers)")
-    le: Optional[int] = Field(default=None, description="Less than or equal (for numbers)")
+    max_length: Optional[int] = Field(
+        default=None, description="Max length for strings"
+    )
+    min_length: Optional[int] = Field(
+        default=None, description="Min length for strings"
+    )
+    ge: Optional[int] = Field(
+        default=None, description="Greater than or equal (for numbers)"
+    )
+    le: Optional[int] = Field(
+        default=None, description="Less than or equal (for numbers)"
+    )
 
 
 class GenerateTableInput(BaseModel):
@@ -80,10 +91,18 @@ class GenerateTableInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    model_name: str = Field(..., min_length=1, description="Model class name (PascalCase)")
-    table_name: str = Field(..., min_length=1, description="Database table name (snake_case)")
-    fields: list[FieldDefinition] = Field(..., min_length=1, description="Field definitions")
-    include_timestamps: bool = Field(default=False, description="Include created_at/updated_at")
+    model_name: str = Field(
+        ..., min_length=1, description="Model class name (PascalCase)"
+    )
+    table_name: str = Field(
+        ..., min_length=1, description="Database table name (snake_case)"
+    )
+    fields: list[FieldDefinition] = Field(
+        ..., min_length=1, description="Field definitions"
+    )
+    include_timestamps: bool = Field(
+        default=False, description="Include created_at/updated_at"
+    )
 
     @field_validator("model_name")
     @classmethod
@@ -99,7 +118,9 @@ class GenerateSchemasInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     model_name: str = Field(..., min_length=1, description="Model class name")
-    fields: list[FieldDefinition] = Field(..., min_length=1, description="Field definitions")
+    fields: list[FieldDefinition] = Field(
+        ..., min_length=1, description="Field definitions"
+    )
 
     @field_validator("model_name")
     @classmethod
@@ -141,8 +162,12 @@ class GenerateQueriesInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     model_name: str = Field(..., min_length=1, description="Model class name")
-    include_pagination: bool = Field(default=True, description="Include pagination query")
-    filter_fields: Optional[list[str]] = Field(default=None, description="Fields to filter by")
+    include_pagination: bool = Field(
+        default=True, description="Include pagination query"
+    )
+    filter_fields: Optional[list[str]] = Field(
+        default=None, description="Fields to filter by"
+    )
 
 
 class GenerateDatabaseConfigInput(BaseModel):
@@ -152,7 +177,9 @@ class GenerateDatabaseConfigInput(BaseModel):
 
     database_type: DatabaseType = Field(..., description="Database type")
     database_name: str = Field(..., min_length=1, description="Database name")
-    use_env_var: bool = Field(default=True, description="Use environment variable for URL")
+    use_env_var: bool = Field(
+        default=True, description="Use environment variable for URL"
+    )
     host: str = Field(default="localhost", description="Database host")
     port: Optional[int] = Field(default=None, description="Database port")
     username: str = Field(default="user", description="Database username")
@@ -178,7 +205,9 @@ class DiagnoseIssuesInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    error_message: str = Field(..., min_length=1, description="Error message to diagnose")
+    error_message: str = Field(
+        ..., min_length=1, description="Error message to diagnose"
+    )
     model_code: Optional[str] = Field(default=None, description="Related model code")
 
 
@@ -313,18 +342,24 @@ async def sqlmodel_generate_table(
     # Add timestamps
     if include_timestamps:
         lines.append("")
-        lines.append("    created_at: datetime = Field(default_factory=datetime.utcnow)")
-        lines.append("    updated_at: datetime = Field(default_factory=datetime.utcnow)")
+        lines.append(
+            "    created_at: datetime = Field(default_factory=datetime.utcnow)"
+        )
+        lines.append(
+            "    updated_at: datetime = Field(default_factory=datetime.utcnow)"
+        )
 
     code = "\n".join(imports) + "\n" + "\n".join(lines)
 
-    return json.dumps({
-        "success": True,
-        "code": code,
-        "model_name": model_name,
-        "table_name": table_name,
-        "field_count": len(field_objs),
-    })
+    return json.dumps(
+        {
+            "success": True,
+            "code": code,
+            "model_name": model_name,
+            "table_name": table_name,
+            "field_count": len(field_objs),
+        }
+    )
 
 
 @mcp.tool()
@@ -374,7 +409,9 @@ async def sqlmodel_generate_schemas(
                 field_args.append(f"max_length={field.max_length}")
             if field.min_length:
                 field_args.append(f"min_length={field.min_length}")
-            lines.append(f"    {field.name}: {type_str} = Field({', '.join(field_args)})")
+            lines.append(
+                f"    {field.name}: {type_str} = Field({', '.join(field_args)})"
+            )
 
     # Read schema - includes id
     lines.append("")
@@ -390,11 +427,17 @@ async def sqlmodel_generate_schemas(
 
     code = "\n".join(imports) + "\n" + "\n".join(lines)
 
-    return json.dumps({
-        "success": True,
-        "code": code,
-        "schemas": [f"{model_name}Create", f"{model_name}Update", f"{model_name}Read"],
-    })
+    return json.dumps(
+        {
+            "success": True,
+            "code": code,
+            "schemas": [
+                f"{model_name}Create",
+                f"{model_name}Update",
+                f"{model_name}Read",
+            ],
+        }
+    )
 
 
 @mcp.tool()
@@ -437,17 +480,25 @@ async def sqlmodel_generate_relationship(
         # Parent model
         cascade_kwargs = ""
         if cascade_delete:
-            cascade_kwargs = ',\n        sa_relationship_kwargs={"cascade": "all, delete-orphan"}'
+            cascade_kwargs = (
+                ',\n        sa_relationship_kwargs={"cascade": "all, delete-orphan"}'
+            )
 
         lines.append("")
         lines.append(f"# Add to {parent_model} model:")
-        lines.append(f'    {child_snake}s: List["{child_model}"] = Relationship(back_populates="{parent_snake}"{cascade_kwargs})')
+        lines.append(
+            f'    {child_snake}s: List["{child_model}"] = Relationship(back_populates="{parent_snake}"{cascade_kwargs})'
+        )
 
         # Child model
         lines.append("")
         lines.append(f"# Add to {child_model} model:")
-        lines.append(f'    {parent_snake}_id: Optional[int] = Field(default=None, foreign_key="{parent_snake}s.id")')
-        lines.append(f'    {parent_snake}: Optional[{parent_model}] = Relationship(back_populates="{child_snake}s")')
+        lines.append(
+            f'    {parent_snake}_id: Optional[int] = Field(default=None, foreign_key="{parent_snake}s.id")'
+        )
+        lines.append(
+            f'    {parent_snake}: Optional[{parent_model}] = Relationship(back_populates="{child_snake}s")'
+        )
 
     elif relationship_type == "many_to_many":
         # Link table
@@ -459,39 +510,55 @@ async def sqlmodel_generate_relationship(
         lines.append(f"class {link_table}(SQLModel, table=True):")
         lines.append(f'    __tablename__ = "{link_table_name}"')
         lines.append("")
-        lines.append(f'    {parent_snake}_id: int = Field(foreign_key="{parent_snake}s.id", primary_key=True)')
-        lines.append(f'    {child_snake}_id: int = Field(foreign_key="{child_snake}s.id", primary_key=True)')
+        lines.append(
+            f'    {parent_snake}_id: int = Field(foreign_key="{parent_snake}s.id", primary_key=True)'
+        )
+        lines.append(
+            f'    {child_snake}_id: int = Field(foreign_key="{child_snake}s.id", primary_key=True)'
+        )
 
         # Parent model
         lines.append("")
         lines.append(f"# Add to {parent_model} model:")
-        lines.append(f'    {child_snake}s: List["{child_model}"] = Relationship(back_populates="{parent_snake}s", link_model={link_table})')
+        lines.append(
+            f'    {child_snake}s: List["{child_model}"] = Relationship(back_populates="{parent_snake}s", link_model={link_table})'
+        )
 
         # Child model
         lines.append("")
         lines.append(f"# Add to {child_model} model:")
-        lines.append(f'    {parent_snake}s: List[{parent_model}] = Relationship(back_populates="{child_snake}s", link_model={link_table})')
+        lines.append(
+            f'    {parent_snake}s: List[{parent_model}] = Relationship(back_populates="{child_snake}s", link_model={link_table})'
+        )
 
     elif relationship_type == "self_referential":
         lines.append("")
         lines.append(f"# Self-referential relationship in {parent_model}:")
-        lines.append(f'    parent_id: Optional[int] = Field(default=None, foreign_key="{parent_snake}s.id")')
+        lines.append(
+            f'    parent_id: Optional[int] = Field(default=None, foreign_key="{parent_snake}s.id")'
+        )
         lines.append("")
         lines.append(f'    parent: Optional["{parent_model}"] = Relationship(')
         lines.append('        back_populates="children",')
-        lines.append(f'        sa_relationship_kwargs={{"remote_side": "{parent_model}.id"}}')
+        lines.append(
+            f'        sa_relationship_kwargs={{"remote_side": "{parent_model}.id"}}'
+        )
         lines.append("    )")
-        lines.append(f'    children: List["{parent_model}"] = Relationship(back_populates="parent")')
+        lines.append(
+            f'    children: List["{parent_model}"] = Relationship(back_populates="parent")'
+        )
 
     code = "\n".join(imports) + "\n" + "\n".join(lines)
 
-    return json.dumps({
-        "success": True,
-        "code": code,
-        "relationship_type": relationship_type,
-        "parent": parent_model,
-        "child": child_model,
-    })
+    return json.dumps(
+        {
+            "success": True,
+            "code": code,
+            "relationship_type": relationship_type,
+            "parent": parent_model,
+            "child": child_model,
+        }
+    )
 
 
 @mcp.tool()
@@ -569,17 +636,19 @@ def delete_{snake_name}(session: Session, {snake_name}_id: int) -> bool:
     return True
 """
 
-    return json.dumps({
-        "success": True,
-        "code": code,
-        "functions": [
-            f"create_{snake_name}",
-            f"get_{snake_name}",
-            f"get_{snake_name}s",
-            f"update_{snake_name}",
-            f"delete_{snake_name}",
-        ],
-    })
+    return json.dumps(
+        {
+            "success": True,
+            "code": code,
+            "functions": [
+                f"create_{snake_name}",
+                f"get_{snake_name}",
+                f"get_{snake_name}s",
+                f"update_{snake_name}",
+                f"delete_{snake_name}",
+            ],
+        }
+    )
 
 
 @mcp.tool()
@@ -659,12 +728,14 @@ def get_{snake_name}s_by_{field}(
 
     code = "\n".join(imports) + "".join(lines)
 
-    return json.dumps({
-        "success": True,
-        "code": code,
-        "include_pagination": include_pagination,
-        "filter_fields": filter_fields or [],
-    })
+    return json.dumps(
+        {
+            "success": True,
+            "code": code,
+            "include_pagination": include_pagination,
+            "filter_fields": filter_fields or [],
+        }
+    )
 
 
 @mcp.tool()
@@ -715,7 +786,9 @@ async def sqlmodel_generate_database_config(
 
     if database_type == "sqlite":
         if use_env_var:
-            url_code = f'DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///{database_name}")'
+            url_code = (
+                f'DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///{database_name}")'
+            )
         else:
             url_code = f'DATABASE_URL = "sqlite:///{database_name}"'
 
@@ -729,10 +802,10 @@ engine = create_engine(
     else:
         # PostgreSQL or MySQL
         if use_env_var:
-            url_code = f'''DATABASE_URL = os.getenv(
+            url_code = f"""DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "{database_type}://{username}:password@{host}:{actual_port}/{database_name}"
-)'''
+)"""
         else:
             url_code = f'DATABASE_URL = "{database_type}://{username}:password@{host}:{actual_port}/{database_name}"'
 
@@ -767,13 +840,15 @@ def get_db():
         yield session
 """
 
-    return json.dumps({
-        "success": True,
-        "code": code,
-        "database_type": database_type,
-        "database_name": database_name,
-        "use_env_var": use_env_var,
-    })
+    return json.dumps(
+        {
+            "success": True,
+            "code": code,
+            "database_type": database_type,
+            "database_name": database_name,
+            "use_env_var": use_env_var,
+        }
+    )
 
 
 @mcp.tool()
@@ -795,10 +870,14 @@ async def sqlmodel_validate_model(model_code: str) -> str:
     # Check for table=True
     has_table_true = "table=True" in model_code
     if not has_table_true and "SQLModel" in model_code:
-        warnings.append("Model does not have table=True - this is a schema, not a table model")
+        warnings.append(
+            "Model does not have table=True - this is a schema, not a table model"
+        )
 
     # Check for primary key
-    has_primary_key = "primary_key=True" in model_code or "primary_key = True" in model_code
+    has_primary_key = (
+        "primary_key=True" in model_code or "primary_key = True" in model_code
+    )
     if has_table_true and not has_primary_key:
         issues.append("Table model is missing a primary key field")
 
@@ -810,7 +889,9 @@ async def sqlmodel_validate_model(model_code: str) -> str:
     ]
     for pattern in mutable_patterns:
         if re.search(pattern, model_code):
-            issues.append("Mutable default value detected (use default_factory instead)")
+            issues.append(
+                "Mutable default value detected (use default_factory instead)"
+            )
             break
 
     # Check for Optional without default=None
@@ -828,18 +909,20 @@ async def sqlmodel_validate_model(model_code: str) -> str:
 
     valid = len(issues) == 0
 
-    return json.dumps({
-        "valid": valid,
-        "issues": issues,
-        "warnings": warnings,
-        "checks_performed": [
-            "primary_key_check",
-            "mutable_default_check",
-            "optional_default_check",
-            "relationship_back_populates_check",
-            "tablename_check",
-        ],
-    })
+    return json.dumps(
+        {
+            "valid": valid,
+            "issues": issues,
+            "warnings": warnings,
+            "checks_performed": [
+                "primary_key_check",
+                "mutable_default_check",
+                "optional_default_check",
+                "relationship_back_populates_check",
+                "tablename_check",
+            ],
+        }
+    )
 
 
 @mcp.tool()
@@ -883,13 +966,15 @@ async def sqlmodel_diagnose_issues(
         ]
 
     # ImportError - Circular
-    elif "importerror" in error_lower and ("circular" in error_lower or "partially initialized" in error_lower):
+    elif "importerror" in error_lower and (
+        "circular" in error_lower or "partially initialized" in error_lower
+    ):
         diagnosis = "Circular import detected between model modules"
         suggestions = [
             "Use TYPE_CHECKING for forward references",
             "Use string annotations for relationship type hints",
             "Consider consolidating related models in one file",
-            'Example: from typing import TYPE_CHECKING; if TYPE_CHECKING: from .user import User',
+            "Example: from typing import TYPE_CHECKING; if TYPE_CHECKING: from .user import User",
         ]
 
     # AttributeError - No attribute
@@ -920,12 +1005,16 @@ async def sqlmodel_diagnose_issues(
             "Check SQLModel and SQLAlchemy documentation",
         ]
 
-    return json.dumps({
-        "success": True,
-        "diagnosis": diagnosis,
-        "suggestions": suggestions,
-        "error_type": error_message.split(":")[0] if ":" in error_message else "Unknown",
-    })
+    return json.dumps(
+        {
+            "success": True,
+            "diagnosis": diagnosis,
+            "suggestions": suggestions,
+            "error_type": (
+                error_message.split(":")[0] if ":" in error_message else "Unknown"
+            ),
+        }
+    )
 
 
 # =============================================================================

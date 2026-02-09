@@ -236,81 +236,213 @@ WORKFLOW_DEFINITIONS: dict[str, dict] = {
         "title": "Comprehensive Cluster Assessment",
         "purpose": "Full cluster health and efficiency review",
         "steps": [
-            {"step": 1, "name": "Cluster Overview", "cmd": "kagent analyze cluster --summary"},
-            {"step": 2, "name": "Component Health", "cmd": "kagent analyze components --all"},
-            {"step": 3, "name": "Resource Utilization", "cmd": "kagent analyze resources --cluster-wide"},
-            {"step": 4, "name": "Best Practices", "cmd": "kagent analyze best-practices --all-namespaces"},
-            {"step": 5, "name": "Optimization Opportunities", "cmd": "kagent recommend --type all --conservative"},
+            {
+                "step": 1,
+                "name": "Cluster Overview",
+                "cmd": "kagent analyze cluster --summary",
+            },
+            {
+                "step": 2,
+                "name": "Component Health",
+                "cmd": "kagent analyze components --all",
+            },
+            {
+                "step": 3,
+                "name": "Resource Utilization",
+                "cmd": "kagent analyze resources --cluster-wide",
+            },
+            {
+                "step": 4,
+                "name": "Best Practices",
+                "cmd": "kagent analyze best-practices --all-namespaces",
+            },
+            {
+                "step": 5,
+                "name": "Optimization Opportunities",
+                "cmd": "kagent recommend --type all --conservative",
+            },
         ],
     },
     "namespace-health": {
         "title": "Namespace Health Check",
         "purpose": "Focused analysis of specific namespace",
         "steps": [
-            {"step": 1, "name": "Workload Status", "cmd": "kagent analyze workloads --namespace {namespace}"},
-            {"step": 2, "name": "Resource Efficiency", "cmd": "kagent analyze resources --namespace {namespace} --detailed"},
-            {"step": 3, "name": "Configuration Audit", "cmd": "kagent analyze config --namespace {namespace}"},
-            {"step": 4, "name": "Network Analysis", "cmd": "kagent analyze network --namespace {namespace}"},
-            {"step": 5, "name": "Recommendations", "cmd": "kagent recommend --namespace {namespace}"},
+            {
+                "step": 1,
+                "name": "Workload Status",
+                "cmd": "kagent analyze workloads --namespace {namespace}",
+            },
+            {
+                "step": 2,
+                "name": "Resource Efficiency",
+                "cmd": "kagent analyze resources --namespace {namespace} --detailed",
+            },
+            {
+                "step": 3,
+                "name": "Configuration Audit",
+                "cmd": "kagent analyze config --namespace {namespace}",
+            },
+            {
+                "step": 4,
+                "name": "Network Analysis",
+                "cmd": "kagent analyze network --namespace {namespace}",
+            },
+            {
+                "step": 5,
+                "name": "Recommendations",
+                "cmd": "kagent recommend --namespace {namespace}",
+            },
         ],
     },
     "pre-deployment": {
         "title": "Pre-Deployment Validation",
         "purpose": "Validate configuration before deployment",
         "steps": [
-            {"step": 1, "name": "Resource Availability", "cmd": "kagent analyze capacity --for-deployment ./values.yaml"},
-            {"step": 2, "name": "Configuration Check", "cmd": "kagent validate chart ./{chart} --values values.yaml"},
-            {"step": 3, "name": "Best Practices", "cmd": "kagent lint deployment --strict"},
-            {"step": 4, "name": "Risk Assessment", "cmd": "kagent assess risk --deployment {chart}"},
+            {
+                "step": 1,
+                "name": "Resource Availability",
+                "cmd": "kagent analyze capacity --for-deployment ./values.yaml",
+            },
+            {
+                "step": 2,
+                "name": "Configuration Check",
+                "cmd": "kagent validate chart ./{chart} --values values.yaml",
+            },
+            {
+                "step": 3,
+                "name": "Best Practices",
+                "cmd": "kagent lint deployment --strict",
+            },
+            {
+                "step": 4,
+                "name": "Risk Assessment",
+                "cmd": "kagent assess risk --deployment {chart}",
+            },
         ],
     },
     "performance-investigation": {
         "title": "Performance Investigation",
         "purpose": "Diagnose performance issues",
         "steps": [
-            {"step": 1, "name": "Current Metrics", "cmd": "kagent analyze performance --namespace {namespace}"},
-            {"step": 2, "name": "Bottleneck Detection", "cmd": "kagent analyze bottlenecks --namespace {namespace} --top 5"},
-            {"step": 3, "name": "Resource Pressure", "cmd": "kagent analyze pressure --namespace {namespace}"},
-            {"step": 4, "name": "Historical Comparison", "cmd": "kagent analyze trends --namespace {namespace} --period {time_range}"},
+            {
+                "step": 1,
+                "name": "Current Metrics",
+                "cmd": "kagent analyze performance --namespace {namespace}",
+            },
+            {
+                "step": 2,
+                "name": "Bottleneck Detection",
+                "cmd": "kagent analyze bottlenecks --namespace {namespace} --top 5",
+            },
+            {
+                "step": 3,
+                "name": "Resource Pressure",
+                "cmd": "kagent analyze pressure --namespace {namespace}",
+            },
+            {
+                "step": 4,
+                "name": "Historical Comparison",
+                "cmd": "kagent analyze trends --namespace {namespace} --period {time_range}",
+            },
         ],
     },
     "right-sizing": {
         "title": "Resource Right-Sizing",
         "purpose": "Optimize resource allocation",
         "steps": [
-            {"step": 1, "name": "Current Usage Analysis", "cmd": "kagent analyze sizing --namespace {namespace} --period 7d"},
-            {"step": 2, "name": "Identify Over-Provisioned", "cmd": "kagent analyze waste --namespace {namespace} --threshold 40"},
-            {"step": 3, "name": "Generate Recommendations", "cmd": "kagent recommend sizing --namespace {namespace} --{optimization_level}"},
-            {"step": 4, "name": "Implementation Plan", "cmd": "# Review Helm upgrade commands from recommendations"},
+            {
+                "step": 1,
+                "name": "Current Usage Analysis",
+                "cmd": "kagent analyze sizing --namespace {namespace} --period 7d",
+            },
+            {
+                "step": 2,
+                "name": "Identify Over-Provisioned",
+                "cmd": "kagent analyze waste --namespace {namespace} --threshold 40",
+            },
+            {
+                "step": 3,
+                "name": "Generate Recommendations",
+                "cmd": "kagent recommend sizing --namespace {namespace} --{optimization_level}",
+            },
+            {
+                "step": 4,
+                "name": "Implementation Plan",
+                "cmd": "# Review Helm upgrade commands from recommendations",
+            },
         ],
     },
     "security-audit": {
         "title": "Security Audit",
         "purpose": "Review security configuration",
         "steps": [
-            {"step": 1, "name": "Security Posture", "cmd": "kagent analyze security --namespace {namespace}"},
-            {"step": 2, "name": "RBAC Analysis", "cmd": "kagent analyze rbac --namespace {namespace}"},
-            {"step": 3, "name": "Pod Security Standards", "cmd": "kagent analyze pod-security --namespace {namespace}"},
-            {"step": 4, "name": "Network Policy Coverage", "cmd": "kagent analyze network-security --namespace {namespace}"},
+            {
+                "step": 1,
+                "name": "Security Posture",
+                "cmd": "kagent analyze security --namespace {namespace}",
+            },
+            {
+                "step": 2,
+                "name": "RBAC Analysis",
+                "cmd": "kagent analyze rbac --namespace {namespace}",
+            },
+            {
+                "step": 3,
+                "name": "Pod Security Standards",
+                "cmd": "kagent analyze pod-security --namespace {namespace}",
+            },
+            {
+                "step": 4,
+                "name": "Network Policy Coverage",
+                "cmd": "kagent analyze network-security --namespace {namespace}",
+            },
         ],
     },
     "cost-analysis": {
         "title": "Cost Analysis (Educational)",
         "purpose": "Understand resource costs for learning",
         "steps": [
-            {"step": 1, "name": "Resource Cost Estimation", "cmd": "kagent analyze cost --namespace {namespace} --educational"},
-            {"step": 2, "name": "Cost Optimization", "cmd": "kagent analyze cost-optimization --namespace {namespace}"},
-            {"step": 3, "name": "Efficiency Score", "cmd": "kagent analyze efficiency-score --namespace {namespace}"},
+            {
+                "step": 1,
+                "name": "Resource Cost Estimation",
+                "cmd": "kagent analyze cost --namespace {namespace} --educational",
+            },
+            {
+                "step": 2,
+                "name": "Cost Optimization",
+                "cmd": "kagent analyze cost-optimization --namespace {namespace}",
+            },
+            {
+                "step": 3,
+                "name": "Efficiency Score",
+                "cmd": "kagent analyze efficiency-score --namespace {namespace}",
+            },
         ],
     },
     "anomaly-investigation": {
         "title": "Anomaly Investigation",
         "purpose": "Investigate detected anomalies",
         "steps": [
-            {"step": 1, "name": "Identify Anomalies", "cmd": "kagent analyze anomalies --namespace {namespace}"},
-            {"step": 2, "name": "Gather Details", "cmd": "kagent analyze anomaly --id <anomaly-id> --detailed"},
-            {"step": 3, "name": "Root Cause Analysis", "cmd": "kagent explain anomaly --id <anomaly-id>"},
-            {"step": 4, "name": "Remediation Options", "cmd": "kagent recommend --for-anomaly <anomaly-id>"},
+            {
+                "step": 1,
+                "name": "Identify Anomalies",
+                "cmd": "kagent analyze anomalies --namespace {namespace}",
+            },
+            {
+                "step": 2,
+                "name": "Gather Details",
+                "cmd": "kagent analyze anomaly --id <anomaly-id> --detailed",
+            },
+            {
+                "step": 3,
+                "name": "Root Cause Analysis",
+                "cmd": "kagent explain anomaly --id <anomaly-id>",
+            },
+            {
+                "step": 4,
+                "name": "Remediation Options",
+                "cmd": "kagent recommend --for-anomaly <anomaly-id>",
+            },
         ],
     },
 }
@@ -373,7 +505,11 @@ PERFORMANCE_INDICATORS: dict[str, dict] = {
 ANOMALY_TYPES: dict[str, dict] = {
     "high-restarts": {
         "detection": "> 3 restarts/hour",
-        "potential_causes": ["OOMKilled", "Application crash", "Liveness probe failure"],
+        "potential_causes": [
+            "OOMKilled",
+            "Application crash",
+            "Liveness probe failure",
+        ],
         "investigation_prompts": [
             "kagent analyze pods --restarts --namespace {namespace}",
             "kagent explain anomaly --type restarts",
@@ -381,7 +517,11 @@ ANOMALY_TYPES: dict[str, dict] = {
     },
     "pending-pods": {
         "detection": "Pod pending > 5min",
-        "potential_causes": ["Insufficient resources", "Scheduling constraints", "PVC pending"],
+        "potential_causes": [
+            "Insufficient resources",
+            "Scheduling constraints",
+            "PVC pending",
+        ],
         "investigation_prompts": [
             "kagent analyze pods --pending --namespace {namespace}",
             "kagent analyze capacity --namespace {namespace}",
@@ -397,7 +537,11 @@ ANOMALY_TYPES: dict[str, dict] = {
     },
     "failed-probes": {
         "detection": "Continuous probe failures",
-        "potential_causes": ["Application issue", "Misconfigured probe", "Resource starvation"],
+        "potential_causes": [
+            "Application issue",
+            "Misconfigured probe",
+            "Resource starvation",
+        ],
         "investigation_prompts": [
             "kagent analyze probes --namespace {namespace}",
             "kagent analyze performance --namespace {namespace}",
@@ -405,14 +549,22 @@ ANOMALY_TYPES: dict[str, dict] = {
     },
     "image-pull-failures": {
         "detection": "ImagePullBackOff",
-        "potential_causes": ["Registry unreachable", "Wrong image name/tag", "Auth failure"],
+        "potential_causes": [
+            "Registry unreachable",
+            "Wrong image name/tag",
+            "Auth failure",
+        ],
         "investigation_prompts": [
             "kagent analyze images --namespace {namespace} --errors",
         ],
     },
     "pvc-pending": {
         "detection": "PVC pending > 1min",
-        "potential_causes": ["Storage class unavailable", "Quota exceeded", "Provisioner issue"],
+        "potential_causes": [
+            "Storage class unavailable",
+            "Quota exceeded",
+            "Provisioner issue",
+        ],
         "investigation_prompts": [
             "kagent analyze pvc --namespace {namespace} --status",
             "kagent analyze storage-provisioner",
@@ -580,16 +732,56 @@ CONCEPT_EXPLANATIONS: dict[str, dict] = {
 # ---------------------------------------------------------------------------
 
 SECURITY_CHECKLIST: list[dict] = [
-    {"category": "Container Security", "item": "Non-root containers", "cmd": "kagent analyze containers --security --namespace {namespace}"},
-    {"category": "Container Security", "item": "Read-only root filesystem", "cmd": "kagent analyze containers --filesystem --namespace {namespace}"},
-    {"category": "Container Security", "item": "Capabilities dropped", "cmd": "kagent analyze containers --capabilities --namespace {namespace}"},
-    {"category": "Resources", "item": "Resource limits set for all containers", "cmd": "kagent analyze config --validate-limits --namespace {namespace}"},
-    {"category": "Resources", "item": "Resource requests set for all containers", "cmd": "kagent analyze config --validate-requests --namespace {namespace}"},
-    {"category": "Network", "item": "Network policies defined", "cmd": "kagent analyze network-policies --namespace {namespace}"},
-    {"category": "RBAC", "item": "Service accounts restricted", "cmd": "kagent analyze rbac --namespace {namespace}"},
-    {"category": "Secrets", "item": "Secrets properly managed", "cmd": "kagent analyze secrets --namespace {namespace} --hygiene"},
-    {"category": "Images", "item": "Specific image tags (not :latest)", "cmd": "kagent analyze images --namespace {namespace} --tags"},
-    {"category": "Images", "item": "Trusted image registries", "cmd": "kagent analyze images --namespace {namespace} --registries"},
+    {
+        "category": "Container Security",
+        "item": "Non-root containers",
+        "cmd": "kagent analyze containers --security --namespace {namespace}",
+    },
+    {
+        "category": "Container Security",
+        "item": "Read-only root filesystem",
+        "cmd": "kagent analyze containers --filesystem --namespace {namespace}",
+    },
+    {
+        "category": "Container Security",
+        "item": "Capabilities dropped",
+        "cmd": "kagent analyze containers --capabilities --namespace {namespace}",
+    },
+    {
+        "category": "Resources",
+        "item": "Resource limits set for all containers",
+        "cmd": "kagent analyze config --validate-limits --namespace {namespace}",
+    },
+    {
+        "category": "Resources",
+        "item": "Resource requests set for all containers",
+        "cmd": "kagent analyze config --validate-requests --namespace {namespace}",
+    },
+    {
+        "category": "Network",
+        "item": "Network policies defined",
+        "cmd": "kagent analyze network-policies --namespace {namespace}",
+    },
+    {
+        "category": "RBAC",
+        "item": "Service accounts restricted",
+        "cmd": "kagent analyze rbac --namespace {namespace}",
+    },
+    {
+        "category": "Secrets",
+        "item": "Secrets properly managed",
+        "cmd": "kagent analyze secrets --namespace {namespace} --hygiene",
+    },
+    {
+        "category": "Images",
+        "item": "Specific image tags (not :latest)",
+        "cmd": "kagent analyze images --namespace {namespace} --tags",
+    },
+    {
+        "category": "Images",
+        "item": "Trusted image registries",
+        "cmd": "kagent analyze images --namespace {namespace} --registries",
+    },
 ]
 
 # ---------------------------------------------------------------------------
@@ -602,12 +794,19 @@ _CFG = ConfigDict(str_strip_whitespace=True, extra="forbid")
 class KagentGeneratePromptInput(BaseModel):
     model_config = _CFG
     analysis_type: str = Field(
-        ..., description="Type of analysis: health, performance, resources, security, cost, best-practices, scaling, network, storage"
+        ...,
+        description="Type of analysis: health, performance, resources, security, cost, best-practices, scaling, network, storage",
     )
-    scope: str = Field(default="namespace", description="Scope: cluster, namespace, or workload")
+    scope: str = Field(
+        default="namespace", description="Scope: cluster, namespace, or workload"
+    )
     namespace: str = Field(default="default", description="Target namespace")
-    workload: Optional[str] = Field(default=None, description="Specific workload name (deployment, service, etc.)")
-    time_range: str = Field(default="24h", description="Time range: 1h, 6h, 24h, 7d, 30d")
+    workload: Optional[str] = Field(
+        default=None, description="Specific workload name (deployment, service, etc.)"
+    )
+    time_range: str = Field(
+        default="24h", description="Time range: 1h, 6h, 24h, 7d, 30d"
+    )
 
     @field_validator("analysis_type")
     @classmethod
@@ -640,10 +839,14 @@ class KagentGeneratePromptInput(BaseModel):
 
 class KagentAssessHealthInput(BaseModel):
     model_config = _CFG
-    scope: str = Field(default="cluster", description="Scope: cluster, namespace, or workload")
+    scope: str = Field(
+        default="cluster", description="Scope: cluster, namespace, or workload"
+    )
     namespace: str = Field(default="default", description="Target namespace")
     workload: Optional[str] = Field(default=None, description="Specific workload")
-    include_thresholds: bool = Field(default=True, description="Include health threshold reference")
+    include_thresholds: bool = Field(
+        default=True, description="Include health threshold reference"
+    )
 
     @field_validator("scope")
     @classmethod
@@ -663,8 +866,12 @@ class KagentAssessHealthInput(BaseModel):
 class KagentAnalyzeResourcesInput(BaseModel):
     model_config = _CFG
     namespace: str = Field(default="default", description="Target namespace")
-    resource_type: Optional[str] = Field(default=None, description="Specific resource type: cpu, memory, storage")
-    waste_threshold_pct: int = Field(default=50, ge=10, le=90, description="Waste detection threshold percentage")
+    resource_type: Optional[str] = Field(
+        default=None, description="Specific resource type: cpu, memory, storage"
+    )
+    waste_threshold_pct: int = Field(
+        default=50, ge=10, le=90, description="Waste detection threshold percentage"
+    )
 
     @field_validator("resource_type")
     @classmethod
@@ -684,18 +891,32 @@ class KagentAnalyzeResourcesInput(BaseModel):
 class KagentRecommendSizingInput(BaseModel):
     model_config = _CFG
     namespace: str = Field(default="default", description="Target namespace")
-    workload: Optional[str] = Field(default=None, description="Specific workload (deployment name)")
-    optimization_level: str = Field(default="conservative", description="Level: conservative, moderate, aggressive")
-    current_cpu_request: Optional[str] = Field(default=None, description="Current CPU request (e.g., '500m')")
-    current_memory_request: Optional[str] = Field(default=None, description="Current memory request (e.g., '512Mi')")
-    observed_cpu_p95: Optional[str] = Field(default=None, description="Observed p95 CPU usage (e.g., '150m')")
-    observed_memory_p95: Optional[str] = Field(default=None, description="Observed p95 memory usage (e.g., '280Mi')")
+    workload: Optional[str] = Field(
+        default=None, description="Specific workload (deployment name)"
+    )
+    optimization_level: str = Field(
+        default="conservative", description="Level: conservative, moderate, aggressive"
+    )
+    current_cpu_request: Optional[str] = Field(
+        default=None, description="Current CPU request (e.g., '500m')"
+    )
+    current_memory_request: Optional[str] = Field(
+        default=None, description="Current memory request (e.g., '512Mi')"
+    )
+    observed_cpu_p95: Optional[str] = Field(
+        default=None, description="Observed p95 CPU usage (e.g., '150m')"
+    )
+    observed_memory_p95: Optional[str] = Field(
+        default=None, description="Observed p95 memory usage (e.g., '280Mi')"
+    )
 
     @field_validator("optimization_level")
     @classmethod
     def _check_level(cls, v: str) -> str:
         if v not in VALID_OPTIMIZATION_LEVELS:
-            raise ValueError(f"optimization_level must be one of {VALID_OPTIMIZATION_LEVELS}")
+            raise ValueError(
+                f"optimization_level must be one of {VALID_OPTIMIZATION_LEVELS}"
+            )
         return v
 
     @field_validator("namespace")
@@ -722,12 +943,19 @@ class KagentDetectAntipatternsInput(BaseModel):
 class KagentGenerateWorkflowInput(BaseModel):
     model_config = _CFG
     workflow_type: str = Field(
-        ..., description="Workflow type: cluster-assessment, namespace-health, pre-deployment, performance-investigation, right-sizing, security-audit, cost-analysis, anomaly-investigation"
+        ...,
+        description="Workflow type: cluster-assessment, namespace-health, pre-deployment, performance-investigation, right-sizing, security-audit, cost-analysis, anomaly-investigation",
     )
     namespace: str = Field(default="default", description="Target namespace")
-    optimization_level: str = Field(default="conservative", description="Level: conservative, moderate, aggressive")
-    chart_name: Optional[str] = Field(default=None, description="Helm chart name (for pre-deployment)")
-    time_range: str = Field(default="24h", description="Time range for historical analysis")
+    optimization_level: str = Field(
+        default="conservative", description="Level: conservative, moderate, aggressive"
+    )
+    chart_name: Optional[str] = Field(
+        default=None, description="Helm chart name (for pre-deployment)"
+    )
+    time_range: str = Field(
+        default="24h", description="Time range for historical analysis"
+    )
 
     @field_validator("workflow_type")
     @classmethod
@@ -740,7 +968,9 @@ class KagentGenerateWorkflowInput(BaseModel):
     @classmethod
     def _check_level(cls, v: str) -> str:
         if v not in VALID_OPTIMIZATION_LEVELS:
-            raise ValueError(f"optimization_level must be one of {VALID_OPTIMIZATION_LEVELS}")
+            raise ValueError(
+                f"optimization_level must be one of {VALID_OPTIMIZATION_LEVELS}"
+            )
         return v
 
     @field_validator("namespace")
@@ -755,7 +985,9 @@ class KagentValidatePredeploymentInput(BaseModel):
     model_config = _CFG
     namespace: str = Field(default="default", description="Target namespace")
     chart_name: Optional[str] = Field(default=None, description="Helm chart name")
-    values_file: str = Field(default="values.yaml", description="Values file to validate")
+    values_file: str = Field(
+        default="values.yaml", description="Values file to validate"
+    )
 
     @field_validator("namespace")
     @classmethod
@@ -769,8 +1001,12 @@ class KagentAnalyzePerformanceInput(BaseModel):
     model_config = _CFG
     namespace: str = Field(default="default", description="Target namespace")
     workload: Optional[str] = Field(default=None, description="Specific workload name")
-    time_range: str = Field(default="24h", description="Time range: 1h, 6h, 24h, 7d, 30d")
-    observed_anomalies: Optional[list[str]] = Field(default=None, description="Observed issues (e.g., ['High latency', 'Timeouts'])")
+    time_range: str = Field(
+        default="24h", description="Time range: 1h, 6h, 24h, 7d, 30d"
+    )
+    observed_anomalies: Optional[list[str]] = Field(
+        default=None, description="Observed issues (e.g., ['High latency', 'Timeouts'])"
+    )
 
     @field_validator("time_range")
     @classmethod
@@ -790,7 +1026,9 @@ class KagentAnalyzePerformanceInput(BaseModel):
 class KagentAuditSecurityInput(BaseModel):
     model_config = _CFG
     namespace: str = Field(default="default", description="Target namespace")
-    include_prompts: bool = Field(default=True, description="Include kagent prompts for each check")
+    include_prompts: bool = Field(
+        default=True, description="Include kagent prompts for each check"
+    )
 
     @field_validator("namespace")
     @classmethod
@@ -803,9 +1041,12 @@ class KagentAuditSecurityInput(BaseModel):
 class KagentExplainConceptInput(BaseModel):
     model_config = _CFG
     concept: str = Field(
-        ..., description="Concept to explain: requests-vs-limits, hpa-vs-vpa, qos-classes, resource-quotas, pod-disruption-budgets, priority-classes, cpu-throttling, oom-killed, probe-types, image-optimization"
+        ...,
+        description="Concept to explain: requests-vs-limits, hpa-vs-vpa, qos-classes, resource-quotas, pod-disruption-budgets, priority-classes, cpu-throttling, oom-killed, probe-types, image-optimization",
     )
-    namespace: Optional[str] = Field(default="default", description="Namespace for contextualized prompts")
+    namespace: Optional[str] = Field(
+        default="default", description="Namespace for contextualized prompts"
+    )
 
     @field_validator("concept")
     @classmethod
@@ -820,8 +1061,13 @@ class KagentExplainConceptInput(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-def _format_prompts(prompts: list[str], namespace: str, workload: Optional[str] = None,
-                    time_range: str = "24h", threshold: int = 50) -> list[str]:
+def _format_prompts(
+    prompts: list[str],
+    namespace: str,
+    workload: Optional[str] = None,
+    time_range: str = "24h",
+    threshold: int = 50,
+) -> list[str]:
     """Interpolate namespace/workload/time_range into prompt templates."""
     result = []
     for p in prompts:
@@ -835,8 +1081,9 @@ def _format_prompts(prompts: list[str], namespace: str, workload: Optional[str] 
     return result
 
 
-def _gen_health_assessment(scope: str, namespace: str, workload: Optional[str],
-                           include_thresholds: bool) -> dict:
+def _gen_health_assessment(
+    scope: str, namespace: str, workload: Optional[str], include_thresholds: bool
+) -> dict:
     """Generate health assessment report structure."""
     prompts: list[str] = []
     if scope == "cluster":
@@ -848,23 +1095,33 @@ def _gen_health_assessment(scope: str, namespace: str, workload: Optional[str],
             "kagent analyze nodes --pressure",
         ]
     elif scope == "namespace":
-        prompts = _format_prompts([
-            "kagent analyze workloads --namespace {namespace}",
-            "kagent analyze resources --namespace {namespace} --detailed",
-            "kagent analyze best-practices --namespace {namespace}",
-            "kagent analyze config --namespace {namespace}",
-        ], namespace)
+        prompts = _format_prompts(
+            [
+                "kagent analyze workloads --namespace {namespace}",
+                "kagent analyze resources --namespace {namespace} --detailed",
+                "kagent analyze best-practices --namespace {namespace}",
+                "kagent analyze config --namespace {namespace}",
+            ],
+            namespace,
+        )
     elif scope == "workload":
         if workload:
-            prompts = _format_prompts([
-                "kagent analyze deployment {workload} --namespace {namespace}",
-                "kagent analyze deployment {workload} --replicas --utilization",
-                "kagent analyze pod {workload} --resources",
-            ], namespace, workload)
+            prompts = _format_prompts(
+                [
+                    "kagent analyze deployment {workload} --namespace {namespace}",
+                    "kagent analyze deployment {workload} --replicas --utilization",
+                    "kagent analyze pod {workload} --resources",
+                ],
+                namespace,
+                workload,
+            )
         else:
-            prompts = _format_prompts([
-                "kagent analyze workloads --namespace {namespace}",
-            ], namespace)
+            prompts = _format_prompts(
+                [
+                    "kagent analyze workloads --namespace {namespace}",
+                ],
+                namespace,
+            )
 
     result: dict = {
         "scope": scope,
@@ -886,18 +1143,25 @@ def _gen_health_assessment(scope: str, namespace: str, workload: Optional[str],
     return result
 
 
-def _gen_resource_analysis(namespace: str, resource_type: Optional[str],
-                           waste_threshold: int) -> dict:
+def _gen_resource_analysis(
+    namespace: str, resource_type: Optional[str], waste_threshold: int
+) -> dict:
     """Generate resource utilization analysis prompts and guidance."""
-    prompts = _format_prompts([
-        "kagent analyze utilization --namespace {namespace}",
-        "kagent analyze waste --namespace {namespace} --threshold {threshold}",
-        "kagent analyze sizing-candidates --namespace {namespace}",
-        "kagent analyze efficiency --below 30",
-    ], namespace, threshold=waste_threshold)
+    prompts = _format_prompts(
+        [
+            "kagent analyze utilization --namespace {namespace}",
+            "kagent analyze waste --namespace {namespace} --threshold {threshold}",
+            "kagent analyze sizing-candidates --namespace {namespace}",
+            "kagent analyze efficiency --below 30",
+        ],
+        namespace,
+        threshold=waste_threshold,
+    )
 
     if resource_type:
-        prompts.append(f"kagent analyze utilization --type {resource_type} --namespace {namespace}")
+        prompts.append(
+            f"kagent analyze utilization --type {resource_type} --namespace {namespace}"
+        )
 
     return {
         "namespace": namespace,
@@ -928,21 +1192,28 @@ def _parse_resource_value(value: str) -> float:
     return float(v) * 1000  # assume cores → millicores
 
 
-def _gen_sizing_recommendation(namespace: str, workload: Optional[str],
-                                level: str, current_cpu: Optional[str],
-                                current_mem: Optional[str],
-                                observed_cpu: Optional[str],
-                                observed_mem: Optional[str]) -> dict:
+def _gen_sizing_recommendation(
+    namespace: str,
+    workload: Optional[str],
+    level: str,
+    current_cpu: Optional[str],
+    current_mem: Optional[str],
+    observed_cpu: Optional[str],
+    observed_mem: Optional[str],
+) -> dict:
     """Generate right-sizing recommendation."""
     config = OPTIMIZATION_CONFIGS[level]
     result: dict = {
         "namespace": namespace,
         "optimization_level": level,
         "level_config": config,
-        "analysis_prompts": _format_prompts([
-            "kagent analyze sizing --namespace {namespace} --period 7d",
-            "kagent recommend sizing --namespace {namespace} --{optimization_level}",
-        ], namespace).copy(),
+        "analysis_prompts": _format_prompts(
+            [
+                "kagent analyze sizing --namespace {namespace} --period 7d",
+                "kagent recommend sizing --namespace {namespace} --{optimization_level}",
+            ],
+            namespace,
+        ).copy(),
         "safety_reminder": "APPROVAL REQUIRED: All changes require explicit user confirmation.",
     }
 
@@ -986,21 +1257,38 @@ def _gen_sizing_recommendation(namespace: str, workload: Optional[str],
         }
 
     # Generate helm upgrade command if we have a workload and any recommendation
-    if workload and ("cpu_recommendation" in result or "memory_recommendation" in result):
+    if workload and (
+        "cpu_recommendation" in result or "memory_recommendation" in result
+    ):
         set_args = []
         if "cpu_recommendation" in result:
-            set_args.append(f"--set {workload}.resources.requests.cpu={result['cpu_recommendation']['recommended_request']}")
-            set_args.append(f"--set {workload}.resources.limits.cpu={result['cpu_recommendation']['recommended_limit']}")
+            set_args.append(
+                f"--set {workload}.resources.requests.cpu={result['cpu_recommendation']['recommended_request']}"
+            )
+            set_args.append(
+                f"--set {workload}.resources.limits.cpu={result['cpu_recommendation']['recommended_limit']}"
+            )
         if "memory_recommendation" in result:
-            set_args.append(f"--set {workload}.resources.requests.memory={result['memory_recommendation']['recommended_request']}")
-            set_args.append(f"--set {workload}.resources.limits.memory={result['memory_recommendation']['recommended_limit']}")
-        result["helm_upgrade_command"] = f"helm upgrade <release> ./<chart> {' '.join(set_args)}"
+            set_args.append(
+                f"--set {workload}.resources.requests.memory={result['memory_recommendation']['recommended_request']}"
+            )
+            set_args.append(
+                f"--set {workload}.resources.limits.memory={result['memory_recommendation']['recommended_limit']}"
+            )
+        result["helm_upgrade_command"] = (
+            f"helm upgrade <release> ./<chart> {' '.join(set_args)}"
+        )
 
     return result
 
 
-def _gen_workflow(workflow_type: str, namespace: str, level: str,
-                  chart_name: Optional[str], time_range: str) -> dict:
+def _gen_workflow(
+    workflow_type: str,
+    namespace: str,
+    level: str,
+    chart_name: Optional[str],
+    time_range: str,
+) -> dict:
     """Generate a complete analysis workflow."""
     defn = WORKFLOW_DEFINITIONS[workflow_type]
     steps = []
@@ -1059,15 +1347,18 @@ async def kagent_generate_prompt(
     raw_prompts = PROMPT_CATEGORIES.get(category_key, [])
     prompts = _format_prompts(raw_prompts, inp.namespace, inp.workload, inp.time_range)
 
-    return json.dumps({
-        "analysis_type": inp.analysis_type,
-        "scope": inp.scope,
-        "namespace": inp.namespace,
-        "workload": inp.workload,
-        "time_range": inp.time_range,
-        "prompts": prompts,
-        "output_formats": ["--output json", "--output yaml", "--output table"],
-    }, indent=2)
+    return json.dumps(
+        {
+            "analysis_type": inp.analysis_type,
+            "scope": inp.scope,
+            "namespace": inp.namespace,
+            "workload": inp.workload,
+            "time_range": inp.time_range,
+            "prompts": prompts,
+            "output_formats": ["--output json", "--output yaml", "--output table"],
+        },
+        indent=2,
+    )
 
 
 @mcp.tool()
@@ -1088,7 +1379,9 @@ async def kagent_assess_health(
         workload=workload,
         include_thresholds=include_thresholds,
     )
-    result = _gen_health_assessment(inp.scope, inp.namespace, inp.workload, inp.include_thresholds)
+    result = _gen_health_assessment(
+        inp.scope, inp.namespace, inp.workload, inp.include_thresholds
+    )
     return json.dumps(result, indent=2)
 
 
@@ -1108,7 +1401,9 @@ async def kagent_analyze_resources(
         resource_type=resource_type,
         waste_threshold_pct=waste_threshold_pct,
     )
-    result = _gen_resource_analysis(inp.namespace, inp.resource_type, inp.waste_threshold_pct)
+    result = _gen_resource_analysis(
+        inp.namespace, inp.resource_type, inp.waste_threshold_pct
+    )
     return json.dumps(result, indent=2)
 
 
@@ -1138,9 +1433,13 @@ async def kagent_recommend_sizing(
         observed_memory_p95=observed_memory_p95,
     )
     result = _gen_sizing_recommendation(
-        inp.namespace, inp.workload, inp.optimization_level,
-        inp.current_cpu_request, inp.current_memory_request,
-        inp.observed_cpu_p95, inp.observed_memory_p95,
+        inp.namespace,
+        inp.workload,
+        inp.optimization_level,
+        inp.current_cpu_request,
+        inp.current_memory_request,
+        inp.observed_cpu_p95,
+        inp.observed_memory_p95,
     )
     return json.dumps(result, indent=2)
 
@@ -1171,16 +1470,22 @@ async def kagent_detect_antipatterns(
             entry["fix"] = info["fix"]
         patterns.append(entry)
 
-    return json.dumps({
-        "namespace": inp.namespace,
-        "antipatterns": patterns,
-        "detection_prompts": _format_prompts([
-            "kagent analyze best-practices --namespace {namespace}",
-            "kagent analyze config --validate-limits --namespace {namespace}",
-            "kagent analyze containers --security --namespace {namespace}",
-            "kagent analyze images --namespace {namespace} --tags",
-        ], inp.namespace),
-    }, indent=2)
+    return json.dumps(
+        {
+            "namespace": inp.namespace,
+            "antipatterns": patterns,
+            "detection_prompts": _format_prompts(
+                [
+                    "kagent analyze best-practices --namespace {namespace}",
+                    "kagent analyze config --validate-limits --namespace {namespace}",
+                    "kagent analyze containers --security --namespace {namespace}",
+                    "kagent analyze images --namespace {namespace} --tags",
+                ],
+                inp.namespace,
+            ),
+        },
+        indent=2,
+    )
 
 
 @mcp.tool()
@@ -1206,8 +1511,11 @@ async def kagent_generate_workflow(
         time_range=time_range,
     )
     result = _gen_workflow(
-        inp.workflow_type, inp.namespace, inp.optimization_level,
-        inp.chart_name, inp.time_range,
+        inp.workflow_type,
+        inp.namespace,
+        inp.optimization_level,
+        inp.chart_name,
+        inp.time_range,
     )
     return json.dumps(result, indent=2)
 
@@ -1231,23 +1539,58 @@ async def kagent_validate_predeployment(
     chart = inp.chart_name or "<chart>"
 
     checklist = [
-        {"category": "Resources", "item": "Sufficient cluster resources", "cmd": f"kagent analyze capacity --for-deployment ./{inp.values_file}"},
-        {"category": "Configuration", "item": "Chart linting passes", "cmd": f"kagent validate chart ./{chart} --values {inp.values_file}"},
-        {"category": "Configuration", "item": "Best practices met", "cmd": "kagent lint deployment --strict"},
-        {"category": "Configuration", "item": "Resource limits defined", "cmd": f"kagent analyze config --validate-limits --namespace {inp.namespace}"},
-        {"category": "Configuration", "item": "Probes configured", "cmd": f"kagent analyze probes --namespace {inp.namespace}"},
-        {"category": "Security", "item": "Security context set", "cmd": f"kagent analyze containers --security --namespace {inp.namespace}"},
-        {"category": "Images", "item": "Image tags specific (not :latest)", "cmd": f"kagent analyze images --namespace {inp.namespace} --tags"},
-        {"category": "Risk", "item": "Risk assessment", "cmd": f"kagent assess risk --deployment {chart}"},
+        {
+            "category": "Resources",
+            "item": "Sufficient cluster resources",
+            "cmd": f"kagent analyze capacity --for-deployment ./{inp.values_file}",
+        },
+        {
+            "category": "Configuration",
+            "item": "Chart linting passes",
+            "cmd": f"kagent validate chart ./{chart} --values {inp.values_file}",
+        },
+        {
+            "category": "Configuration",
+            "item": "Best practices met",
+            "cmd": "kagent lint deployment --strict",
+        },
+        {
+            "category": "Configuration",
+            "item": "Resource limits defined",
+            "cmd": f"kagent analyze config --validate-limits --namespace {inp.namespace}",
+        },
+        {
+            "category": "Configuration",
+            "item": "Probes configured",
+            "cmd": f"kagent analyze probes --namespace {inp.namespace}",
+        },
+        {
+            "category": "Security",
+            "item": "Security context set",
+            "cmd": f"kagent analyze containers --security --namespace {inp.namespace}",
+        },
+        {
+            "category": "Images",
+            "item": "Image tags specific (not :latest)",
+            "cmd": f"kagent analyze images --namespace {inp.namespace} --tags",
+        },
+        {
+            "category": "Risk",
+            "item": "Risk assessment",
+            "cmd": f"kagent assess risk --deployment {chart}",
+        },
     ]
 
-    return json.dumps({
-        "namespace": inp.namespace,
-        "chart_name": chart,
-        "values_file": inp.values_file,
-        "checklist": checklist,
-        "advisory_notice": "Complete all checks before running helm install/upgrade.",
-    }, indent=2)
+    return json.dumps(
+        {
+            "namespace": inp.namespace,
+            "chart_name": chart,
+            "values_file": inp.values_file,
+            "checklist": checklist,
+            "advisory_notice": "Complete all checks before running helm install/upgrade.",
+        },
+        indent=2,
+    )
 
 
 @mcp.tool()
@@ -1275,27 +1618,39 @@ async def kagent_analyze_performance(
             "metric": info["metric"],
             "good": info["good"],
             "needs_attention": info["needs_attention"],
-            "prompts": _format_prompts(info["prompts"], inp.namespace, inp.workload, inp.time_range),
+            "prompts": _format_prompts(
+                info["prompts"], inp.namespace, inp.workload, inp.time_range
+            ),
         }
 
     result: dict = {
         "namespace": inp.namespace,
         "time_range": inp.time_range,
         "performance_indicators": indicators,
-        "general_prompts": _format_prompts([
-            "kagent analyze performance --namespace {namespace}",
-            "kagent analyze bottlenecks --namespace {namespace} --top 5",
-            "kagent analyze trends --namespace {namespace} --period {time_range}",
-        ], inp.namespace, inp.workload, inp.time_range),
+        "general_prompts": _format_prompts(
+            [
+                "kagent analyze performance --namespace {namespace}",
+                "kagent analyze bottlenecks --namespace {namespace} --top 5",
+                "kagent analyze trends --namespace {namespace} --period {time_range}",
+            ],
+            inp.namespace,
+            inp.workload,
+            inp.time_range,
+        ),
     }
 
     if inp.workload:
         result["workload"] = inp.workload
-        result["workload_prompts"] = _format_prompts([
-            "kagent analyze performance --deployment {workload} -n {namespace}",
-            "kagent analyze bottlenecks --deployment {workload} -n {namespace}",
-            "kagent analyze resources --deployment {workload} --pressure",
-        ], inp.namespace, inp.workload, inp.time_range)
+        result["workload_prompts"] = _format_prompts(
+            [
+                "kagent analyze performance --deployment {workload} -n {namespace}",
+                "kagent analyze bottlenecks --deployment {workload} -n {namespace}",
+                "kagent analyze resources --deployment {workload} --pressure",
+            ],
+            inp.namespace,
+            inp.workload,
+            inp.time_range,
+        )
 
     if inp.observed_anomalies:
         result["observed_anomalies"] = inp.observed_anomalies
@@ -1311,16 +1666,39 @@ async def kagent_analyze_performance(
         for anomaly_text in inp.observed_anomalies:
             lower = anomaly_text.lower()
             for atype, ainfo in ANOMALY_TYPES.items():
-                causes_match = any(c.lower() in lower for c in ainfo["potential_causes"])
+                causes_match = any(
+                    c.lower() in lower for c in ainfo["potential_causes"]
+                )
                 type_match = atype.replace("-", " ") in lower
-                keyword_match = any(kw in lower for kw in ["restart", "pending", "evict", "probe", "image", "pvc", "latency", "timeout", "crash", "oom"])
+                keyword_match = any(
+                    kw in lower
+                    for kw in [
+                        "restart",
+                        "pending",
+                        "evict",
+                        "probe",
+                        "image",
+                        "pvc",
+                        "latency",
+                        "timeout",
+                        "crash",
+                        "oom",
+                    ]
+                )
                 if causes_match or type_match or keyword_match:
-                    matched_anomalies.append({
-                        "observed": anomaly_text,
-                        "likely_type": atype,
-                        "potential_causes": ainfo["potential_causes"],
-                        "investigation_prompts": _format_prompts(ainfo["investigation_prompts"], inp.namespace, inp.workload, inp.time_range),
-                    })
+                    matched_anomalies.append(
+                        {
+                            "observed": anomaly_text,
+                            "likely_type": atype,
+                            "potential_causes": ainfo["potential_causes"],
+                            "investigation_prompts": _format_prompts(
+                                ainfo["investigation_prompts"],
+                                inp.namespace,
+                                inp.workload,
+                                inp.time_range,
+                            ),
+                        }
+                    )
                     break
         if matched_anomalies:
             result["matched_anomalies"] = matched_anomalies
@@ -1354,17 +1732,23 @@ async def kagent_audit_security(
             entry["command"] = check["cmd"].format(namespace=inp.namespace)
         items.append(entry)
 
-    return json.dumps({
-        "namespace": inp.namespace,
-        "audit_checklist": items,
-        "workflow_prompts": _format_prompts([
-            "kagent analyze security --namespace {namespace}",
-            "kagent analyze rbac --namespace {namespace}",
-            "kagent analyze pod-security --namespace {namespace}",
-            "kagent analyze network-security --namespace {namespace}",
-        ], inp.namespace),
-        "advisory_notice": "Security findings are recommendations only. Review and apply through Helm values.",
-    }, indent=2)
+    return json.dumps(
+        {
+            "namespace": inp.namespace,
+            "audit_checklist": items,
+            "workflow_prompts": _format_prompts(
+                [
+                    "kagent analyze security --namespace {namespace}",
+                    "kagent analyze rbac --namespace {namespace}",
+                    "kagent analyze pod-security --namespace {namespace}",
+                    "kagent analyze network-security --namespace {namespace}",
+                ],
+                inp.namespace,
+            ),
+            "advisory_notice": "Security findings are recommendations only. Review and apply through Helm values.",
+        },
+        indent=2,
+    )
 
 
 @mcp.tool()
@@ -1383,14 +1767,19 @@ async def kagent_explain_concept(
     )
     info = CONCEPT_EXPLANATIONS[inp.concept]
 
-    return json.dumps({
-        "concept": inp.concept,
-        "title": info["title"],
-        "summary": info["summary"],
-        "details": info["details"],
-        "related_prompts": _format_prompts(info["related_prompts"], inp.namespace or "default"),
-        "all_concepts": list(VALID_CONCEPTS),
-    }, indent=2)
+    return json.dumps(
+        {
+            "concept": inp.concept,
+            "title": info["title"],
+            "summary": info["summary"],
+            "details": info["details"],
+            "related_prompts": _format_prompts(
+                info["related_prompts"], inp.namespace or "default"
+            ),
+            "all_concepts": list(VALID_CONCEPTS),
+        },
+        indent=2,
+    )
 
 
 # ---------------------------------------------------------------------------

@@ -63,7 +63,8 @@ class ApprovalChecker:
         """Return list of keywords that matched in the task body."""
         text = task_path.read_text(encoding="utf-8")
         return [
-            kw for kw, p in zip(self.config.approval_keywords, self._patterns)
+            kw
+            for kw, p in zip(self.config.approval_keywords, self._patterns)
             if p.search(text)
         ]
 

@@ -24,28 +24,36 @@ class MetricsCollector:
 
     def task_started(self, task_name: str, priority: float = 0.0) -> None:
         """Record that a task has begun execution."""
-        self._write({
-            "event": "task_started",
-            "task_name": task_name,
-            "priority": priority,
-        })
+        self._write(
+            {
+                "event": "task_started",
+                "task_name": task_name,
+                "priority": priority,
+            }
+        )
 
     def task_completed(self, task_name: str, duration_seconds: float) -> None:
         """Record successful task completion."""
-        self._write({
-            "event": "task_completed",
-            "task_name": task_name,
-            "duration_seconds": round(duration_seconds, 3),
-        })
+        self._write(
+            {
+                "event": "task_completed",
+                "task_name": task_name,
+                "duration_seconds": round(duration_seconds, 3),
+            }
+        )
 
-    def task_failed(self, task_name: str, duration_seconds: float, error: str = "") -> None:
+    def task_failed(
+        self, task_name: str, duration_seconds: float, error: str = ""
+    ) -> None:
         """Record a task failure."""
-        self._write({
-            "event": "task_failed",
-            "task_name": task_name,
-            "duration_seconds": round(duration_seconds, 3),
-            "error": error,
-        })
+        self._write(
+            {
+                "event": "task_failed",
+                "task_name": task_name,
+                "duration_seconds": round(duration_seconds, 3),
+                "error": error,
+            }
+        )
 
     def resource_snapshot(self) -> None:
         """
@@ -56,6 +64,7 @@ class MetricsCollector:
         """
         try:
             import psutil
+
             process = psutil.Process()
 
             # Get CPU and memory usage
@@ -63,11 +72,13 @@ class MetricsCollector:
             memory_info = process.memory_info()
             memory_mb = round(memory_info.rss / (1024 * 1024), 2)  # RSS in MB
 
-            self._write({
-                "event": "resource_snapshot",
-                "cpu_percent": round(cpu_percent, 2),
-                "memory_mb": memory_mb,
-            })
+            self._write(
+                {
+                    "event": "resource_snapshot",
+                    "cpu_percent": round(cpu_percent, 2),
+                    "memory_mb": memory_mb,
+                }
+            )
         except ImportError:
             # psutil not available - silently skip
             pass
@@ -105,7 +116,9 @@ class MetricsCollector:
     def calculate_avg_latency(self, since: Optional[datetime] = None) -> float:
         """Average task duration in seconds across completed and failed tasks."""
         events = self._load_events(since)
-        terminal = [e for e in events if e["event"] in ("task_completed", "task_failed")]
+        terminal = [
+            e for e in events if e["event"] in ("task_completed", "task_failed")
+        ]
         if not terminal:
             return 0.0
         total = sum(e["duration_seconds"] for e in terminal)

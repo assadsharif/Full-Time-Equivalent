@@ -51,9 +51,7 @@ def safe_read(file_path: Path) -> str:
     try:
         return file_path.read_text(encoding="utf-8")
     except OSError as e:
-        raise FileOperationError(
-            f"Failed to read {file_path}: {e}"
-        ) from e
+        raise FileOperationError(f"Failed to read {file_path}: {e}") from e
 
 
 def safe_write(file_path: Path, content: str) -> None:
@@ -70,6 +68,4 @@ def safe_write(file_path: Path, content: str) -> None:
     try:
         file_path.write_text(content, encoding="utf-8")
     except OSError as e:
-        raise FileOperationError(
-            f"Failed to write {file_path}: {e}"
-        ) from e
+        raise FileOperationError(f"Failed to write {file_path}: {e}") from e

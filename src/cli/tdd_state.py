@@ -10,7 +10,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-
 # Valid TDD phases
 PHASES = ("idle", "red", "green", "refactor")
 

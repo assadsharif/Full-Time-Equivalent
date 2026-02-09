@@ -56,16 +56,11 @@ def init_configuration(vault_path: Optional[str] = None, force: bool = False) ->
         display_info(f"Default vault path: {default_path}")
 
         use_default = Prompt.ask(
-            "Use default vault path?",
-            choices=["y", "n"],
-            default="y"
+            "Use default vault path?", choices=["y", "n"], default="y"
         )
 
         if use_default.lower() == "n":
-            vault_path = Prompt.ask(
-                "Enter vault path",
-                default=default_path
-            )
+            vault_path = Prompt.ask("Enter vault path", default=default_path)
         else:
             vault_path = default_path
 
@@ -77,9 +72,7 @@ def init_configuration(vault_path: Optional[str] = None, force: bool = False) ->
     if not vault_path_resolved.exists():
         display_warning(f"Vault directory does not exist: {vault_path_resolved}")
         create_vault = Prompt.ask(
-            "Would you like to create it?",
-            choices=["y", "n"],
-            default="n"
+            "Would you like to create it?", choices=["y", "n"], default="n"
         )
 
         if create_vault.lower() == "y":
@@ -104,7 +97,7 @@ def init_configuration(vault_path: Optional[str] = None, force: bool = False) ->
         checkpoint_manager = get_checkpoint_manager()
         checkpoint_manager.update_vault(
             path=str(vault_path_resolved),
-            initialized=is_valid_vault(vault_path_resolved)
+            initialized=is_valid_vault(vault_path_resolved),
         )
 
         display_success("Checkpoint file created")

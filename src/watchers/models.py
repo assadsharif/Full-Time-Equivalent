@@ -19,7 +19,9 @@ class WatcherEvent(BaseModel):
         default_factory=lambda: datetime.now(timezone.utc),
         description="Event timestamp in UTC",
     )
-    priority: str = Field(default="medium", description="Priority: low, medium, high, urgent")
+    priority: str = Field(
+        default="medium", description="Priority: low, medium, high, urgent"
+    )
     pii_redacted: bool = Field(default=False, description="Whether PII was redacted")
 
 
@@ -32,8 +34,12 @@ class EmailMessage(WatcherEvent):
     subject: str = Field(..., description="Email subject line")
     body: str = Field(default="", description="Email body in Markdown format")
     labels: list[str] = Field(default_factory=list, description="Gmail labels")
-    has_attachments: bool = Field(default=False, description="Whether email has attachments")
-    attachments: list[str] = Field(default_factory=list, description="List of attachment filenames")
+    has_attachments: bool = Field(
+        default=False, description="Whether email has attachments"
+    )
+    attachments: list[str] = Field(
+        default_factory=list, description="List of attachment filenames"
+    )
     attachment_paths: list[Path] = Field(
         default_factory=list, description="Paths to downloaded attachments"
     )
@@ -54,7 +60,9 @@ class FileEvent(WatcherEvent):
     file_size: int = Field(..., description="File size in bytes")
     file_type: str = Field(default="application/octet-stream", description="MIME type")
     file_hash: str = Field(default="", description="SHA256 hash of file content")
-    event_type: str = Field(default="created", description="Event type: created, modified, deleted")
+    event_type: str = Field(
+        default="created", description="Event type: created, modified, deleted"
+    )
 
     def generate_id(self) -> str:
         """Generate unique ID from file details."""
@@ -69,10 +77,14 @@ class WhatsAppMessage(WatcherEvent):
     source: str = "whatsapp"
     message_id: str = Field(..., description="WhatsApp message ID")
     sender_phone: str = Field(..., description="Sender phone number")
-    message_type: str = Field(default="text", description="Message type: text, image, document")
+    message_type: str = Field(
+        default="text", description="Message type: text, image, document"
+    )
     body: str = Field(default="", description="Message body")
     has_media: bool = Field(default=False, description="Whether message has media")
-    media_path: Optional[Path] = Field(default=None, description="Path to downloaded media")
+    media_path: Optional[Path] = Field(
+        default=None, description="Path to downloaded media"
+    )
 
     def generate_id(self) -> str:
         """Generate unique ID from message details."""

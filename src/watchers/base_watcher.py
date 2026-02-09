@@ -150,7 +150,10 @@ class BaseWatcher(ABC):
             except permanent_errors as e:
                 logger.error(
                     f"Permanent error in {self.watcher_name}, not retrying: {e}",
-                    context={"error_type": type(e).__name__, "watcher": self.watcher_name},
+                    context={
+                        "error_type": type(e).__name__,
+                        "watcher": self.watcher_name,
+                    },
                 )
                 raise
             except Exception as e:

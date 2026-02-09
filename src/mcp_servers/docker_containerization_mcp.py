@@ -31,14 +31,39 @@ mcp = FastMCP("docker_containerization_mcp")
 # ---------------------------------------------------------------------------
 
 TEMPLATES: list[dict] = [
-    {"name": "fastapi", "language": "python", "framework": "fastapi", "role": "backend"},
+    {
+        "name": "fastapi",
+        "language": "python",
+        "framework": "fastapi",
+        "role": "backend",
+    },
     {"name": "flask", "language": "python", "framework": "flask", "role": "backend"},
     {"name": "django", "language": "python", "framework": "django", "role": "backend"},
-    {"name": "nextjs", "language": "javascript", "framework": "nextjs", "role": "frontend"},
-    {"name": "react", "language": "javascript", "framework": "react", "role": "frontend"},
+    {
+        "name": "nextjs",
+        "language": "javascript",
+        "framework": "nextjs",
+        "role": "frontend",
+    },
+    {
+        "name": "react",
+        "language": "javascript",
+        "framework": "react",
+        "role": "frontend",
+    },
     {"name": "vue", "language": "javascript", "framework": "vue", "role": "frontend"},
-    {"name": "express", "language": "javascript", "framework": "express", "role": "backend"},
-    {"name": "nestjs", "language": "javascript", "framework": "nestjs", "role": "backend"},
+    {
+        "name": "express",
+        "language": "javascript",
+        "framework": "express",
+        "role": "backend",
+    },
+    {
+        "name": "nestjs",
+        "language": "javascript",
+        "framework": "nestjs",
+        "role": "backend",
+    },
     {"name": "go-stdlib", "language": "go", "framework": "stdlib", "role": "backend"},
     {"name": "rust", "language": "rust", "framework": "actix", "role": "backend"},
 ]
@@ -179,16 +204,24 @@ class DockerfileGenerateInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    application_role: str = Field(..., description="Application tier: 'backend' or 'frontend'")
+    application_role: str = Field(
+        ..., description="Application tier: 'backend' or 'frontend'"
+    )
     language: str = Field(..., min_length=1, description="Programming language")
     version: str = Field(..., min_length=1, description="Language/runtime version")
     framework: str = Field(..., min_length=1, description="Framework name")
     port: int = Field(..., ge=1, le=65535, description="Port to expose")
-    environment_variables: Optional[list[str]] = Field(None, description="Env var names (no values)")
+    environment_variables: Optional[list[str]] = Field(
+        None, description="Env var names (no values)"
+    )
     base_image: Optional[str] = Field(None, description="Override base image")
-    build_args: Optional[dict[str, str]] = Field(None, description="Build-time arguments")
+    build_args: Optional[dict[str, str]] = Field(
+        None, description="Build-time arguments"
+    )
     multi_stage: bool = Field(True, description="Use multi-stage builds")
-    healthcheck_path: Optional[str] = Field(None, description="Health check endpoint path")
+    healthcheck_path: Optional[str] = Field(
+        None, description="Health check endpoint path"
+    )
 
     @field_validator("application_role")
     @classmethod
@@ -224,7 +257,9 @@ class RunCommandInput(BaseModel):
     port: int = Field(..., ge=1, le=65535, description="Port mapping (host:container)")
     container_name: Optional[str] = Field(None, description="Container name")
     env_file: Optional[str] = Field(None, description="Path to env file")
-    env_vars: Optional[list[str]] = Field(None, description="Env var names to pass through")
+    env_vars: Optional[list[str]] = Field(
+        None, description="Env var names to pass through"
+    )
     detach: bool = Field(False, description="Run in detached mode")
     restart_policy: str = Field("unless-stopped", description="Restart policy")
 
@@ -235,15 +270,15 @@ class GordonPromptInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     category: str = Field(..., description="Prompt category")
-    context: Optional[str] = Field(None, description="Additional context to embed in prompt")
+    context: Optional[str] = Field(
+        None, description="Additional context to embed in prompt"
+    )
 
     @field_validator("category")
     @classmethod
     def validate_category(cls, v: str) -> str:
         if v not in VALID_GORDON_CATEGORIES:
-            raise ValueError(
-                f"category must be one of {VALID_GORDON_CATEGORIES}"
-            )
+            raise ValueError(f"category must be one of {VALID_GORDON_CATEGORIES}")
         return v
 
 
@@ -262,7 +297,9 @@ class DockerignoreInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     language: str = Field(..., min_length=1, description="Primary language")
-    extras: Optional[list[str]] = Field(None, description="Additional patterns to exclude")
+    extras: Optional[list[str]] = Field(
+        None, description="Additional patterns to exclude"
+    )
 
 
 class DockerfileValidateInput(BaseModel):
@@ -270,14 +307,19 @@ class DockerfileValidateInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    dockerfile_content: str = Field(..., min_length=1, description="Dockerfile content to validate")
+    dockerfile_content: str = Field(
+        ..., min_length=1, description="Dockerfile content to validate"
+    )
 
 
 # ---------------------------------------------------------------------------
 # Dockerfile generators (deterministic, pure functions)
 # ---------------------------------------------------------------------------
 
-def _gen_python_fastapi(version: str, port: int, env_vars: list[str] | None, healthcheck: str | None) -> str:
+
+def _gen_python_fastapi(
+    version: str, port: int, env_vars: list[str] | None, healthcheck: str | None
+) -> str:
     hc_path = healthcheck or "/health"
     env_block = ""
     if env_vars:
@@ -328,7 +370,9 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "{port}"]
 """
 
 
-def _gen_python_flask(version: str, port: int, env_vars: list[str] | None, healthcheck: str | None) -> str:
+def _gen_python_flask(
+    version: str, port: int, env_vars: list[str] | None, healthcheck: str | None
+) -> str:
     hc_path = healthcheck or "/health"
     env_block = ""
     if env_vars:
@@ -365,7 +409,9 @@ CMD ["gunicorn", "--bind", "0.0.0.0:{port}", "--workers", "4", "app:app"]
 """
 
 
-def _gen_python_django(version: str, port: int, env_vars: list[str] | None, healthcheck: str | None) -> str:
+def _gen_python_django(
+    version: str, port: int, env_vars: list[str] | None, healthcheck: str | None
+) -> str:
     hc_path = healthcheck or "/health/"
     env_block = ""
     if env_vars:
@@ -408,7 +454,9 @@ CMD ["gunicorn", "--bind", "0.0.0.0:{port}", "--workers", "4", "config.wsgi:appl
 """
 
 
-def _gen_python_generic(version: str, port: int, env_vars: list[str] | None, healthcheck: str | None) -> str:
+def _gen_python_generic(
+    version: str, port: int, env_vars: list[str] | None, healthcheck: str | None
+) -> str:
     hc_path = healthcheck or "/health"
     env_block = ""
     if env_vars:
@@ -444,7 +492,9 @@ CMD ["python", "main.py"]
 """
 
 
-def _gen_nextjs(version: str, port: int, env_vars: list[str] | None, healthcheck: str | None) -> str:
+def _gen_nextjs(
+    version: str, port: int, env_vars: list[str] | None, healthcheck: str | None
+) -> str:
     env_block = ""
     if env_vars:
         env_block = "\n".join(f"ARG {v}\nENV {v}=${v}" for v in env_vars) + "\n"
@@ -500,7 +550,9 @@ CMD ["node", "server.js"]
 """
 
 
-def _gen_react(version: str, port: int, env_vars: list[str] | None, healthcheck: str | None) -> str:
+def _gen_react(
+    version: str, port: int, env_vars: list[str] | None, healthcheck: str | None
+) -> str:
     env_block = ""
     if env_vars:
         env_block = "\n".join(f"ARG {v}\nENV {v}=${v}" for v in env_vars) + "\n"
@@ -547,7 +599,9 @@ CMD ["nginx", "-g", "daemon off;"]
 """
 
 
-def _gen_vue(version: str, port: int, env_vars: list[str] | None, healthcheck: str | None) -> str:
+def _gen_vue(
+    version: str, port: int, env_vars: list[str] | None, healthcheck: str | None
+) -> str:
     env_block = ""
     if env_vars:
         env_block = "\n".join(f"ARG {v}\nENV {v}=${v}" for v in env_vars) + "\n"
@@ -577,7 +631,9 @@ CMD ["nginx", "-g", "daemon off;"]
 """
 
 
-def _gen_express(version: str, port: int, env_vars: list[str] | None, healthcheck: str | None) -> str:
+def _gen_express(
+    version: str, port: int, env_vars: list[str] | None, healthcheck: str | None
+) -> str:
     hc_path = healthcheck or "/health"
     env_block = ""
     if env_vars:
@@ -614,7 +670,9 @@ CMD ["node", "server.js"]
 """
 
 
-def _gen_nestjs(version: str, port: int, env_vars: list[str] | None, healthcheck: str | None) -> str:
+def _gen_nestjs(
+    version: str, port: int, env_vars: list[str] | None, healthcheck: str | None
+) -> str:
     hc_path = healthcheck or "/health"
     env_block = ""
     if env_vars:
@@ -655,7 +713,9 @@ CMD ["node", "dist/main.js"]
 """
 
 
-def _gen_go(version: str, port: int, env_vars: list[str] | None, healthcheck: str | None) -> str:
+def _gen_go(
+    version: str, port: int, env_vars: list[str] | None, healthcheck: str | None
+) -> str:
     env_block = ""
     if env_vars:
         env_block = f"\n# Required environment variables: {', '.join(env_vars)}\n"
@@ -693,7 +753,9 @@ ENTRYPOINT ["/server"]
 """
 
 
-def _gen_rust(version: str, port: int, env_vars: list[str] | None, healthcheck: str | None) -> str:
+def _gen_rust(
+    version: str, port: int, env_vars: list[str] | None, healthcheck: str | None
+) -> str:
     hc_path = healthcheck or "/health"
     env_block = ""
     if env_vars:
@@ -851,6 +913,7 @@ target/
 # Tools
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool()
 async def docker_generate_dockerfile(
     application_role: str,
@@ -884,17 +947,19 @@ async def docker_generate_dockerfile(
                 new_lines.append(line)
         dockerfile = "\n".join(new_lines)
 
-    return json.dumps({
-        "status": "success",
-        "dockerfile": dockerfile,
-        "template_used": f"{language}/{framework}",
-        "notes": [
-            "Security: non-root user configured",
-            "Build: multi-stage build for minimal image size",
-            "Health: HEALTHCHECK instruction included",
-            "WARNING: Do NOT execute docker commands — review and adjust first",
-        ],
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "dockerfile": dockerfile,
+            "template_used": f"{language}/{framework}",
+            "notes": [
+                "Security: non-root user configured",
+                "Build: multi-stage build for minimal image size",
+                "Health: HEALTHCHECK instruction included",
+                "WARNING: Do NOT execute docker commands — review and adjust first",
+            ],
+        }
+    )
 
 
 @mcp.tool()
@@ -925,14 +990,16 @@ async def docker_suggest_build_command(
 
     command = " \\\n".join(parts)
 
-    return json.dumps({
-        "command": command,
-        "notes": [
-            "SUGGESTION ONLY — not executed",
-            "Uses git short SHA for image tagging",
-            "Add --no-cache to force full rebuild",
-        ],
-    })
+    return json.dumps(
+        {
+            "command": command,
+            "notes": [
+                "SUGGESTION ONLY — not executed",
+                "Uses git short SHA for image tagging",
+                "Add --no-cache to force full rebuild",
+            ],
+        }
+    )
 
 
 @mcp.tool()
@@ -973,14 +1040,16 @@ async def docker_suggest_run_command(
 
     command = " \\\n".join(parts)
 
-    return json.dumps({
-        "command": command,
-        "notes": [
-            "SUGGESTION ONLY — not executed",
-            "Use --env-file for secrets (never hardcode)",
-            f"Restart policy: {restart_policy}",
-        ],
-    })
+    return json.dumps(
+        {
+            "command": command,
+            "notes": [
+                "SUGGESTION ONLY — not executed",
+                "Use --env-file for secrets (never hardcode)",
+                f"Restart policy: {restart_policy}",
+            ],
+        }
+    )
 
 
 @mcp.tool()
@@ -1000,11 +1069,13 @@ async def docker_suggest_gordon_prompt(
     if context:
         prompt = f"{prompt}\n\nAdditional context: {context}"
 
-    return json.dumps({
-        "status": "success",
-        "category": category,
-        "prompt": prompt,
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "category": category,
+            "prompt": prompt,
+        }
+    )
 
 
 @mcp.tool()
@@ -1027,16 +1098,18 @@ async def docker_recommend_base_image(
         image = f"ubuntu:22.04"
         size = "~80MB"
 
-    return json.dumps({
-        "status": "success",
-        "recommended_image": image,
-        "estimated_size": size,
-        "notes": [
-            "Prefer slim/alpine variants for smaller attack surface",
-            "Pin specific version tags (avoid :latest)",
-            f"Language: {language}, Version: {version}",
-        ],
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "recommended_image": image,
+            "estimated_size": size,
+            "notes": [
+                "Prefer slim/alpine variants for smaller attack surface",
+                "Pin specific version tags (avoid :latest)",
+                f"Language: {language}, Version: {version}",
+            ],
+        }
+    )
 
 
 @mcp.tool()
@@ -1065,10 +1138,12 @@ async def docker_generate_dockerignore(
         for pattern in extras:
             content += f"{pattern}\n"
 
-    return json.dumps({
-        "status": "success",
-        "content": content,
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "content": content,
+        }
+    )
 
 
 @mcp.tool()
@@ -1087,14 +1162,18 @@ async def docker_validate_dockerfile(
     has_user = any(l.startswith("USER ") and "root" not in l.lower() for l in lines)
     has_healthcheck = any(l.startswith("HEALTHCHECK ") for l in upper_lines)
     has_multistage = sum(1 for l in upper_lines if l.startswith("FROM ")) > 1
-    uses_latest = any(":latest" in l for l in lines if l.strip().upper().startswith("FROM "))
+    uses_latest = any(
+        ":latest" in l for l in lines if l.strip().upper().startswith("FROM ")
+    )
 
     warnings: list[str] = []
 
     if not has_from:
         warnings.append("Missing FROM instruction — not a valid Dockerfile")
     if not has_user:
-        warnings.append("No non-root USER directive — container runs as root (security risk)")
+        warnings.append(
+            "No non-root USER directive — container runs as root (security risk)"
+        )
     if not has_healthcheck:
         warnings.append("No HEALTHCHECK instruction — container health not monitored")
     if not has_multistage:
@@ -1111,14 +1190,16 @@ async def docker_validate_dockerfile(
             )
             break
 
-    return json.dumps({
-        "has_from": has_from,
-        "has_nonroot_user": has_user,
-        "has_healthcheck": has_healthcheck,
-        "has_multistage": has_multistage,
-        "uses_latest_tag": uses_latest,
-        "warnings": warnings,
-    })
+    return json.dumps(
+        {
+            "has_from": has_from,
+            "has_nonroot_user": has_user,
+            "has_healthcheck": has_healthcheck,
+            "has_multistage": has_multistage,
+            "uses_latest_tag": uses_latest,
+            "warnings": warnings,
+        }
+    )
 
 
 @mcp.tool()
@@ -1128,10 +1209,12 @@ async def docker_list_templates() -> str:
     Returns JSON: {status, templates}
     Each template has: name, language, framework, role
     """
-    return json.dumps({
-        "status": "success",
-        "templates": TEMPLATES,
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "templates": TEMPLATES,
+        }
+    )
 
 
 # ---------------------------------------------------------------------------

@@ -113,7 +113,10 @@ class PIIRedactor:
         redaction_count = 0
         redacted_text = text
 
-        for pattern_name, (compiled_pattern, replacement) in self._compiled_patterns.items():
+        for pattern_name, (
+            compiled_pattern,
+            replacement,
+        ) in self._compiled_patterns.items():
             matches = compiled_pattern.findall(redacted_text)
             if matches:
                 patterns_found.append(pattern_name)
@@ -148,9 +151,11 @@ class PIIRedactor:
                 redacted[key] = self.redact_dict(value)
             elif isinstance(value, list):
                 redacted[key] = [
-                    self.redact_dict(item) if isinstance(item, dict)
-                    else self.redact(item).text if isinstance(item, str)
-                    else item
+                    (
+                        self.redact_dict(item)
+                        if isinstance(item, dict)
+                        else self.redact(item).text if isinstance(item, str) else item
+                    )
                     for item in value
                 ]
             elif isinstance(value, str):
@@ -169,7 +174,10 @@ class PIIRedactor:
             replacement: Replacement text
         """
         self.patterns[name] = {"pattern": pattern, "replacement": replacement}
-        self._compiled_patterns[name] = (re.compile(pattern, re.IGNORECASE), replacement)
+        self._compiled_patterns[name] = (
+            re.compile(pattern, re.IGNORECASE),
+            replacement,
+        )
         logger.info(f"Added PII pattern: {name}")
 
     def contains_pii(self, text: str) -> bool:
