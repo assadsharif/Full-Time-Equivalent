@@ -341,7 +341,12 @@ class AnomalyDetector:
             current = window_end
 
         if len(window_counts) < 3:
-            return None  # Not enough data
+            return None  # Not enough windows
+
+        # Also check if we have sufficient actual data (not just empty windows)
+        total_events = sum(window_counts)
+        if total_events < time_window_hours * 3:
+            return None  # Not enough actual events to establish baseline
 
         mean = sum(window_counts) / len(window_counts)
         variance = sum((x - mean) ** 2 for x in window_counts) / len(window_counts)
