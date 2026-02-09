@@ -246,15 +246,17 @@ class PersistenceLoop:
             checkpoint.last_error_type = error_type
 
             # Use error-type-specific retry policy (smart retry)
+            # Cap by global max_attempts to respect configuration
             retry_policy = RetryPolicy.for_error_type(error_type)
+            effective_max_attempts = min(retry_policy.max_attempts, self._retry.max_attempts)
 
-            if checkpoint.consecutive_retries >= retry_policy.max_attempts:
+            if checkpoint.consecutive_retries >= effective_max_attempts:
                 self._write_checkpoint(task_path, checkpoint)
                 return InvocationResult(
                     success=False,
                     stdout=result.stdout,
                     stderr=(
-                        f"Transient failure ({error_type}) repeated {retry_policy.max_attempts} "
+                        f"Transient failure ({error_type}) repeated {effective_max_attempts} "
                         f"times: {result.stderr[:150]}"
                     ),
                     returncode=result.returncode,
