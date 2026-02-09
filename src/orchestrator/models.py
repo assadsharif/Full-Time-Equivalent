@@ -35,6 +35,24 @@ class TaskState(str, Enum):
 class OrchestratorConfig:
     """Runtime configuration loaded from YAML or constructed programmatically."""
 
+    # Default constants (class-level for from_yaml access)
+    DEFAULT_VIP_SENDERS = ["ceo@company.com", "board@company.com"]
+    DEFAULT_APPROVAL_KEYWORDS = [
+        "deploy",
+        "production",
+        "delete",
+        "payment",
+        "wire",
+        "send email",
+        "execute",
+        "remove",
+    ]
+    DEFAULT_NOTIFICATION_EVENTS = [
+        "task_failed",
+        "health_degraded",
+        "orchestrator_stopped",
+    ]
+
     vault_path: Path = field(default_factory=lambda: Path.home() / "AI_Employee_Vault")
     poll_interval: int = 30  # seconds between discovery sweeps
     max_concurrent_tasks: int = 5  # parallel Claude invocations
@@ -49,24 +67,12 @@ class OrchestratorConfig:
 
     # VIP sender list (scores sender_importance = 5)
     vip_senders: list = field(
-        default_factory=lambda: [
-            "ceo@company.com",
-            "board@company.com",
-        ]
+        default_factory=lambda: OrchestratorConfig.DEFAULT_VIP_SENDERS.copy()
     )
 
     # Approval-required action keywords
     approval_keywords: list = field(
-        default_factory=lambda: [
-            "deploy",
-            "production",
-            "delete",
-            "payment",
-            "wire",
-            "send email",
-            "execute",
-            "remove",
-        ]
+        default_factory=lambda: OrchestratorConfig.DEFAULT_APPROVAL_KEYWORDS.copy()
     )
 
     # Persistence-loop retry policy (Plan 04)
@@ -79,11 +85,7 @@ class OrchestratorConfig:
     notifications_enabled: bool = False
     notification_webhook_url: Optional[str] = None
     notification_events: list[str] = field(
-        default_factory=lambda: [
-            "task_failed",
-            "health_degraded",
-            "orchestrator_stopped",
-        ]
+        default_factory=lambda: OrchestratorConfig.DEFAULT_NOTIFICATION_EVENTS.copy()
     )
 
     @classmethod
@@ -118,17 +120,15 @@ class OrchestratorConfig:
             urgency_weight=prio.get("urgency", 0.4),
             deadline_weight=prio.get("deadline", 0.3),
             sender_weight=prio.get("sender", 0.3),
-            vip_senders=raw.get(
-                "vip_senders", ["ceo@company.com", "board@company.com"]
-            ),
-            approval_keywords=raw.get("approval_keywords", cls.approval_keywords),
+            vip_senders=raw.get("vip_senders", cls.DEFAULT_VIP_SENDERS),
+            approval_keywords=raw.get("approval_keywords", cls.DEFAULT_APPROVAL_KEYWORDS),
             retry_max_attempts=raw.get("retry", {}).get("max_attempts", 3),
             retry_base_delay=raw.get("retry", {}).get("base_delay", 1.0),
             retry_max_delay=raw.get("retry", {}).get("max_delay", 16.0),
             retry_jitter=raw.get("retry", {}).get("jitter", 0.2),
             notifications_enabled=notifs.get("enabled", False),
             notification_webhook_url=notifs.get("webhook_url"),
-            notification_events=notifs.get("events", cls.notification_events),
+            notification_events=notifs.get("events", cls.DEFAULT_NOTIFICATION_EVENTS),
         )
 
 
