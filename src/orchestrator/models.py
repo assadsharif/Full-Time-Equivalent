@@ -171,3 +171,8 @@ class LoopExit:
     final_state: TaskState
     error: Optional[str] = None
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+
+    @property
+    def task_name(self) -> str:
+        """Return task filename for backward compatibility."""
+        return self.task_path.name

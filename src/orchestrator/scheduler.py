@@ -315,7 +315,8 @@ class Orchestrator:
                 )
                 task.state = TaskState.DONE
                 self._log(f"  [{task.name}] → DONE ✓ ({result.duration_seconds}s)")
-                self._record_exit(task, "done", True, start)
+                reason = "dry-run" if self.dry_run else "done"
+                self._record_exit(task, reason, True, start)
             else:
                 # 5b. EXECUTING → REJECTED
                 task.error = result.stderr[:200]
@@ -369,7 +370,8 @@ class Orchestrator:
                 )
                 task.state = TaskState.DONE
                 self._log(f"  [{task.name}] → DONE ✓ ({result.duration_seconds}s)")
-                self._record_exit(task, "done", True, start)
+                reason = "dry-run" if self.dry_run else "done"
+                self._record_exit(task, reason, True, start)
             else:
                 task.error = result.stderr[:200]
                 self._metrics.task_failed(task.name, elapsed, task.error)
