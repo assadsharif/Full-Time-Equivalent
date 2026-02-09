@@ -26,28 +26,40 @@ class TestStateMachine:
         Verify transition from Inbox to Needs_Action is valid.
         """
         sm = StateMachine()
-        assert sm.validate_transition(WorkflowState.INBOX, WorkflowState.NEEDS_ACTION) is True
+        assert (
+            sm.validate_transition(WorkflowState.INBOX, WorkflowState.NEEDS_ACTION)
+            is True
+        )
 
     def test_validate_transition_needs_action_to_plans(self):
         """
         Verify transition from Needs_Action to Plans is valid.
         """
         sm = StateMachine()
-        assert sm.validate_transition(WorkflowState.NEEDS_ACTION, WorkflowState.PLANS) is True
+        assert (
+            sm.validate_transition(WorkflowState.NEEDS_ACTION, WorkflowState.PLANS)
+            is True
+        )
 
     def test_validate_transition_plans_to_pending_approval(self):
         """
         Verify transition from Plans to Pending_Approval is valid.
         """
         sm = StateMachine()
-        assert sm.validate_transition(WorkflowState.PLANS, WorkflowState.PENDING_APPROVAL) is True
+        assert (
+            sm.validate_transition(WorkflowState.PLANS, WorkflowState.PENDING_APPROVAL)
+            is True
+        )
 
     def test_validate_transition_plans_to_needs_action(self):
         """
         Verify transition from Plans back to Needs_Action is valid (clarifications needed).
         """
         sm = StateMachine()
-        assert sm.validate_transition(WorkflowState.PLANS, WorkflowState.NEEDS_ACTION) is True
+        assert (
+            sm.validate_transition(WorkflowState.PLANS, WorkflowState.NEEDS_ACTION)
+            is True
+        )
 
     def test_validate_transition_pending_approval_to_approved(self):
         """
@@ -56,35 +68,52 @@ class TestStateMachine:
         Constitutional requirement (Section 7): Human approval via file move.
         """
         sm = StateMachine()
-        assert sm.validate_transition(WorkflowState.PENDING_APPROVAL, WorkflowState.APPROVED) is True
+        assert (
+            sm.validate_transition(
+                WorkflowState.PENDING_APPROVAL, WorkflowState.APPROVED
+            )
+            is True
+        )
 
     def test_validate_transition_pending_approval_to_rejected(self):
         """
         Verify transition from Pending_Approval to Rejected is valid (human rejection).
         """
         sm = StateMachine()
-        assert sm.validate_transition(WorkflowState.PENDING_APPROVAL, WorkflowState.REJECTED) is True
+        assert (
+            sm.validate_transition(
+                WorkflowState.PENDING_APPROVAL, WorkflowState.REJECTED
+            )
+            is True
+        )
 
     def test_validate_transition_approved_to_done(self):
         """
         Verify transition from Approved to Done is valid (execution succeeded).
         """
         sm = StateMachine()
-        assert sm.validate_transition(WorkflowState.APPROVED, WorkflowState.DONE) is True
+        assert (
+            sm.validate_transition(WorkflowState.APPROVED, WorkflowState.DONE) is True
+        )
 
     def test_validate_transition_approved_to_rejected(self):
         """
         Verify transition from Approved to Rejected is valid (execution failed).
         """
         sm = StateMachine()
-        assert sm.validate_transition(WorkflowState.APPROVED, WorkflowState.REJECTED) is True
+        assert (
+            sm.validate_transition(WorkflowState.APPROVED, WorkflowState.REJECTED)
+            is True
+        )
 
     def test_validate_transition_rejected_to_inbox(self):
         """
         Verify transition from Rejected to Inbox is valid (retry with revised approach).
         """
         sm = StateMachine()
-        assert sm.validate_transition(WorkflowState.REJECTED, WorkflowState.INBOX) is True
+        assert (
+            sm.validate_transition(WorkflowState.REJECTED, WorkflowState.INBOX) is True
+        )
 
     def test_validate_transition_plans_to_approved_forbidden(self):
         """
@@ -93,14 +122,18 @@ class TestStateMachine:
         Constitutional requirement (Section 6-7): Sensitive actions require approval.
         """
         sm = StateMachine()
-        assert sm.validate_transition(WorkflowState.PLANS, WorkflowState.APPROVED) is False
+        assert (
+            sm.validate_transition(WorkflowState.PLANS, WorkflowState.APPROVED) is False
+        )
 
     def test_validate_transition_inbox_to_approved_forbidden(self):
         """
         Verify transition from Inbox to Approved is FORBIDDEN (skips planning + approval).
         """
         sm = StateMachine()
-        assert sm.validate_transition(WorkflowState.INBOX, WorkflowState.APPROVED) is False
+        assert (
+            sm.validate_transition(WorkflowState.INBOX, WorkflowState.APPROVED) is False
+        )
 
     def test_validate_transition_plans_to_done_forbidden(self):
         """
@@ -120,15 +153,19 @@ class TestStateMachine:
         # Test Done → all other states (all should be False)
         for state in WorkflowState:
             if state != WorkflowState.DONE:
-                assert sm.validate_transition(WorkflowState.DONE, state) is False, \
-                    f"Done → {state} should be forbidden"
+                assert (
+                    sm.validate_transition(WorkflowState.DONE, state) is False
+                ), f"Done → {state} should be forbidden"
 
     def test_validate_transition_needs_action_to_approved_forbidden(self):
         """
         Verify transition from Needs_Action to Approved is FORBIDDEN (skips planning + approval).
         """
         sm = StateMachine()
-        assert sm.validate_transition(WorkflowState.NEEDS_ACTION, WorkflowState.APPROVED) is False
+        assert (
+            sm.validate_transition(WorkflowState.NEEDS_ACTION, WorkflowState.APPROVED)
+            is False
+        )
 
     def test_validate_transition_inbox_to_done_forbidden(self):
         """
@@ -156,7 +193,7 @@ class TestStateMachine:
             modified_at=datetime.now(),
             metadata={},
             file_path=task_path,
-            content="# Test retry logic"
+            content="# Test retry logic",
         )
         task.to_file(task_path)
 
@@ -178,13 +215,15 @@ class TestStateMachine:
                 return original_atomic_move(src, dst)
 
         # Measure time to verify backoff
-        with patch('src.control_plane.state_machine.atomic_move', side_effect=mock_atomic_move):
+        with patch(
+            "src.control_plane.state_machine.atomic_move", side_effect=mock_atomic_move
+        ):
             start_time = time.time()
             result = sm.transition(
                 task=task,
                 to_state=WorkflowState.NEEDS_ACTION,
                 reason="Test retry logic",
-                actor="system"
+                actor="system",
             )
             elapsed = time.time() - start_time
 
@@ -195,8 +234,12 @@ class TestStateMachine:
         assert result.file_path.exists()
 
         # Verify exponential backoff (first backoff is 0.1s)
-        assert elapsed >= 0.1, f"Should have waited at least 0.1s for backoff, got {elapsed:.3f}s"
-        assert elapsed < 0.5, f"Should not have waited more than 0.5s, got {elapsed:.3f}s"
+        assert (
+            elapsed >= 0.1
+        ), f"Should have waited at least 0.1s for backoff, got {elapsed:.3f}s"
+        assert (
+            elapsed < 0.5
+        ), f"Should not have waited more than 0.5s, got {elapsed:.3f}s"
 
         # Verify log entry shows success
         log_file = isolated_fs / "Logs" / f"{datetime.now().strftime('%Y-%m-%d')}.log"
@@ -223,7 +266,7 @@ class TestStateMachine:
             modified_at=datetime.now(),
             metadata={},
             file_path=task_path,
-            content="# Test retry exhaustion"
+            content="# Test retry exhaustion",
         )
         task.to_file(task_path)
 
@@ -241,14 +284,16 @@ class TestStateMachine:
 
         # Measure time to verify all backoffs: 0.1s + 0.2s + 0.4s = 0.7s (but last attempt doesn't backoff)
         # So total should be 0.1s + 0.2s = 0.3s
-        with patch('src.control_plane.state_machine.atomic_move', side_effect=mock_atomic_move):
+        with patch(
+            "src.control_plane.state_machine.atomic_move", side_effect=mock_atomic_move
+        ):
             start_time = time.time()
             with pytest.raises(FileOperationError):
                 sm.transition(
                     task=task,
                     to_state=WorkflowState.NEEDS_ACTION,
                     reason="Test retry exhaustion",
-                    actor="system"
+                    actor="system",
                 )
             elapsed = time.time() - start_time
 
@@ -256,8 +301,12 @@ class TestStateMachine:
         assert call_count == 3, f"Should have made 3 attempts, got {call_count}"
 
         # Verify exponential backoff timing: 0.1s + 0.2s = 0.3s
-        assert elapsed >= 0.3, f"Should have waited at least 0.3s for backoffs, got {elapsed:.3f}s"
-        assert elapsed < 0.8, f"Should not have waited more than 0.8s, got {elapsed:.3f}s"
+        assert (
+            elapsed >= 0.3
+        ), f"Should have waited at least 0.3s for backoffs, got {elapsed:.3f}s"
+        assert (
+            elapsed < 0.8
+        ), f"Should not have waited more than 0.8s, got {elapsed:.3f}s"
 
         # Verify task stayed in original state
         assert task.state == WorkflowState.INBOX
@@ -269,7 +318,7 @@ class TestStateMachine:
         assert log_file.exists()
         log_content = log_file.read_text()
         assert '"result": "failure"' in log_content
-        assert 'CRITICAL: File operation failed after 3 attempt(s)' in log_content
+        assert "CRITICAL: File operation failed after 3 attempt(s)" in log_content
 
 
 class TestAtomicFileMove:
@@ -305,7 +354,9 @@ class TestAtomicFileMove:
         destination = isolated_fs / "Needs_Action" / "task-002.md"
 
         # Mock Path.rename to raise OSError with errno 28 (disk full)
-        with patch.object(Path, 'rename', side_effect=OSError(28, "No space left on device")):
+        with patch.object(
+            Path, "rename", side_effect=OSError(28, "No space left on device")
+        ):
             with pytest.raises(FileOperationError) as exc_info:
                 atomic_move(source, destination)
 
@@ -322,7 +373,9 @@ class TestAtomicFileMove:
         destination = isolated_fs / "Needs_Action" / "task-003.md"
 
         # Mock Path.rename to raise PermissionError
-        with patch.object(Path, 'rename', side_effect=PermissionError("Permission denied")):
+        with patch.object(
+            Path, "rename", side_effect=PermissionError("Permission denied")
+        ):
             with pytest.raises(FileOperationError) as exc_info:
                 atomic_move(source, destination)
 
@@ -339,7 +392,7 @@ class TestAtomicFileMove:
         destination = isolated_fs / "Needs_Action" / "task-004.md"
 
         # Mock rename to fail
-        with patch.object(Path, 'rename', side_effect=OSError("Simulated failure")):
+        with patch.object(Path, "rename", side_effect=OSError("Simulated failure")):
             try:
                 atomic_move(source, destination)
             except FileOperationError:
@@ -347,4 +400,6 @@ class TestAtomicFileMove:
 
         # Verify source still exists (no partial state)
         assert source.exists(), "Source should still exist after failed move"
-        assert not destination.exists(), "Destination should not exist after failed move"
+        assert (
+            not destination.exists()
+        ), "Destination should not exist after failed move"

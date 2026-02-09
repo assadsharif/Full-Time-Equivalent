@@ -70,9 +70,7 @@ class TestVolumeDetection:
             for hour in range(24):
                 ts = now - timedelta(days=day + 1, hours=23 - hour)
                 for _ in range(5):
-                    baseline_events.append(
-                        create_mcp_event("test-server", "read", ts)
-                    )
+                    baseline_events.append(create_mcp_event("test-server", "read", ts))
 
         # Create spike: 20 calls in current hour (4x baseline)
         spike_events = [
@@ -144,15 +142,12 @@ class TestTimingDetection:
             for hour in range(9, 17):
                 ts = now.replace(hour=hour) - timedelta(days=day + 1)
                 for _ in range(3):
-                    baseline_events.append(
-                        create_mcp_event("test-server", "read", ts)
-                    )
+                    baseline_events.append(create_mcp_event("test-server", "read", ts))
 
         # Create anomaly: calls at 3 AM (unusual)
         anomaly_time = now.replace(hour=3, minute=0)
         anomaly_events = [
-            create_mcp_event("test-server", "read", anomaly_time)
-            for _ in range(5)
+            create_mcp_event("test-server", "read", anomaly_time) for _ in range(5)
         ]
 
         write_events(audit_log, baseline_events + anomaly_events)
@@ -198,9 +193,7 @@ class TestSequenceDetection:
             # Common pattern: list → read → read → list
             for i, action in enumerate(["list", "read", "read", "list"] * 10):
                 ts = ts_base + timedelta(minutes=i)
-                baseline_events.append(
-                    create_mcp_event("test-server", action, ts)
-                )
+                baseline_events.append(create_mcp_event("test-server", action, ts))
 
         # Create anomaly: unusual sequence
         anomaly_actions = ["delete", "delete", "delete", "write", "delete"]
@@ -394,6 +387,7 @@ class TestBaselineCalculation:
 
         # Create variable baseline: 5-15 calls/hour
         import random
+
         random.seed(42)
 
         events = []

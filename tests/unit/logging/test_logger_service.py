@@ -176,17 +176,13 @@ class TestDurationMeasurement:
     def test_measure_duration_custom_message(self, logger):
         """Should support custom log message."""
         with logger.measure_duration(
-            "operation",
-            log_message="Custom completion message"
+            "operation", log_message="Custom completion message"
         ):
             pass
 
     def test_measure_duration_custom_level(self, logger):
         """Should support custom log level."""
-        with logger.measure_duration(
-            "operation",
-            log_level=LogLevel.DEBUG
-        ):
+        with logger.measure_duration("operation", log_level=LogLevel.DEBUG):
             pass
 
 
@@ -233,8 +229,7 @@ class TestSecretRedaction:
     def test_redact_password_in_context(self, logger):
         """Should redact passwords in context dict."""
         logger.info(
-            "User login",
-            context={"username": "alice", "password": "secret123"}
+            "User login", context={"username": "alice", "password": "secret123"}
         )
         # Password should be redacted
 
@@ -265,6 +260,7 @@ class TestExceptionCapture:
 
     def test_capture_nested_exception(self, logger):
         """Should capture nested exception stack traces."""
+
         def inner_function():
             raise ValueError("Inner error")
 
@@ -377,6 +373,7 @@ class TestPublicAPI:
 
         # Reset global logger
         import src.logging
+
         src.logging._global_logger = None
 
         logger = get_logger(__name__)

@@ -30,10 +30,7 @@ class TestSecretRedactorBasics:
     def test_redactor_initialization_custom(self):
         """SecretRedactor should accept custom patterns and redaction text."""
         custom_patterns = [r"secret=\w+", r"token:\w+"]
-        redactor = SecretRedactor(
-            patterns=custom_patterns,
-            redaction_text="[HIDDEN]"
-        )
+        redactor = SecretRedactor(patterns=custom_patterns, redaction_text="[HIDDEN]")
 
         assert redactor.patterns == custom_patterns
         assert redactor.redaction_text == "[HIDDEN]"
@@ -47,16 +44,31 @@ class TestApiKeyRedaction:
         """Should redact simple api_key patterns."""
         redactor = SecretRedactor()
 
-        assert redactor.redact("api_key=sk_live_12345678901234567890") == "api_key=***REDACTED***"
-        assert redactor.redact("apikey=abcd1234567890abcd1234567890") == "apikey=***REDACTED***"
-        assert redactor.redact("API_KEY=ABCD1234567890ABCD1234567890") == "API_KEY=***REDACTED***"
+        assert (
+            redactor.redact("api_key=sk_live_12345678901234567890")
+            == "api_key=***REDACTED***"
+        )
+        assert (
+            redactor.redact("apikey=abcd1234567890abcd1234567890")
+            == "apikey=***REDACTED***"
+        )
+        assert (
+            redactor.redact("API_KEY=ABCD1234567890ABCD1234567890")
+            == "API_KEY=***REDACTED***"
+        )
 
     def test_redact_api_key_with_quotes(self):
         """Should redact API keys with quotes and colons."""
         redactor = SecretRedactor()
 
-        assert redactor.redact('api_key: "sk_live_12345678901234567890"') == 'api_key: ***REDACTED***'
-        assert redactor.redact("apikey='abcd1234567890abcd1234567890'") == "apikey=***REDACTED***"
+        assert (
+            redactor.redact('api_key: "sk_live_12345678901234567890"')
+            == "api_key: ***REDACTED***"
+        )
+        assert (
+            redactor.redact("apikey='abcd1234567890abcd1234567890'")
+            == "apikey=***REDACTED***"
+        )
 
     def test_redact_api_key_in_context(self):
         """Should redact API keys in longer text."""
@@ -84,7 +96,7 @@ class TestPasswordRedaction:
 
         # Note: Pattern stops at whitespace or quotes
         assert redactor.redact("password=P@ssw0rd!") == "password=***REDACTED***"
-        assert redactor.redact('password="MyPass123"') == 'password=***REDACTED***'
+        assert redactor.redact('password="MyPass123"') == "password=***REDACTED***"
 
     def test_redact_password_in_url(self):
         """Should redact passwords in URLs."""
@@ -102,9 +114,16 @@ class TestBearerTokenRedaction:
         """Should redact Bearer tokens."""
         redactor = SecretRedactor()
 
-        assert redactor.redact("Bearer abc123def456ghi789jkl012") == "Bearer ***REDACTED***"
-        assert redactor.redact("token=abc123def456ghi789jkl012") == "token=***REDACTED***"
-        assert redactor.redact("auth: abc123def456ghi789jkl012") == "auth: ***REDACTED***"
+        assert (
+            redactor.redact("Bearer abc123def456ghi789jkl012")
+            == "Bearer ***REDACTED***"
+        )
+        assert (
+            redactor.redact("token=abc123def456ghi789jkl012") == "token=***REDACTED***"
+        )
+        assert (
+            redactor.redact("auth: abc123def456ghi789jkl012") == "auth: ***REDACTED***"
+        )
 
     def test_redact_jwt_token(self):
         """Should redact JWT tokens (header.payload.signature)."""
@@ -124,9 +143,18 @@ class TestPrivateKeyRedaction:
         """Should redact secret key patterns."""
         redactor = SecretRedactor()
 
-        assert redactor.redact("secret=abc123def456ghi789jkl012") == "secret=***REDACTED***"
-        assert redactor.redact("private_key=abc123def456ghi789jkl012") == "private_key=***REDACTED***"
-        assert redactor.redact("private-key: abc123def456ghi789jkl012") == "private-key: ***REDACTED***"
+        assert (
+            redactor.redact("secret=abc123def456ghi789jkl012")
+            == "secret=***REDACTED***"
+        )
+        assert (
+            redactor.redact("private_key=abc123def456ghi789jkl012")
+            == "private_key=***REDACTED***"
+        )
+        assert (
+            redactor.redact("private-key: abc123def456ghi789jkl012")
+            == "private-key: ***REDACTED***"
+        )
 
 
 class TestAwsKeyRedaction:
@@ -150,10 +178,7 @@ class TestDictionaryRedaction:
         """Should redact dictionary values."""
         redactor = SecretRedactor()
 
-        data = {
-            "user": "alice",
-            "api_key": "sk_live_12345678901234567890"
-        }
+        data = {"user": "alice", "api_key": "sk_live_12345678901234567890"}
 
         redacted = redactor.redact_dict(data)
 
@@ -167,10 +192,7 @@ class TestDictionaryRedaction:
 
         data = {
             "service": "api",
-            "config": {
-                "host": "localhost",
-                "password": "secret123"
-            }
+            "config": {"host": "localhost", "password": "secret123"},
         }
 
         redacted = redactor.redact_dict(data)
@@ -186,7 +208,7 @@ class TestDictionaryRedaction:
         data = {
             "servers": [
                 {"host": "server1", "password": "pass123"},
-                {"host": "server2", "password": "pass456"}
+                {"host": "server2", "password": "pass456"},
             ]
         }
 
@@ -200,12 +222,7 @@ class TestDictionaryRedaction:
         """Should preserve non-secret values."""
         redactor = SecretRedactor()
 
-        data = {
-            "name": "test",
-            "count": 42,
-            "enabled": True,
-            "items": ["a", "b", "c"]
-        }
+        data = {"name": "test", "count": 42, "enabled": True, "items": ["a", "b", "c"]}
 
         redacted = redactor.redact_dict(data)
 
@@ -274,18 +291,23 @@ class TestCustomPatterns:
         """Should support custom redaction text."""
         redactor = SecretRedactor(redaction_text="[HIDDEN]")
 
-        assert redactor.redact("api_key=sk_live_12345678901234567890") == "api_key=[HIDDEN]"
+        assert (
+            redactor.redact("api_key=sk_live_12345678901234567890")
+            == "api_key=[HIDDEN]"
+        )
 
     def test_custom_pattern_only(self):
         """Should work with only custom patterns (no defaults)."""
         redactor = SecretRedactor(
-            patterns=[r"ssn=\d{3}-\d{2}-\d{4}"],
-            redaction_text="[SSN]"
+            patterns=[r"ssn=\d{3}-\d{2}-\d{4}"], redaction_text="[SSN]"
         )
 
         assert redactor.redact("ssn=123-45-6789") == "ssn=[SSN]"
         # Default patterns not applied
-        assert redactor.redact("api_key=sk_live_12345678901234567890") == "api_key=sk_live_12345678901234567890"
+        assert (
+            redactor.redact("api_key=sk_live_12345678901234567890")
+            == "api_key=sk_live_12345678901234567890"
+        )
 
 
 class TestPerformance:

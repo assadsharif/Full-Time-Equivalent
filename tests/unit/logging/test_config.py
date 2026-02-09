@@ -103,7 +103,7 @@ redaction_text: "[REDACTED]"
         assert config.retention_days == 60
         assert config.compression_enabled is False
         assert config.max_file_size_mb == 50
-        assert config.secret_patterns == ['api_key=\\w+', 'Bearer \\w+']
+        assert config.secret_patterns == ["api_key=\\w+", "Bearer \\w+"]
         assert config.redaction_text == "[REDACTED]"
 
     def test_from_file_nested_structure(self, tmp_path):
@@ -129,7 +129,7 @@ retention:
 
         assert config.buffer_size == 2000
         assert config.flush_interval_s == 0.5
-        assert config.secret_patterns == ['password=\\w+']
+        assert config.secret_patterns == ["password=\\w+"]
         assert config.redaction_text == "***SECRET***"
         assert config.retention_days == 90
         assert config.compression_enabled is True
@@ -229,7 +229,7 @@ class TestFromEnv:
             assert config.retention_days == 90
             assert config.compression_enabled is False
             assert config.max_file_size_mb == 200
-            assert config.secret_patterns == ['api_key=\\w+', 'Bearer \\w+']
+            assert config.secret_patterns == ["api_key=\\w+", "Bearer \\w+"]
             assert config.redaction_text == "[HIDDEN]"
         finally:
             # Cleanup

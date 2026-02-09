@@ -782,9 +782,10 @@ interface {resource_pascal}Update {{
 }}
 
 export const {resource_name}Api = {{
-{",\n".join(methods)}
+{methods_joined}
 }}
 '''
+    methods_joined = ",\n".join(methods)
 
     return json.dumps({
         "success": True,

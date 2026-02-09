@@ -105,7 +105,7 @@ class TestSimpleExceptions:
             logger.error(
                 "Division error",
                 exception=e,
-                context={"numerator": 1, "denominator": 0}
+                context={"numerator": 1, "denominator": 0},
             )
 
         await logger.flush()
@@ -260,7 +260,7 @@ class TestExceptionLoggingPatterns:
             logger.error(
                 "Operation failed",
                 exception=e,
-                context={"operation": "risky_operation"}
+                context={"operation": "risky_operation"},
             )
 
         await logger.flush()
@@ -399,9 +399,7 @@ class TestExceptionDetails:
         content = log_files[0].read_text()
         lines = content.strip().split("\n")
 
-        exception_types = [
-            json.loads(line)["exception"]["type"] for line in lines
-        ]
+        exception_types = [json.loads(line)["exception"]["type"] for line in lines]
 
         assert "ValueError" in exception_types
         assert "TypeError" in exception_types

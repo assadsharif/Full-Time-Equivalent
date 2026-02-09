@@ -143,7 +143,7 @@ class TestApprovalPending:
     def test_approval_pending_help(self):
         """Test approval pending command help"""
         runner = CliRunner()
-        result = runner.invoke(approval_pending_command, ['--help'])
+        result = runner.invoke(approval_pending_command, ["--help"])
 
         assert result.exit_code == 0
         assert "List pending approvals" in result.output
@@ -158,8 +158,7 @@ class TestApprovalPending:
             (vault_path / folder).mkdir()
 
         result = runner.invoke(
-            approval_pending_command,
-            ['--vault-path', str(vault_path)]
+            approval_pending_command, ["--vault-path", str(vault_path)]
         )
 
         assert result.exit_code == 0
@@ -191,8 +190,7 @@ Send $1000 to vendor.
         (vault_path / "Approvals" / "PAYMENT_001.md").write_text(approval_content)
 
         result = runner.invoke(
-            approval_pending_command,
-            ['--vault-path', str(vault_path)]
+            approval_pending_command, ["--vault-path", str(vault_path)]
         )
 
         assert result.exit_code == 0
@@ -207,8 +205,7 @@ Send $1000 to vendor.
         invalid_vault.mkdir()
 
         result = runner.invoke(
-            approval_pending_command,
-            ['--vault-path', str(invalid_vault)]
+            approval_pending_command, ["--vault-path", str(invalid_vault)]
         )
 
         assert result.exit_code == 1
@@ -220,22 +217,18 @@ class TestApprovalReview:
     def test_approval_review_help(self):
         """Test approval review command help"""
         runner = CliRunner()
-        result = runner.invoke(approval_review_command, ['--help'])
+        result = runner.invoke(approval_review_command, ["--help"])
 
         assert result.exit_code == 0
         assert "Review and decide on approval" in result.output
         assert "APPROVAL_ID" in result.output
         assert "--vault-path" in result.output
 
-    @patch('cli.approval.get_checkpoint_manager')
-    @patch('cli.approval.Prompt.ask')
-    @patch('cli.approval.Confirm.ask')
+    @patch("cli.approval.get_checkpoint_manager")
+    @patch("cli.approval.Prompt.ask")
+    @patch("cli.approval.Confirm.ask")
     def test_approval_review_approve(
-        self,
-        mock_confirm,
-        mock_prompt,
-        mock_checkpoint,
-        tmp_path
+        self, mock_confirm, mock_prompt, mock_checkpoint, tmp_path
     ):
         """Test approving an approval"""
         runner = CliRunner()
@@ -271,8 +264,7 @@ This is a test.
         mock_checkpoint.return_value = mock_mgr
 
         result = runner.invoke(
-            approval_review_command,
-            ['TEST_APPROVE', '--vault-path', str(vault_path)]
+            approval_review_command, ["TEST_APPROVE", "--vault-path", str(vault_path)]
         )
 
         assert result.exit_code == 0
@@ -282,15 +274,11 @@ This is a test.
         updated_content = approval_file.read_text()
         assert "approved" in updated_content.lower()
 
-    @patch('cli.approval.get_checkpoint_manager')
-    @patch('cli.approval.Prompt.ask')
-    @patch('cli.approval.Confirm.ask')
+    @patch("cli.approval.get_checkpoint_manager")
+    @patch("cli.approval.Prompt.ask")
+    @patch("cli.approval.Confirm.ask")
     def test_approval_review_reject(
-        self,
-        mock_confirm,
-        mock_prompt,
-        mock_checkpoint,
-        tmp_path
+        self, mock_confirm, mock_prompt, mock_checkpoint, tmp_path
     ):
         """Test rejecting an approval"""
         runner = CliRunner()
@@ -326,8 +314,7 @@ This is a test.
         mock_checkpoint.return_value = mock_mgr
 
         result = runner.invoke(
-            approval_review_command,
-            ['TEST_REJECT', '--vault-path', str(vault_path)]
+            approval_review_command, ["TEST_REJECT", "--vault-path", str(vault_path)]
         )
 
         assert result.exit_code == 0
@@ -338,12 +325,8 @@ This is a test.
         assert "rejected" in updated_content.lower()
         assert "Not needed" in updated_content
 
-    @patch('cli.approval.Prompt.ask')
-    def test_approval_review_skip(
-        self,
-        mock_prompt,
-        tmp_path
-    ):
+    @patch("cli.approval.Prompt.ask")
+    def test_approval_review_skip(self, mock_prompt, tmp_path):
         """Test skipping an approval"""
         runner = CliRunner()
         vault_path = tmp_path / "vault"
@@ -373,8 +356,7 @@ This is a test.
         mock_prompt.return_value = "3"  # Choose skip
 
         result = runner.invoke(
-            approval_review_command,
-            ['TEST_SKIP', '--vault-path', str(vault_path)]
+            approval_review_command, ["TEST_SKIP", "--vault-path", str(vault_path)]
         )
 
         assert result.exit_code == 0
@@ -393,8 +375,7 @@ This is a test.
             (vault_path / folder).mkdir()
 
         result = runner.invoke(
-            approval_review_command,
-            ['NONEXISTENT', '--vault-path', str(vault_path)]
+            approval_review_command, ["NONEXISTENT", "--vault-path", str(vault_path)]
         )
 
         assert result.exit_code == 1
@@ -427,8 +408,7 @@ Already processed.
         (vault_path / "Approvals" / "TEST_PROCESSED.md").write_text(approval_content)
 
         result = runner.invoke(
-            approval_review_command,
-            ['TEST_PROCESSED', '--vault-path', str(vault_path)]
+            approval_review_command, ["TEST_PROCESSED", "--vault-path", str(vault_path)]
         )
 
         assert result.exit_code == 0
@@ -462,8 +442,7 @@ This is expired.
         (vault_path / "Approvals" / "TEST_EXPIRED.md").write_text(approval_content)
 
         result = runner.invoke(
-            approval_review_command,
-            ['TEST_EXPIRED', '--vault-path', str(vault_path)]
+            approval_review_command, ["TEST_EXPIRED", "--vault-path", str(vault_path)]
         )
 
         assert result.exit_code == 1
@@ -492,11 +471,13 @@ created_at: 2026-01-29T10:00:00Z
 
 Invalid nonce.
 """
-        (vault_path / "Approvals" / "TEST_INVALID_NONCE.md").write_text(approval_content)
+        (vault_path / "Approvals" / "TEST_INVALID_NONCE.md").write_text(
+            approval_content
+        )
 
         result = runner.invoke(
             approval_review_command,
-            ['TEST_INVALID_NONCE', '--vault-path', str(vault_path)]
+            ["TEST_INVALID_NONCE", "--vault-path", str(vault_path)],
         )
 
         assert result.exit_code == 1
@@ -509,7 +490,7 @@ class TestApprovalGroup:
     def test_approval_group_help(self):
         """Test approval group help"""
         runner = CliRunner()
-        result = runner.invoke(approval_group, ['--help'])
+        result = runner.invoke(approval_group, ["--help"])
 
         assert result.exit_code == 0
         assert "approval" in result.output.lower()

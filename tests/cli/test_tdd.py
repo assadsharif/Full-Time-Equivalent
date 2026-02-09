@@ -24,10 +24,10 @@ from cli.tdd import (
 )
 from cli.tdd_state import TDDState
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def runner():
@@ -49,6 +49,7 @@ def mock_state(tmp_path):
 # ---------------------------------------------------------------------------
 # TDD State Manager
 # ---------------------------------------------------------------------------
+
 
 class TestTDDState:
     """Test TDDState persistence and transitions."""
@@ -107,6 +108,7 @@ class TestTDDState:
 # Helper: _parse_pytest_summary
 # ---------------------------------------------------------------------------
 
+
 class TestParsePytestSummary:
     def test_parse_all_passed(self):
         p, f, e = _parse_pytest_summary("===== 5 passed in 0.10s =====")
@@ -115,7 +117,9 @@ class TestParsePytestSummary:
         assert e == 0
 
     def test_parse_mixed(self):
-        p, f, e = _parse_pytest_summary("===== 3 passed, 2 failed, 1 error in 1.0s =====")
+        p, f, e = _parse_pytest_summary(
+            "===== 3 passed, 2 failed, 1 error in 1.0s ====="
+        )
         assert (p, f, e) == (3, 2, 1)
 
     def test_parse_empty(self):
@@ -127,12 +131,15 @@ class TestParsePytestSummary:
 # fte tdd init
 # ---------------------------------------------------------------------------
 
+
 class TestTDDInit:
     def test_tdd_init_creates_structure(self, runner, tmp_path):
         with runner.isolated_filesystem(temp_dir=tmp_path):
             # Patch _get_state so the state file goes into this temp dir
             with patch("cli.tdd._get_state") as mock_gs:
-                mock_gs.return_value = TDDState(state_path=Path.cwd() / ".fte" / "tdd_state.json")
+                mock_gs.return_value = TDDState(
+                    state_path=Path.cwd() / ".fte" / "tdd_state.json"
+                )
                 result = runner.invoke(tdd_init)
 
             assert result.exit_code == 0
@@ -146,7 +153,9 @@ class TestTDDInit:
             (Path.cwd() / "conftest.py").write_text("# exists\n")
 
             with patch("cli.tdd._get_state") as mock_gs:
-                mock_gs.return_value = TDDState(state_path=Path.cwd() / ".fte" / "tdd_state.json")
+                mock_gs.return_value = TDDState(
+                    state_path=Path.cwd() / ".fte" / "tdd_state.json"
+                )
                 result = runner.invoke(tdd_init)
 
             assert result.exit_code == 0
@@ -157,10 +166,13 @@ class TestTDDInit:
 # fte tdd red
 # ---------------------------------------------------------------------------
 
+
 class TestTDDRed:
     @patch("cli.tdd._get_state")
     @patch("cli.tdd._run_pytest")
-    def test_tdd_red_passes_when_tests_fail(self, mock_pytest, mock_gs, runner, mock_state):
+    def test_tdd_red_passes_when_tests_fail(
+        self, mock_pytest, mock_gs, runner, mock_state
+    ):
         mock_gs.return_value = mock_state
         mock_pytest.return_value = MagicMock(
             returncode=1,
@@ -175,7 +187,9 @@ class TestTDDRed:
 
     @patch("cli.tdd._get_state")
     @patch("cli.tdd._run_pytest")
-    def test_tdd_red_warns_when_tests_pass(self, mock_pytest, mock_gs, runner, mock_state):
+    def test_tdd_red_warns_when_tests_pass(
+        self, mock_pytest, mock_gs, runner, mock_state
+    ):
         mock_gs.return_value = mock_state
         mock_pytest.return_value = MagicMock(
             returncode=0,
@@ -193,10 +207,13 @@ class TestTDDRed:
 # fte tdd green
 # ---------------------------------------------------------------------------
 
+
 class TestTDDGreen:
     @patch("cli.tdd._get_state")
     @patch("cli.tdd._run_pytest")
-    def test_tdd_green_passes_when_tests_pass(self, mock_pytest, mock_gs, runner, mock_state):
+    def test_tdd_green_passes_when_tests_pass(
+        self, mock_pytest, mock_gs, runner, mock_state
+    ):
         mock_gs.return_value = mock_state
         mock_pytest.return_value = MagicMock(
             returncode=0,
@@ -211,7 +228,9 @@ class TestTDDGreen:
 
     @patch("cli.tdd._get_state")
     @patch("cli.tdd._run_pytest")
-    def test_tdd_green_warns_when_tests_fail(self, mock_pytest, mock_gs, runner, mock_state):
+    def test_tdd_green_warns_when_tests_fail(
+        self, mock_pytest, mock_gs, runner, mock_state
+    ):
         mock_gs.return_value = mock_state
         mock_pytest.return_value = MagicMock(
             returncode=1,
@@ -229,10 +248,13 @@ class TestTDDGreen:
 # fte tdd refactor
 # ---------------------------------------------------------------------------
 
+
 class TestTDDRefactor:
     @patch("cli.tdd._get_state")
     @patch("cli.tdd._run_pytest")
-    def test_tdd_refactor_runs_all_tests(self, mock_pytest, mock_gs, runner, mock_state):
+    def test_tdd_refactor_runs_all_tests(
+        self, mock_pytest, mock_gs, runner, mock_state
+    ):
         mock_gs.return_value = mock_state
         mock_pytest.return_value = MagicMock(
             returncode=0,
@@ -249,7 +271,9 @@ class TestTDDRefactor:
 
     @patch("cli.tdd._get_state")
     @patch("cli.tdd._run_pytest")
-    def test_tdd_refactor_detects_regressions(self, mock_pytest, mock_gs, runner, mock_state):
+    def test_tdd_refactor_detects_regressions(
+        self, mock_pytest, mock_gs, runner, mock_state
+    ):
         mock_gs.return_value = mock_state
         mock_pytest.return_value = MagicMock(
             returncode=1,
@@ -282,6 +306,7 @@ class TestTDDRefactor:
 # fte tdd status
 # ---------------------------------------------------------------------------
 
+
 class TestTDDStatus:
     @patch("cli.tdd._get_state")
     def test_tdd_status_shows_state(self, mock_gs, runner, mock_state):
@@ -310,16 +335,21 @@ class TestTDDStatus:
 # fte tdd cycle
 # ---------------------------------------------------------------------------
 
+
 class TestTDDCycle:
     @patch("cli.tdd._get_state")
     @patch("cli.tdd._run_pytest")
     @patch("click.pause")
-    def test_tdd_cycle_enforces_order(self, mock_pause, mock_pytest, mock_gs, runner, mock_state):
+    def test_tdd_cycle_enforces_order(
+        self, mock_pause, mock_pytest, mock_gs, runner, mock_state
+    ):
         mock_gs.return_value = mock_state
 
         # RED: tests fail, GREEN: tests pass, REFACTOR: tests pass
         mock_pytest.side_effect = [
-            MagicMock(returncode=1, stdout="===== 0 passed, 1 failed in 0.1s =====", stderr=""),
+            MagicMock(
+                returncode=1, stdout="===== 0 passed, 1 failed in 0.1s =====", stderr=""
+            ),
             MagicMock(returncode=0, stdout="===== 1 passed in 0.1s =====", stderr=""),
             MagicMock(returncode=0, stdout="===== 10 passed in 0.5s =====", stderr=""),
         ]
@@ -333,7 +363,9 @@ class TestTDDCycle:
     @patch("cli.tdd._get_state")
     @patch("cli.tdd._run_pytest")
     @patch("click.pause")
-    def test_tdd_cycle_aborts_on_red_pass(self, mock_pause, mock_pytest, mock_gs, runner, mock_state):
+    def test_tdd_cycle_aborts_on_red_pass(
+        self, mock_pause, mock_pytest, mock_gs, runner, mock_state
+    ):
         mock_gs.return_value = mock_state
 
         # RED phase: tests pass (wrong)
@@ -351,14 +383,20 @@ class TestTDDCycle:
     @patch("cli.tdd._get_state")
     @patch("cli.tdd._run_pytest")
     @patch("click.pause")
-    def test_tdd_cycle_aborts_on_green_fail(self, mock_pause, mock_pytest, mock_gs, runner, mock_state):
+    def test_tdd_cycle_aborts_on_green_fail(
+        self, mock_pause, mock_pytest, mock_gs, runner, mock_state
+    ):
         mock_gs.return_value = mock_state
 
         mock_pytest.side_effect = [
             # RED: tests fail (correct)
-            MagicMock(returncode=1, stdout="===== 0 passed, 1 failed in 0.1s =====", stderr=""),
+            MagicMock(
+                returncode=1, stdout="===== 0 passed, 1 failed in 0.1s =====", stderr=""
+            ),
             # GREEN: tests still fail (wrong)
-            MagicMock(returncode=1, stdout="===== 0 passed, 1 failed in 0.1s =====", stderr=""),
+            MagicMock(
+                returncode=1, stdout="===== 0 passed, 1 failed in 0.1s =====", stderr=""
+            ),
         ]
 
         result = runner.invoke(tdd_cycle, ["tests/test_foo.py"])
@@ -370,6 +408,7 @@ class TestTDDCycle:
 # ---------------------------------------------------------------------------
 # fte tdd watch
 # ---------------------------------------------------------------------------
+
 
 class TestTDDWatch:
     @patch("cli.tdd.subprocess.run")
@@ -392,6 +431,7 @@ class TestTDDWatch:
 # ---------------------------------------------------------------------------
 # fte tdd group
 # ---------------------------------------------------------------------------
+
 
 class TestTDDGroup:
     def test_tdd_group_help(self, runner):

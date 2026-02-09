@@ -14,7 +14,9 @@ SKIPPED: Test references State and Transition classes that were planned but not 
 
 import pytest
 
-pytestmark = pytest.mark.skip(reason="Test references State/Transition classes not yet implemented")
+pytestmark = pytest.mark.skip(
+    reason="Test references State/Transition classes not yet implemented"
+)
 
 import asyncio
 from pathlib import Path
@@ -63,7 +65,9 @@ def query_service(temp_log_dir):
 
 
 @pytest.mark.asyncio
-async def test_both_loggers_write_to_same_directory(audit_logger, p2_logger_service, temp_log_dir):
+async def test_both_loggers_write_to_same_directory(
+    audit_logger, p2_logger_service, temp_log_dir
+):
     """
     Test that P1 and P2 loggers can write to the same directory without conflicts.
 
@@ -85,10 +89,13 @@ async def test_both_loggers_write_to_same_directory(audit_logger, p2_logger_serv
 
     # P2: Use new logging infrastructure
     logger = get_logger("integration_test")
-    logger.info("P2 logging system operational", context={
-        "feature": "logging-infrastructure",
-        "test": "coexistence",
-    })
+    logger.info(
+        "P2 logging system operational",
+        context={
+            "feature": "logging-infrastructure",
+            "test": "coexistence",
+        },
+    )
 
     # Flush P2 logs
     await p2_logger_service.flush()
@@ -104,9 +111,9 @@ async def test_both_loggers_write_to_same_directory(audit_logger, p2_logger_serv
     p2_log_files = list(temp_log_dir.glob("[0-9]*.log"))
 
     # Both should have created files
-    assert len(audit_log_files) > 0 or len(p2_log_files) > 0, (
-        "Both logging systems should create log files"
-    )
+    assert (
+        len(audit_log_files) > 0 or len(p2_log_files) > 0
+    ), "Both logging systems should create log files"
 
     print(f"\nP1 audit logs: {audit_log_files}")
     print(f"P2 logs: {p2_log_files}")
@@ -208,7 +215,7 @@ async def test_p2_logger_queries_dont_affect_p1(
     # P2: Query logs (should only see P2 logs, not P1)
     results = query_service.query(
         LogQuery(levels=[LogLevel.INFO, LogLevel.WARNING, LogLevel.ERROR]),
-        format="dict"
+        format="dict",
     )
 
     # Results should contain P2 logs
@@ -310,11 +317,14 @@ async def test_p1_and_p2_log_formats_are_distinct(
 
     # P2: Write structured log
     logger = get_logger("format_test")
-    logger.info("Structured log entry", context={
-        "level": "info",
-        "module": "format_test",
-        "structured": True,
-    })
+    logger.info(
+        "Structured log entry",
+        context={
+            "level": "info",
+            "module": "format_test",
+            "structured": True,
+        },
+    )
     await p2_logger_service.flush()
 
     # Read log files
@@ -355,22 +365,23 @@ async def test_p2_logger_respects_frozen_code_constraint(p2_logger_service):
     logger_service_file = inspect.getfile(LoggerService)
 
     # Should be in src/logging/, not src/control_plane/
-    assert "src/logging" in logger_service_file or "src\\logging" in logger_service_file, (
-        f"P2 logging should be in src/logging/, but found in: {logger_service_file}"
-    )
+    assert (
+        "src/logging" in logger_service_file or "src\\logging" in logger_service_file
+    ), f"P2 logging should be in src/logging/, but found in: {logger_service_file}"
 
-    assert "control_plane" not in logger_service_file, (
-        "P2 logging should NOT be in control_plane (frozen code)"
-    )
+    assert (
+        "control_plane" not in logger_service_file
+    ), "P2 logging should NOT be in control_plane (frozen code)"
 
     # Verify P2 doesn't import P1 AuditLogger
     import src.logging
+
     logger_module_file = inspect.getfile(src.logging)
     logger_module_source = inspect.getsource(src.logging)
 
-    assert "from src.control_plane.logger import AuditLogger" not in logger_module_source, (
-        "P2 logging should NOT import P1 AuditLogger"
-    )
+    assert (
+        "from src.control_plane.logger import AuditLogger" not in logger_module_source
+    ), "P2 logging should NOT import P1 AuditLogger"
 
     print(f"\n✅ P2 logging respects frozen code constraint")
     print(f"P2 location: {logger_service_file}")
@@ -389,7 +400,9 @@ if __name__ == "__main__":
 
             # Create fixtures
             audit_logger = AuditLogger(log_dir=log_dir)
-            logger_service = init_logging(log_dir=log_dir, level=LogLevel.INFO, async_enabled=True)
+            logger_service = init_logging(
+                log_dir=log_dir, level=LogLevel.INFO, async_enabled=True
+            )
             await logger_service.start_async_writer()
 
             # Test 1: Same directory
@@ -408,7 +421,9 @@ if __name__ == "__main__":
             await logger_service.flush()
 
             log_files = list(log_dir.glob("*.log"))
-            print(f"✅ Created {len(log_files)} log file(s): {[f.name for f in log_files]}")
+            print(
+                f"✅ Created {len(log_files)} log file(s): {[f.name for f in log_files]}"
+            )
 
             # Test 2: P1 unchanged
             print("\nTest 2: P1 AuditLogger unchanged...")

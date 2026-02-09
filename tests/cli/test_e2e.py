@@ -96,9 +96,7 @@ Weekly team sync meeting.
 
         # Step 2: Check vault status
         result = runner.invoke(
-            vault_group,
-            ["status", "--vault-path", vault_str],
-            obj={}
+            vault_group, ["status", "--vault-path", vault_str], obj={}
         )
         assert result.exit_code == 0
 
@@ -110,7 +108,7 @@ Weekly team sync meeting.
             result = runner.invoke(
                 briefing_group,
                 ["generate", "--vault-path", vault_str, "--days", "1"],
-                obj={}
+                obj={},
             )
 
         assert result.exit_code == 0
@@ -132,9 +130,7 @@ Weekly team sync meeting.
 
         # Initialize vault structure using vault init command
         result = runner.invoke(
-            vault_group,
-            ["init", "--vault-path", str(vault_path)],
-            obj={}
+            vault_group, ["init", "--vault-path", str(vault_path)], obj={}
         )
         assert result.exit_code == 0
         assert "initialized successfully" in result.output.lower()
@@ -161,11 +157,7 @@ class TestWatcherLifecycle:
     @patch("cli.watcher.subprocess.run")
     @patch("cli.watcher.check_pm2_installed")
     def test_watcher_lifecycle_happy_path(
-        self,
-        mock_pm2_installed,
-        mock_subprocess,
-        e2e_vault,
-        tmp_path
+        self, mock_pm2_installed, mock_subprocess, e2e_vault, tmp_path
     ):
         """Test complete watcher lifecycle"""
         runner = CliRunner()
@@ -181,57 +173,42 @@ class TestWatcherLifecycle:
         mock_pm2_installed.return_value = True
 
         # All subprocess calls should return valid JSON for PM2 list command
-        mock_subprocess.return_value = MagicMock(
-            returncode=0,
-            stdout=json.dumps([])
-        )
+        mock_subprocess.return_value = MagicMock(returncode=0, stdout=json.dumps([]))
 
         try:
             # Step 1: Check status (should be empty/stopped)
-            result = runner.invoke(
-                watcher_group,
-                ["status"],
-                obj={}
-            )
+            result = runner.invoke(watcher_group, ["status"], obj={})
             assert result.exit_code == 0
 
             # Step 2: Start watcher (mock still returns empty list, no existing process)
-            result = runner.invoke(
-                watcher_group,
-                ["start", "gmail"],
-                obj={}
-            )
+            result = runner.invoke(watcher_group, ["start", "gmail"], obj={})
             assert result.exit_code == 0
             assert "started successfully" in result.output.lower()
 
             # Step 3: Check status (should show running)
             mock_subprocess.return_value = MagicMock(
                 returncode=0,
-                stdout=json.dumps([{
-                    "name": "fte-watcher-gmail",
-                    "pm2_env": {
-                        "status": "online",
-                        "pm_uptime": time.time() * 1000,
-                        "pm_id": 0
-                    },
-                    "monit": {"cpu": 1.5, "memory": 50000000}
-                }])
+                stdout=json.dumps(
+                    [
+                        {
+                            "name": "fte-watcher-gmail",
+                            "pm2_env": {
+                                "status": "online",
+                                "pm_uptime": time.time() * 1000,
+                                "pm_id": 0,
+                            },
+                            "monit": {"cpu": 1.5, "memory": 50000000},
+                        }
+                    ]
+                ),
             )
-            result = runner.invoke(
-                watcher_group,
-                ["status"],
-                obj={}
-            )
+            result = runner.invoke(watcher_group, ["status"], obj={})
             assert result.exit_code == 0
             assert "gmail" in result.output.lower()
 
             # Step 4: Stop watcher (return running process, then stopped)
             # First call: watcher is running, second call: watcher stopped
-            result = runner.invoke(
-                watcher_group,
-                ["stop", "gmail"],
-                obj={}
-            )
+            result = runner.invoke(watcher_group, ["stop", "gmail"], obj={})
             assert result.exit_code == 0
             assert "stopped successfully" in result.output.lower()
 
@@ -267,29 +244,19 @@ class TestMCPIntegrationWorkflow:
 
         with patch("cli.mcp.get_mcp_registry_path", return_value=registry_file):
             # Step 1: List servers (empty)
-            result = runner.invoke(
-                mcp_group,
-                ["list"],
-                obj={}
-            )
+            result = runner.invoke(mcp_group, ["list"], obj={})
             assert result.exit_code == 0
             assert "No MCP servers configured" in result.output
 
             # Step 2: Add server
             result = runner.invoke(
-                mcp_group,
-                ["add", "test-api", "https://api.example.com"],
-                obj={}
+                mcp_group, ["add", "test-api", "https://api.example.com"], obj={}
             )
             assert result.exit_code == 0
             assert "added successfully" in result.output.lower()
 
             # Step 3: List servers (should show new server in table)
-            result = runner.invoke(
-                mcp_group,
-                ["list"],
-                obj={}
-            )
+            result = runner.invoke(mcp_group, ["list"], obj={})
             assert result.exit_code == 0
             # Server should appear in the table
             assert "test-api" in result.output
@@ -297,11 +264,7 @@ class TestMCPIntegrationWorkflow:
 
             # Step 4: Test server health
             mock_get.return_value = MagicMock(status_code=200, text="OK")
-            result = runner.invoke(
-                mcp_group,
-                ["test", "test-api"],
-                obj={}
-            )
+            result = runner.invoke(mcp_group, ["test", "test-api"], obj={})
             assert result.exit_code == 0
             assert "healthy" in result.output.lower()
 
@@ -312,15 +275,11 @@ class TestMCPIntegrationWorkflow:
                     {
                         "name": "get_data",
                         "description": "Get data from API",
-                        "parameters": {}
+                        "parameters": {},
                     }
-                ]
+                ],
             )
-            result = runner.invoke(
-                mcp_group,
-                ["tools", "test-api"],
-                obj={}
-            )
+            result = runner.invoke(mcp_group, ["tools", "test-api"], obj={})
             assert result.exit_code == 0
             assert "get_data" in result.output
 
@@ -341,11 +300,7 @@ class TestApprovalWorkflow:
     @patch("cli.approval.Confirm.ask")
     @patch("cli.approval.get_checkpoint_manager")
     def test_approval_workflow_approve(
-        self,
-        mock_checkpoint,
-        mock_confirm,
-        mock_prompt,
-        e2e_vault
+        self, mock_checkpoint, mock_confirm, mock_prompt, e2e_vault
     ):
         """Test approval workflow - approve path"""
         runner = CliRunner()
@@ -357,9 +312,7 @@ class TestApprovalWorkflow:
 
         # Step 1: List pending (empty)
         result = runner.invoke(
-            approval_group,
-            ["pending", "--vault-path", vault_str],
-            obj={}
+            approval_group, ["pending", "--vault-path", vault_str], obj={}
         )
         assert result.exit_code == 0
         assert "No pending approvals" in result.output
@@ -383,9 +336,7 @@ This is a test approval for e2e testing.
 
         # Step 3: List pending (should show approval)
         result = runner.invoke(
-            approval_group,
-            ["pending", "--vault-path", vault_str],
-            obj={}
+            approval_group, ["pending", "--vault-path", vault_str], obj={}
         )
         assert result.exit_code == 0
         assert "TEST_APPROVAL" in result.output  # May be truncated in display
@@ -397,7 +348,7 @@ This is a test approval for e2e testing.
         result = runner.invoke(
             approval_group,
             ["review", "TEST_APPROVAL_E2E", "--vault-path", vault_str],
-            obj={}
+            obj={},
         )
         assert result.exit_code == 0
         assert "approved successfully" in result.output.lower()
@@ -421,10 +372,7 @@ class TestSystemHealthMonitoring:
     @patch("cli.status.check_watcher_status")
     @patch("cli.status.check_mcp_status")
     def test_system_health_workflow(
-        self,
-        mock_mcp_status,
-        mock_watcher_status,
-        e2e_vault
+        self, mock_mcp_status, mock_watcher_status, e2e_vault
     ):
         """Test system health monitoring"""
         runner = CliRunner()
@@ -432,17 +380,10 @@ class TestSystemHealthMonitoring:
 
         # Mock watcher and MCP status
         mock_watcher_status.return_value = {}
-        mock_mcp_status.return_value = {
-            "servers": [],
-            "registry_loaded": True
-        }
+        mock_mcp_status.return_value = {"servers": [], "registry_loaded": True}
 
         # Step 1: Check initial status
-        result = runner.invoke(
-            status_command,
-            ["--vault-path", vault_str],
-            obj={}
-        )
+        result = runner.invoke(status_command, ["--vault-path", vault_str], obj={})
         assert result.exit_code == 0
         assert "Vault Status" in result.output
 
@@ -452,11 +393,7 @@ class TestSystemHealthMonitoring:
             task_file.write_text(f"# Task {i}\n\nPriority: medium")
 
         # Step 3: Check status again (should show task counts)
-        result = runner.invoke(
-            status_command,
-            ["--vault-path", vault_str],
-            obj={}
-        )
+        result = runner.invoke(status_command, ["--vault-path", vault_str], obj={})
         assert result.exit_code == 0
         # Verify vault section shows inbox count
         assert "Inbox" in result.output
@@ -486,7 +423,7 @@ class TestMultiCommandWorkflow:
         mock_checkpoint,
         mock_pm2_installed,
         mock_subprocess,
-        e2e_vault
+        e2e_vault,
     ):
         """Test a complete daily workflow across all commands"""
         runner = CliRunner()
@@ -509,19 +446,11 @@ class TestMultiCommandWorkflow:
 
         try:
             # Morning: Check system status
-            result = runner.invoke(
-                status_command,
-                ["--vault-path", vault_str],
-                obj={}
-            )
+            result = runner.invoke(status_command, ["--vault-path", vault_str], obj={})
             assert result.exit_code == 0
 
             # Start monitoring
-            result = runner.invoke(
-                watcher_group,
-                ["start", "gmail"],
-                obj={}
-            )
+            result = runner.invoke(watcher_group, ["start", "gmail"], obj={})
             assert result.exit_code == 0
 
             # Simulate work: Create completed tasks
@@ -532,9 +461,7 @@ class TestMultiCommandWorkflow:
 
             # End of day: Generate briefing
             result = runner.invoke(
-                briefing_group,
-                ["generate", "--vault-path", vault_str],
-                obj={}
+                briefing_group, ["generate", "--vault-path", vault_str], obj={}
             )
             assert result.exit_code == 0
 
@@ -549,19 +476,16 @@ class TestMultiCommandWorkflow:
             # Mock returns a running watcher so stop command can find it
             mock_subprocess.return_value = MagicMock(
                 returncode=0,
-                stdout=json.dumps([{
-                    "name": "fte-watcher-gmail",
-                    "pm2_env": {
-                        "status": "online",
-                        "pm_id": 0
-                    }
-                }])
+                stdout=json.dumps(
+                    [
+                        {
+                            "name": "fte-watcher-gmail",
+                            "pm2_env": {"status": "online", "pm_id": 0},
+                        }
+                    ]
+                ),
             )
-            result = runner.invoke(
-                watcher_group,
-                ["stop", "gmail"],
-                obj={}
-            )
+            result = runner.invoke(watcher_group, ["stop", "gmail"], obj={})
             assert result.exit_code == 0
 
         finally:
@@ -588,9 +512,7 @@ class TestErrorRecovery:
 
         # Try to run status on invalid vault
         result = runner.invoke(
-            vault_group,
-            ["status", "--vault-path", str(invalid_vault)],
-            obj={}
+            vault_group, ["status", "--vault-path", str(invalid_vault)], obj={}
         )
         assert result.exit_code == 1
         # Should give helpful error message
@@ -604,7 +526,7 @@ class TestErrorRecovery:
         result = runner.invoke(
             approval_group,
             ["review", "NONEXISTENT_APPROVAL", "--vault-path", vault_str],
-            obj={}
+            obj={},
         )
         assert result.exit_code == 1
         assert "not found" in result.output.lower()
@@ -636,9 +558,7 @@ class TestConcurrentOperations:
 
             for _ in range(3):
                 result = runner.invoke(
-                    briefing_group,
-                    ["generate", "--vault-path", vault_str],
-                    obj={}
+                    briefing_group, ["generate", "--vault-path", vault_str], obj={}
                 )
                 assert result.exit_code == 0
 
@@ -668,9 +588,7 @@ class TestDataIntegrity:
             mock_checkpoint.return_value = mock_mgr
 
             result = runner.invoke(
-                briefing_group,
-                ["generate", "--vault-path", vault_str],
-                obj={}
+                briefing_group, ["generate", "--vault-path", vault_str], obj={}
             )
 
         assert result.exit_code == 0

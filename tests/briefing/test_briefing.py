@@ -25,7 +25,6 @@ from src.briefing.aggregator import BriefingAggregator
 from src.briefing.models import BriefingData, TaskSummary
 from src.briefing.template_renderer import TemplateRenderer
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -150,15 +149,18 @@ class TestBriefingAggregator:
 
     def test_multiple_tasks_stats(self, vault_dir):
         _done_file(
-            vault_dir, "a.md",
+            vault_dir,
+            "a.md",
             "# a.md\n\n**Priority**: \U0001f534 Urgent\n**From**: ceo@co.com\n\n---\n\nA.\n",
         )
         _done_file(
-            vault_dir, "b.md",
+            vault_dir,
+            "b.md",
             "# b.md\n\n**Priority**: \U0001f7e0 High\n**From**: ceo@co.com\n\n---\n\nB.\n",
         )
         _done_file(
-            vault_dir, "c.md",
+            vault_dir,
+            "c.md",
             "# c.md\n\n**Priority**: \U0001f7e0 High\n**From**: dev@co.com\n\n---\n\nC.\n",
         )
         data = BriefingAggregator(vault_dir / "Done").aggregate()
@@ -170,12 +172,14 @@ class TestBriefingAggregator:
 
     def test_avg_iterations_computed(self, vault_dir):
         _done_file(
-            vault_dir, "iter1.md",
+            vault_dir,
+            "iter1.md",
             "---\npersistence_loop:\n  iteration: 2\n---\n"
             "# iter1.md\n\n**From**: x@x.com\n\n---\n\nBody.\n",
         )
         _done_file(
-            vault_dir, "iter2.md",
+            vault_dir,
+            "iter2.md",
             "---\npersistence_loop:\n  iteration: 4\n---\n"
             "# iter2.md\n\n**From**: x@x.com\n\n---\n\nBody.\n",
         )
@@ -245,8 +249,8 @@ class TestTemplateRenderer:
     def test_render_contains_stats(self):
         renderer = TemplateRenderer(TEMPLATE_DIR)
         output = renderer.render("executive_summary.md.j2", self._sample_data())
-        assert "2" in output          # total_tasks
-        assert "2.0" in output        # avg_iterations
+        assert "2" in output  # total_tasks
+        assert "2.0" in output  # avg_iterations
 
     def test_render_no_unresolved_placeholders(self):
         renderer = TemplateRenderer(TEMPLATE_DIR)
@@ -277,12 +281,27 @@ class TestPDFGenerator:
             period_end=now,
             generated_at=now,
             tasks=[
-                TaskSummary(name="deploy-prod", priority="urgent", sender="ops@co.com",
-                            body="Deployed.", persistence_iterations=2),
-                TaskSummary(name="client-report", priority="high", sender="sales@co.com",
-                            body="Report sent.", persistence_iterations=1),
-                TaskSummary(name="docs-update", priority="low", sender="docs@co.com",
-                            body="Docs updated.", persistence_iterations=0),
+                TaskSummary(
+                    name="deploy-prod",
+                    priority="urgent",
+                    sender="ops@co.com",
+                    body="Deployed.",
+                    persistence_iterations=2,
+                ),
+                TaskSummary(
+                    name="client-report",
+                    priority="high",
+                    sender="sales@co.com",
+                    body="Report sent.",
+                    persistence_iterations=1,
+                ),
+                TaskSummary(
+                    name="docs-update",
+                    priority="low",
+                    sender="docs@co.com",
+                    body="Docs updated.",
+                    persistence_iterations=0,
+                ),
             ],
             total_tasks=3,
             by_priority={"urgent": 1, "high": 1, "low": 1},
@@ -335,13 +354,20 @@ class TestPDFGenerator:
 
         now = datetime.now(timezone.utc)
         tasks = [
-            TaskSummary(name=f"task-{i:03d}", priority="medium",
-                        sender=f"user{i % 5}@co.com", body=f"Body {i}.")
+            TaskSummary(
+                name=f"task-{i:03d}",
+                priority="medium",
+                sender=f"user{i % 5}@co.com",
+                body=f"Body {i}.",
+            )
             for i in range(50)
         ]
         data = BriefingData(
-            period_start=now, period_end=now, generated_at=now,
-            tasks=tasks, total_tasks=50,
+            period_start=now,
+            period_end=now,
+            generated_at=now,
+            tasks=tasks,
+            total_tasks=50,
             by_priority={"medium": 50},
             by_sender={f"user{i}@co.com": 10 for i in range(5)},
             avg_iterations=2.5,
@@ -361,7 +387,8 @@ class TestBriefingEndToEnd:
         """Populate /Done, aggregate, render, verify /Briefings output."""
         # --- populate /Done with realistic files ---
         _done_file(
-            vault_dir, "deploy-prod.md",
+            vault_dir,
+            "deploy-prod.md",
             "---\npersistence_loop:\n  iteration: 2\n---\n"
             "# deploy-prod.md\n\n"
             "**Priority**: \U0001f534 Urgent\n"
@@ -371,7 +398,8 @@ class TestBriefingEndToEnd:
             "Production deployment v2.1 rolled out successfully.\n",
         )
         _done_file(
-            vault_dir, "client-report.md",
+            vault_dir,
+            "client-report.md",
             "# client-report.md\n\n"
             "**Priority**: \U0001f7e0 High\n"
             "**Status**: Done\n"
@@ -380,7 +408,8 @@ class TestBriefingEndToEnd:
             "Q4 client report delivered to Acme Corp.\n",
         )
         _done_file(
-            vault_dir, "newsletter-draft.md",
+            vault_dir,
+            "newsletter-draft.md",
             "# newsletter-draft.md\n\n"
             "**Priority**: \U0001f7e2 Low\n"
             "**Status**: Done\n"
@@ -404,9 +433,9 @@ class TestBriefingEndToEnd:
         assert output_path.exists()
         report = output_path.read_text()
         assert "Executive Briefing" in report
-        assert "3" in report                       # total_tasks
+        assert "3" in report  # total_tasks
         assert "ops@company.com" in report
         assert "sales@company.com" in report
         assert "marketing@company.com" in report
         assert "Production deployment" in report
-        assert "{{" not in report                  # no unresolved placeholders
+        assert "{{" not in report  # no unresolved placeholders

@@ -19,7 +19,6 @@ from pathlib import Path
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -90,12 +89,18 @@ class TestBriefingPipeline:
         done = vault / "Done"
         done.mkdir(exist_ok=True)
         tasks = [
-            ("deploy-prod.md",
-             "# deploy-prod\n\n**Priority**: \U0001f534 Urgent\n**From**: ops@co.com\n\n---\n\nProduction v3 deployed.\n"),
-            ("client-deck.md",
-             "# client-deck\n\n**Priority**: \U0001f7e0 High\n**From**: sales@co.com\n\n---\n\nDeck sent to Acme.\n"),
-            ("newsletter.md",
-             "# newsletter\n\n**Priority**: \U0001f7e2 Low\n**From**: marketing@co.com\n\n---\n\nNewsletter out.\n"),
+            (
+                "deploy-prod.md",
+                "# deploy-prod\n\n**Priority**: \U0001f534 Urgent\n**From**: ops@co.com\n\n---\n\nProduction v3 deployed.\n",
+            ),
+            (
+                "client-deck.md",
+                "# client-deck\n\n**Priority**: \U0001f7e0 High\n**From**: sales@co.com\n\n---\n\nDeck sent to Acme.\n",
+            ),
+            (
+                "newsletter.md",
+                "# newsletter\n\n**Priority**: \U0001f7e2 Low\n**From**: marketing@co.com\n\n---\n\nNewsletter out.\n",
+            ),
         ]
         for name, content in tasks:
             (done / name).write_text(content)

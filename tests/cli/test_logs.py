@@ -27,7 +27,9 @@ def _load_pure_helpers():
     """Load _parse_time and _parse_relative_time without the click/logging deps."""
     # Stub packages so the relative imports don't crash
     _stub_logging_models = types.ModuleType("src.logging.models")
-    _stub_logging_models.LogLevel = type("LogLevel", (), {"DEBUG": "DEBUG", "INFO": "INFO"})
+    _stub_logging_models.LogLevel = type(
+        "LogLevel", (), {"DEBUG": "DEBUG", "INFO": "INFO"}
+    )
     _stub_logging_models.LogQuery = type("LogQuery", (), {})
 
     _stub_logging_query = types.ModuleType("src.logging.query_service")

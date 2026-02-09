@@ -12,6 +12,7 @@ from src.watchers.models import FileEvent
 
 try:
     import pathspec
+
     HAS_PATHSPEC = True
 except ImportError:
     HAS_PATHSPEC = False
@@ -31,6 +32,7 @@ class TestFileSystemWatcher:
     def teardown_method(self):
         """Clean up test fixtures."""
         import shutil
+
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_init(self):
@@ -98,7 +100,9 @@ class TestFileSystemWatcher:
         file_hash = watcher._compute_hash(test_file)
 
         # SHA256 of "Hello, World!" is known
-        expected_hash = "dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f"
+        expected_hash = (
+            "dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f"
+        )
         assert file_hash == expected_hash
 
     def test_compute_hash_large_file_skip(self):
@@ -176,7 +180,7 @@ class TestFileSystemWatcher:
 
     @pytest.mark.skipif(
         True,  # Skip in CI - requires watchdog
-        reason="Integration test requires watchdog observer"
+        reason="Integration test requires watchdog observer",
     )
     def test_on_created_event(self):
         """Test file creation event handling."""
@@ -191,6 +195,7 @@ class TestFileSystemWatcher:
 
         # Simulate file created event
         from watchdog.events import FileCreatedEvent
+
         event = FileCreatedEvent(str(test_file))
         watcher.on_created(event)
 

@@ -12,6 +12,7 @@ import types
 
 sys.path.insert(0, ".")
 
+
 # ---------------------------------------------------------------------------
 # Stub cli.config before importing security.py to avoid the logging shadow.
 # security.py does "from cli.config import get_config" which needs src/ on
@@ -20,6 +21,7 @@ sys.path.insert(0, ".")
 class _StubConfig:
     vault_path = "/tmp"
 
+
 _cli_config_stub = types.ModuleType("cli.config")
 _cli_config_stub.get_config = lambda: _StubConfig()
 if "cli" not in sys.modules:
@@ -27,7 +29,6 @@ if "cli" not in sys.modules:
 sys.modules["cli.config"] = _cli_config_stub
 
 from src.cli.security import _parse_time_window
-
 
 # ---------------------------------------------------------------------------
 # _parse_time_window — hours

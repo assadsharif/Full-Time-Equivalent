@@ -149,7 +149,9 @@ class TestQueryWithFilters:
         results = service.query(params, format="dict")
 
         assert len(results) == 2
-        assert all(entry.level in [LogLevel.ERROR, LogLevel.CRITICAL] for entry in results)
+        assert all(
+            entry.level in [LogLevel.ERROR, LogLevel.CRITICAL] for entry in results
+        )
 
         service.close()
 
@@ -255,10 +257,7 @@ class TestFilterByTimeRange:
         start = now - timedelta(hours=3)
         end = now
 
-        results = service.filter_by_time_range(
-            start, end,
-            level=LogLevel.ERROR
-        )
+        results = service.filter_by_time_range(start, end, level=LogLevel.ERROR)
 
         # Should only include ERROR logs in time range
         assert all(entry.level >= LogLevel.ERROR for entry in results)

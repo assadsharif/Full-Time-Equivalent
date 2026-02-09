@@ -85,10 +85,7 @@ class TestQueryPerformance:
         """Filtered queries should complete in < 1s."""
         service = QueryService(large_log_dir)
 
-        params = LogQuery(
-            levels=[LogLevel.ERROR, LogLevel.CRITICAL],
-            limit=1000
-        )
+        params = LogQuery(levels=[LogLevel.ERROR, LogLevel.CRITICAL], limit=1000)
 
         start = time.perf_counter()
         results = service.query(params, format="dict")
@@ -188,7 +185,9 @@ class TestQueryThroughput:
         total_time_ms = (end - start) * 1000
         avg_time_ms = total_time_ms / num_queries
 
-        assert avg_time_ms < 500, f"Avg query time: {avg_time_ms:.2f}ms (target: < 500ms)"
+        assert (
+            avg_time_ms < 500
+        ), f"Avg query time: {avg_time_ms:.2f}ms (target: < 500ms)"
 
         service.close()
 
@@ -266,7 +265,9 @@ class TestScalability:
         assert len(results) == 1000
         # For 100k entries (~10MB), should be much faster than 10s
         # For actual 1GB, target is < 10s
-        assert elapsed_seconds < 10, f"Query took {elapsed_seconds:.2f}s (target: < 10s)"
+        assert (
+            elapsed_seconds < 10
+        ), f"Query took {elapsed_seconds:.2f}s (target: < 10s)"
 
         service.close()
 

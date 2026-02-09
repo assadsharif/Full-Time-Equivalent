@@ -37,17 +37,11 @@ class TestConfigLoader:
         """Test loading config from YAML file"""
         config_file = tmp_path / "cli.yaml"
         config_data = {
-            "vault": {
-                "default_path": "~/CustomVault",
-                "auto_detect": False
-            },
-            "logging": {
-                "level": "DEBUG",
-                "colored": False
-            }
+            "vault": {"default_path": "~/CustomVault", "auto_detect": False},
+            "logging": {"level": "DEBUG", "colored": False},
         }
 
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             yaml.dump(config_data, f)
 
         loader = ConfigLoader(config_file)
@@ -72,7 +66,7 @@ class TestConfigLoader:
     def test_load_invalid_yaml(self, tmp_path):
         """Test loading invalid YAML raises ValueError"""
         config_file = tmp_path / "cli.yaml"
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             f.write("invalid: yaml: content: [")
 
         loader = ConfigLoader(config_file)
@@ -83,13 +77,9 @@ class TestConfigLoader:
     def test_load_invalid_config_data(self, tmp_path):
         """Test loading config with invalid data raises ValueError"""
         config_file = tmp_path / "cli.yaml"
-        config_data = {
-            "watcher": {
-                "poll_interval": "not_an_integer"  # Should be int
-            }
-        }
+        config_data = {"watcher": {"poll_interval": "not_an_integer"}}  # Should be int
 
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             yaml.dump(config_data, f)
 
         loader = ConfigLoader(config_file)
@@ -102,7 +92,7 @@ class TestConfigLoader:
         config_file = tmp_path / "cli.yaml"
         config_data = {"vault": {"default_path": "~/Test"}}
 
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             yaml.dump(config_data, f)
 
         loader = ConfigLoader(config_file)
@@ -116,7 +106,7 @@ class TestConfigLoader:
         config_file = tmp_path / "cli.yaml"
         config_data = {"vault": {"default_path": "~/Test1"}}
 
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             yaml.dump(config_data, f)
 
         loader = ConfigLoader(config_file)
@@ -125,7 +115,7 @@ class TestConfigLoader:
 
         # Update file
         config_data["vault"]["default_path"] = "~/Test2"
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             yaml.dump(config_data, f)
 
         config2 = loader.reload()
@@ -156,8 +146,7 @@ class TestCLIConfig:
     def test_partial_config(self):
         """Test partial config with defaults for missing values"""
         config = CLIConfig(
-            vault={"default_path": "~/CustomVault"},
-            logging={"level": "DEBUG"}
+            vault={"default_path": "~/CustomVault"}, logging={"level": "DEBUG"}
         )
 
         assert config.vault.default_path == "~/CustomVault"
@@ -178,10 +167,12 @@ class TestGlobalConfig:
         # Mock the default config path
         monkeypatch.setattr(
             "src.cli.config.ConfigLoader.__init__",
-            lambda self, path=None: setattr(self, "config_path", config_file) or setattr(self, "_config", None)
+            lambda self, path=None: setattr(self, "config_path", config_file)
+            or setattr(self, "_config", None),
         )
 
         from src.cli import config as config_module
+
         # Reset global state
         config_module._config_loader = None
 
@@ -195,11 +186,12 @@ class TestGlobalConfig:
         config_file = tmp_path / "cli.yaml"
         config_data = {"vault": {"default_path": "~/Test"}}
 
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             yaml.dump(config_data, f)
 
         # Reset global loader
         from src.cli import config as config_module
+
         config_module._config_loader = ConfigLoader(config_file)
 
         config = reload_config()

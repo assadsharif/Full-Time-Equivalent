@@ -44,7 +44,6 @@ from src.mcp_servers.sqlmodel_orm_mcp import (
     DatabaseType,
 )
 
-
 # =============================================================================
 # Test: Server Registration
 # =============================================================================
@@ -198,9 +197,7 @@ class TestInputValidation:
     # ValidateModelInput
     def test_validate_model_valid(self):
         """Valid model code should pass validation input."""
-        inp = ValidateModelInput(
-            model_code="class Todo(SQLModel, table=True): pass"
-        )
+        inp = ValidateModelInput(model_code="class Todo(SQLModel, table=True): pass")
         assert "Todo" in inp.model_code
 
     def test_validate_model_empty_rejected(self):
@@ -480,7 +477,9 @@ class TestGenerateCrud:
         result = json.loads(result_json)
 
         assert result["success"] is True
-        assert "def get_todos" in result["code"] or "def get_all_todos" in result["code"]
+        assert (
+            "def get_todos" in result["code"] or "def get_all_todos" in result["code"]
+        )
 
     @pytest.mark.asyncio
     async def test_generate_crud_uses_session(self):
@@ -594,12 +593,12 @@ class TestValidateModel:
     @pytest.mark.asyncio
     async def test_validate_good_model(self):
         """Valid model should pass validation."""
-        model_code = '''
+        model_code = """
 class Todo(SQLModel, table=True):
     __tablename__ = "todos"
     id: Optional[int] = Field(default=None, primary_key=True)
     title: str = Field(max_length=200)
-'''
+"""
         result_json = await sqlmodel_validate_model(model_code=model_code)
         result = json.loads(result_json)
 
@@ -609,10 +608,10 @@ class Todo(SQLModel, table=True):
     @pytest.mark.asyncio
     async def test_validate_missing_primary_key(self):
         """Model without primary key should be flagged."""
-        model_code = '''
+        model_code = """
 class Todo(SQLModel, table=True):
     title: str
-'''
+"""
         result_json = await sqlmodel_validate_model(model_code=model_code)
         result = json.loads(result_json)
 
@@ -622,11 +621,11 @@ class Todo(SQLModel, table=True):
     @pytest.mark.asyncio
     async def test_validate_missing_table_true(self):
         """Model without table=True should be flagged as warning."""
-        model_code = '''
+        model_code = """
 class Todo(SQLModel):
     id: Optional[int] = Field(default=None, primary_key=True)
     title: str
-'''
+"""
         result_json = await sqlmodel_validate_model(model_code=model_code)
         result = json.loads(result_json)
 
@@ -636,16 +635,19 @@ class Todo(SQLModel):
     @pytest.mark.asyncio
     async def test_validate_mutable_default(self):
         """Mutable default should be flagged."""
-        model_code = '''
+        model_code = """
 class Todo(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     tags: list = []
-'''
+"""
         result_json = await sqlmodel_validate_model(model_code=model_code)
         result = json.loads(result_json)
 
         assert result["valid"] is False
-        assert any("mutable" in issue.lower() or "default" in issue.lower() for issue in result["issues"])
+        assert any(
+            "mutable" in issue.lower() or "default" in issue.lower()
+            for issue in result["issues"]
+        )
 
 
 # =============================================================================
@@ -689,7 +691,10 @@ class TestDiagnoseIssues:
         result = json.loads(result_json)
 
         assert result["success"] is True
-        assert "circular" in result["diagnosis"].lower() or "import" in result["diagnosis"].lower()
+        assert (
+            "circular" in result["diagnosis"].lower()
+            or "import" in result["diagnosis"].lower()
+        )
 
     @pytest.mark.asyncio
     async def test_diagnose_unknown_error(self):

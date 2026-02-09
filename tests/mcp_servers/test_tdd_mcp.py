@@ -31,10 +31,10 @@ from mcp_servers.tdd_mcp import (
     tdd_validate_cycle,
 )
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def tmp_state(tmp_path):
@@ -52,13 +52,16 @@ def tmp_project(tmp_path):
 # Server Registration
 # ---------------------------------------------------------------------------
 
+
 class TestServerRegistration:
     def test_server_name(self):
         assert mcp.name == "tdd_mcp"
 
     def test_server_has_eight_tools(self):
         tools = mcp._tool_manager._tools
-        assert len(tools) == 8, f"Expected 8 tools, got {len(tools)}: {list(tools.keys())}"
+        assert (
+            len(tools) == 8
+        ), f"Expected 8 tools, got {len(tools)}: {list(tools.keys())}"
 
     def test_tool_names(self):
         tool_names = set(mcp._tool_manager._tools.keys())
@@ -78,6 +81,7 @@ class TestServerRegistration:
 # ---------------------------------------------------------------------------
 # Input Validation — TddRunTestsInput
 # ---------------------------------------------------------------------------
+
 
 class TestTddRunTestsInputValidation:
     def test_valid_input(self):
@@ -109,6 +113,7 @@ class TestTddRunTestsInputValidation:
 # Input Validation — TddRedInput / TddGreenInput
 # ---------------------------------------------------------------------------
 
+
 class TestTddRedGreenInputValidation:
     def test_red_valid(self):
         inp = TddRedInput(test_path="tests/test_a.py")
@@ -139,6 +144,7 @@ class TestTddRedGreenInputValidation:
 # Input Validation — TddGenerateScaffoldInput
 # ---------------------------------------------------------------------------
 
+
 class TestTddGenerateScaffoldInputValidation:
     def test_valid_module_path(self):
         inp = TddGenerateScaffoldInput(module_path="src/cli/tdd.py")
@@ -160,6 +166,7 @@ class TestTddGenerateScaffoldInputValidation:
 # ---------------------------------------------------------------------------
 # Tool: tdd_run_tests
 # ---------------------------------------------------------------------------
+
 
 class TestTddRunTests:
     @pytest.mark.asyncio
@@ -212,12 +219,15 @@ class TestTddRunTests:
             stderr="",
         )
         await tdd_run_tests(target_path="tests/", cwd="/some/path")
-        mock_run.assert_called_once_with(target="tests/", extra_args=None, cwd="/some/path")
+        mock_run.assert_called_once_with(
+            target="tests/", extra_args=None, cwd="/some/path"
+        )
 
 
 # ---------------------------------------------------------------------------
 # Tool: tdd_red
 # ---------------------------------------------------------------------------
+
 
 class TestTddRed:
     @pytest.mark.asyncio
@@ -258,6 +268,7 @@ class TestTddRed:
 # Tool: tdd_green
 # ---------------------------------------------------------------------------
 
+
 class TestTddGreen:
     @pytest.mark.asyncio
     @patch("mcp_servers.tdd_mcp.run_pytest")
@@ -295,6 +306,7 @@ class TestTddGreen:
 # ---------------------------------------------------------------------------
 # Tool: tdd_refactor
 # ---------------------------------------------------------------------------
+
 
 class TestTddRefactor:
     @pytest.mark.asyncio
@@ -347,12 +359,15 @@ class TestTddRefactor:
         mock_run.assert_called_once()
         call_kwargs = mock_run.call_args
         # extra_args should include --cov
-        assert "--cov" in call_kwargs[1].get("extra_args", []) or "--cov" in call_kwargs.kwargs.get("extra_args", [])
+        assert "--cov" in call_kwargs[1].get(
+            "extra_args", []
+        ) or "--cov" in call_kwargs.kwargs.get("extra_args", [])
 
 
 # ---------------------------------------------------------------------------
 # Tool: tdd_init
 # ---------------------------------------------------------------------------
+
 
 class TestTddInit:
     @pytest.mark.asyncio
@@ -378,6 +393,7 @@ class TestTddInit:
 # Tool: tdd_status
 # ---------------------------------------------------------------------------
 
+
 class TestTddStatus:
     @pytest.mark.asyncio
     @patch("mcp_servers.tdd_mcp.TDDState")
@@ -402,6 +418,7 @@ class TestTddStatus:
 # Tool: tdd_generate_scaffold
 # ---------------------------------------------------------------------------
 
+
 class TestTddGenerateScaffold:
     @pytest.mark.asyncio
     async def test_scaffold_returns_string(self, tmp_path):
@@ -418,19 +435,27 @@ class TestTddGenerateScaffold:
     @pytest.mark.asyncio
     async def test_scaffold_error_path_first(self, tmp_path):
         module = tmp_path / "mymod.py"
-        module.write_text(
-            "def divide(a, b):\n    return a / b\n"
-        )
+        module.write_text("def divide(a, b):\n    return a / b\n")
         result = await tdd_generate_scaffold(module_path=str(module))
         # Error-path tests should come before happy-path in the output
         lines = result.split("\n")
         error_idx = None
         happy_idx = None
         for i, line in enumerate(lines):
-            if "error" in line.lower() or "invalid" in line.lower() or "raise" in line.lower() or "edge" in line.lower():
+            if (
+                "error" in line.lower()
+                or "invalid" in line.lower()
+                or "raise" in line.lower()
+                or "edge" in line.lower()
+            ):
                 if error_idx is None:
                     error_idx = i
-            if "happy" in line.lower() or "success" in line.lower() or "valid" in line.lower() or "normal" in line.lower():
+            if (
+                "happy" in line.lower()
+                or "success" in line.lower()
+                or "valid" in line.lower()
+                or "normal" in line.lower()
+            ):
                 if happy_idx is None:
                     happy_idx = i
         # At minimum, the scaffold should contain test functions
@@ -438,7 +463,9 @@ class TestTddGenerateScaffold:
 
     @pytest.mark.asyncio
     async def test_scaffold_nonexistent_module(self, tmp_path):
-        result = await tdd_generate_scaffold(module_path=str(tmp_path / "nonexistent.py"))
+        result = await tdd_generate_scaffold(
+            module_path=str(tmp_path / "nonexistent.py")
+        )
         # Should return an error in the result
         data = json.loads(result)
         assert data["status"] == "error"
@@ -456,6 +483,7 @@ class TestTddGenerateScaffold:
 # ---------------------------------------------------------------------------
 # Tool: tdd_validate_cycle
 # ---------------------------------------------------------------------------
+
 
 class TestTddValidateCycle:
     @pytest.mark.asyncio

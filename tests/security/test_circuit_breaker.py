@@ -13,7 +13,6 @@ the MCP-guard integration scenarios that the watcher-level tests do not:
 import sys
 import time
 
-
 # ---------------------------------------------------------------------------
 # Import helpers  (avoid triggering the logging shadow — see MEMORY.md)
 # ---------------------------------------------------------------------------
@@ -25,7 +24,6 @@ from src.security.circuit_breaker import (
     CircuitBreakerRegistry,
     CircuitState,
 )
-
 
 # ---------------------------------------------------------------------------
 # Basic state-machine tests

@@ -32,7 +32,7 @@ class TestAuditLogger:
             timestamp=datetime(2026, 1, 27, 10, 0, 0),
             reason="Validation complete",
             actor="system",
-            logged=True
+            logged=True,
         )
 
         logger.log_transition(transition)
@@ -57,7 +57,7 @@ class TestAuditLogger:
             timestamp=datetime(2026, 1, 27, 11, 0, 0),
             reason="Planning started",
             actor="system",
-            logged=True
+            logged=True,
         )
 
         logger.log_transition(transition)
@@ -95,7 +95,7 @@ class TestAuditLogger:
             timestamp=datetime(2026, 1, 27, 12, 0, 0),
             reason="Approved by human",
             actor="human",
-            logged=True
+            logged=True,
         )
 
         logger.log_transition(transition)
@@ -108,7 +108,9 @@ class TestAuditLogger:
         assert "action" in log_entry  # Constitutional requirement
         assert "task_id" in log_entry  # Constitutional requirement (triggering file)
         assert "result" in log_entry  # Constitutional requirement
-        assert "approval_status" in log_entry or "actor" in log_entry  # Constitutional requirement
+        assert (
+            "approval_status" in log_entry or "actor" in log_entry
+        )  # Constitutional requirement
 
     def test_log_transition_append_only(self, isolated_fs):
         """
@@ -127,7 +129,7 @@ class TestAuditLogger:
             timestamp=datetime(2026, 1, 27, 10, 0, 0),
             reason="First transition",
             actor="system",
-            logged=True
+            logged=True,
         )
         logger.log_transition(transition1)
 
@@ -140,13 +142,13 @@ class TestAuditLogger:
             timestamp=datetime(2026, 1, 27, 10, 30, 0),
             reason="Second transition",
             actor="system",
-            logged=True
+            logged=True,
         )
         logger.log_transition(transition2)
 
         # Verify both entries exist in log file
         log_file = isolated_fs / "Logs" / "2026-01-27.log"
-        log_lines = log_file.read_text().strip().split('\n')
+        log_lines = log_file.read_text().strip().split("\n")
 
         assert len(log_lines) == 2, "Should have 2 log entries"
 
@@ -174,7 +176,7 @@ class TestAuditLogger:
             timestamp=datetime(2026, 1, 27, 10, 0, 0),
             reason="Transition on Jan 27",
             actor="system",
-            logged=True
+            logged=True,
         )
         logger.log_transition(transition1)
 
@@ -186,7 +188,7 @@ class TestAuditLogger:
             timestamp=datetime(2026, 1, 28, 10, 0, 0),
             reason="Transition on Jan 28",
             actor="system",
-            logged=True
+            logged=True,
         )
         logger.log_transition(transition2)
 
@@ -214,7 +216,7 @@ class TestAuditLogger:
             reason="Execution failed",
             actor="system",
             logged=True,
-            error="Disk full"
+            error="Disk full",
         )
 
         logger.log_transition(transition)

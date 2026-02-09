@@ -25,7 +25,6 @@ from src.approval.integrity_checker import IntegrityChecker
 from src.approval.models import ApprovalRequest, ApprovalStatus
 from src.approval.nonce_generator import NonceGenerator
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -96,15 +95,13 @@ class TestNonceGenerator:
 
 class TestIntegrityChecker:
     def test_hash_is_deterministic(self):
-        assert (
-            IntegrityChecker.compute_hash("abc")
-            == IntegrityChecker.compute_hash("abc")
+        assert IntegrityChecker.compute_hash("abc") == IntegrityChecker.compute_hash(
+            "abc"
         )
 
     def test_hash_differs_on_change(self):
-        assert (
-            IntegrityChecker.compute_hash("abc")
-            != IntegrityChecker.compute_hash("abd")
+        assert IntegrityChecker.compute_hash("abc") != IntegrityChecker.compute_hash(
+            "abd"
         )
 
     def test_verify_pass(self):
@@ -156,7 +153,9 @@ class TestApprovalManagerCreate:
         assert req.integrity_hash
 
     def test_file_created_with_frontmatter(self, manager, approvals_dir):
-        req = manager.create(task_id="t-002", action_type="email", keywords=["send email"])
+        req = manager.create(
+            task_id="t-002", action_type="email", keywords=["send email"]
+        )
         p = approvals_dir / f"{req.approval_id}.md"
         assert p.exists()
         text = p.read_text()
@@ -168,14 +167,18 @@ class TestApprovalManagerCreate:
 
     def test_risk_high_payment(self, manager):
         req = manager.create(
-            task_id="r1", action_type="payment", keywords=["payment"],
+            task_id="r1",
+            action_type="payment",
+            keywords=["payment"],
             action_details={"amount": 500},
         )
         assert req.risk_level == "high"
 
     def test_risk_critical_large_payment(self, manager):
         req = manager.create(
-            task_id="r2", action_type="wire", keywords=["wire"],
+            task_id="r2",
+            action_type="wire",
+            keywords=["wire"],
             action_details={"amount": 50_000},
         )
         assert req.risk_level == "critical"
@@ -206,7 +209,9 @@ class TestApprovalManagerCreate:
 
     def test_action_details_in_body(self, manager, approvals_dir):
         req = manager.create(
-            task_id="r8", action_type="payment", keywords=["payment"],
+            task_id="r8",
+            action_type="payment",
+            keywords=["payment"],
             action_details={"recipient": "ACME Corp", "amount": 1234},
         )
         body = (approvals_dir / f"{req.approval_id}.md").read_text()
@@ -221,7 +226,9 @@ class TestApprovalManagerCreate:
 
 class TestApprovalManagerRead:
     def test_get_by_id(self, manager):
-        created = manager.create(task_id="rd-1", action_type="deploy", keywords=["deploy"])
+        created = manager.create(
+            task_id="rd-1", action_type="deploy", keywords=["deploy"]
+        )
         loaded = manager.get(created.approval_id)
         assert loaded is not None
         assert loaded.approval_id == created.approval_id
@@ -231,7 +238,9 @@ class TestApprovalManagerRead:
         assert manager.get("no-such-id") is None
 
     def test_find_for_task(self, manager):
-        created = manager.create(task_id="find-me", action_type="deploy", keywords=["deploy"])
+        created = manager.create(
+            task_id="find-me", action_type="deploy", keywords=["deploy"]
+        )
         found = manager.find_for_task("find-me")
         assert found is not None
         assert found.approval_id == created.approval_id
@@ -276,12 +285,16 @@ class TestApprovalManagerLifecycle:
             manager.approve("phantom-id")
 
     def test_reject_transitions_to_rejected(self, manager):
-        req = manager.create(task_id="lc-4", action_type="payment", keywords=["payment"])
+        req = manager.create(
+            task_id="lc-4", action_type="payment", keywords=["payment"]
+        )
         result = manager.reject(req.approval_id, reason="Denied")
         assert result.status == ApprovalStatus.REJECTED
 
     def test_reject_writes_reason_to_file(self, manager, approvals_dir):
-        req = manager.create(task_id="lc-5", action_type="payment", keywords=["payment"])
+        req = manager.create(
+            task_id="lc-5", action_type="payment", keywords=["payment"]
+        )
         manager.reject(req.approval_id, reason="Budget exceeded")
         text = (approvals_dir / f"{req.approval_id}.md").read_text()
         assert "Budget exceeded" in text
@@ -317,7 +330,9 @@ def _expire_request(approvals_dir: Path, req: ApprovalRequest) -> None:
     """Helper: rewrite expires_at in the file to 1 hour in the past."""
     file_path = approvals_dir / f"{req.approval_id}.md"
     past = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
-    file_path.write_text(file_path.read_text().replace(req.expires_at.isoformat(), past))
+    file_path.write_text(
+        file_path.read_text().replace(req.expires_at.isoformat(), past)
+    )
 
 
 class TestApprovalManagerTimeout:
@@ -362,7 +377,7 @@ class TestApprovalIntegrity:
         # Tamper: replace a word in the body only
         text = file_path.read_text()
         end = text.find("---", 3)
-        fm, body = text[: end + 3], text[end + 3:]
+        fm, body = text[: end + 3], text[end + 3 :]
         body = body.replace("deploy", "HACKED")
         file_path.write_text(fm + body)
 

@@ -53,7 +53,9 @@ class TestCredentialStatus:
                 return ["gmail", "slack", "github"]
 
         d = SecurityDashboard(
-            log_paths["audit"], log_paths["alerts"], log_paths["incident"],
+            log_paths["audit"],
+            log_paths["alerts"],
+            log_paths["incident"],
             credential_vault=_FakeVault(),
         )
         status = d.get_credential_status()
@@ -77,7 +79,9 @@ class TestVerificationStatus:
                 return {"gmail-mcp": "abc123", "slack-mcp": "def456"}
 
         d = SecurityDashboard(
-            log_paths["audit"], log_paths["alerts"], log_paths["incident"],
+            log_paths["audit"],
+            log_paths["alerts"],
+            log_paths["incident"],
             mcp_verifier=_FakeVerifier(),
         )
         status = d.get_mcp_verification_status()
@@ -116,7 +120,9 @@ class TestRateLimitStatus:
                 pass  # no-op in test
 
         d = SecurityDashboard(
-            log_paths["audit"], log_paths["alerts"], log_paths["incident"],
+            log_paths["audit"],
+            log_paths["alerts"],
+            log_paths["incident"],
             rate_limiter=_FakeLimiter(),
         )
         status = d.get_rate_limit_status()
@@ -169,9 +175,21 @@ class TestCircuitBreakerStatus:
     def test_isolated_servers_shown_as_open(self, dashboard, log_paths):
         now = datetime.now(timezone.utc)
         records = [
-            {"timestamp": now.isoformat(), "action_type": "mcp_isolated", "details": {"mcp_server": "bad-svc"}},
-            {"timestamp": now.isoformat(), "action_type": "mcp_isolated", "details": {"mcp_server": "sus-svc"}},
-            {"timestamp": now.isoformat(), "action_type": "mcp_restored", "details": {"mcp_server": "bad-svc"}},
+            {
+                "timestamp": now.isoformat(),
+                "action_type": "mcp_isolated",
+                "details": {"mcp_server": "bad-svc"},
+            },
+            {
+                "timestamp": now.isoformat(),
+                "action_type": "mcp_isolated",
+                "details": {"mcp_server": "sus-svc"},
+            },
+            {
+                "timestamp": now.isoformat(),
+                "action_type": "mcp_restored",
+                "details": {"mcp_server": "bad-svc"},
+            },
         ]
         _write_jsonl(log_paths["incident"], records)
 

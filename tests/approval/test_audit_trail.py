@@ -55,8 +55,12 @@ class TestApprovalAuditLogger:
 
     def test_log_rejected_writes_event(self, logger, audit_log):
         logger.log_rejected(
-            "APR-003", "task-3", "payment", "critical",
-            reason="too risky", approver="bob",
+            "APR-003",
+            "task-3",
+            "payment",
+            "critical",
+            reason="too risky",
+            approver="bob",
         )
 
         event = json.loads(audit_log.read_text().strip())
@@ -100,7 +104,9 @@ def _seed_lifecycle(logger: ApprovalAuditLogger):
     logger.log_created("APR-001", "task-A", "email", "low")
     logger.log_approved("APR-001", "task-A", "email", "low", approver="alice")
     logger.log_created("APR-002", "task-B", "payment", "high")
-    logger.log_rejected("APR-002", "task-B", "payment", "high", reason="denied", approver="bob")
+    logger.log_rejected(
+        "APR-002", "task-B", "payment", "high", reason="denied", approver="bob"
+    )
 
 
 class TestQueryApprovalEvents:
@@ -144,7 +150,9 @@ class TestQueryApprovalEvents:
 class TestQueryApproverHistory:
     def test_returns_decisions_by_approver(self, logger, query):
         logger.log_approved("APR-001", "t1", "email", "low", approver="alice")
-        logger.log_rejected("APR-002", "t2", "pay", "high", reason="x", approver="alice")
+        logger.log_rejected(
+            "APR-002", "t2", "pay", "high", reason="x", approver="alice"
+        )
         logger.log_approved("APR-003", "t3", "deploy", "med", approver="bob")
 
         history = query.query_approver_history("alice")
@@ -176,16 +184,16 @@ class TestQueryApprovalStats:
         assert stats["avg_response_time_seconds"] == 0.0
 
     def test_counts_all_statuses(self, logger, query):
-        logger.log_created("APR-001", "t1", "email", "low")      # pending
-        logger.log_approved("APR-001", "t1", "email", "low")     # approved
-        logger.log_created("APR-002", "t2", "pay", "high")       # pending
+        logger.log_created("APR-001", "t1", "email", "low")  # pending
+        logger.log_approved("APR-001", "t1", "email", "low")  # approved
+        logger.log_created("APR-002", "t2", "pay", "high")  # pending
         logger.log_rejected("APR-002", "t2", "pay", "high", reason="x")  # rejected
-        logger.log_created("APR-003", "t3", "deploy", "med")     # pending
-        logger.log_timeout("APR-003", "t3", "deploy", "med")     # timeout
+        logger.log_created("APR-003", "t3", "deploy", "med")  # pending
+        logger.log_timeout("APR-003", "t3", "deploy", "med")  # timeout
 
         stats = query.query_approval_stats()
         assert stats["total_events"] == 6
-        assert stats["pending_count"] == 3   # 3 created events
+        assert stats["pending_count"] == 3  # 3 created events
         assert stats["approved_count"] == 1
         assert stats["rejected_count"] == 1
         assert stats["timeout_count"] == 1
@@ -231,14 +239,22 @@ class TestQueryApprovalStats:
     def test_since_filter(self, audit_log):
         now = datetime.now(timezone.utc)
         old = {
-            "event_type": "approval_created", "approval_id": "OLD",
-            "task_id": "t", "action_type": "e", "risk_level": "l",
-            "status": "pending", "timestamp": (now - timedelta(hours=2)).isoformat(),
+            "event_type": "approval_created",
+            "approval_id": "OLD",
+            "task_id": "t",
+            "action_type": "e",
+            "risk_level": "l",
+            "status": "pending",
+            "timestamp": (now - timedelta(hours=2)).isoformat(),
         }
         new = {
-            "event_type": "approval_created", "approval_id": "NEW",
-            "task_id": "t", "action_type": "e", "risk_level": "l",
-            "status": "pending", "timestamp": now.isoformat(),
+            "event_type": "approval_created",
+            "approval_id": "NEW",
+            "task_id": "t",
+            "action_type": "e",
+            "risk_level": "l",
+            "status": "pending",
+            "timestamp": now.isoformat(),
         }
         with open(audit_log, "w") as fh:
             fh.write(json.dumps(old) + "\n")
@@ -261,10 +277,15 @@ class TestApprovalManagerAuditIntegration:
 
         approvals_dir = tmp_path / "Approvals"
         audit_log = tmp_path / "approval_audit.log"
-        return ApprovalManager(approvals_dir, approval_audit_log_path=audit_log), audit_log
+        return (
+            ApprovalManager(approvals_dir, approval_audit_log_path=audit_log),
+            audit_log,
+        )
 
     def _load_events(self, audit_log: Path) -> list[dict]:
-        return [json.loads(ln) for ln in audit_log.read_text().strip().split("\n") if ln]
+        return [
+            json.loads(ln) for ln in audit_log.read_text().strip().split("\n") if ln
+        ]
 
     def test_create_logs_event(self, tmp_path):
         mgr, audit_log = self._make_manager(tmp_path)

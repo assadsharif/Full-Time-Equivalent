@@ -20,10 +20,10 @@ from src.security.audit_logger import SecurityAuditLogger
 from src.security.metrics import SecurityMetrics
 from src.security.models import RiskLevel
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _seed_audit_log(path: Path, count: int):
     """Write *count* mcp_action events."""
@@ -90,7 +90,9 @@ class TestMetricsPerformance:
         summary = metrics.summary()
         elapsed = time.monotonic() - start
 
-        assert elapsed < 0.2, f"summary() over {event_count} events: {elapsed*1000:.0f} ms (limit 200 ms)"
+        assert (
+            elapsed < 0.2
+        ), f"summary() over {event_count} events: {elapsed*1000:.0f} ms (limit 200 ms)"
         assert summary["mcp_action_count"] == event_count
 
     def test_per_server_actions_correct(self, tmp_path):

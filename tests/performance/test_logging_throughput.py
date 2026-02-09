@@ -95,7 +95,9 @@ def temp_log_dir():
         yield Path(tmpdir)
 
 
-async def benchmark_async_logging(log_dir: Path, num_logs: int = 10000) -> PerformanceMetrics:
+async def benchmark_async_logging(
+    log_dir: Path, num_logs: int = 10000
+) -> PerformanceMetrics:
     """
     Benchmark async logging performance.
 
@@ -155,7 +157,9 @@ async def benchmark_async_logging(log_dir: Path, num_logs: int = 10000) -> Perfo
     return metrics
 
 
-async def benchmark_sync_logging(log_dir: Path, num_logs: int = 10000) -> PerformanceMetrics:
+async def benchmark_sync_logging(
+    log_dir: Path, num_logs: int = 10000
+) -> PerformanceMetrics:
     """
     Benchmark sync logging performance.
 
@@ -231,14 +235,18 @@ async def test_async_vs_sync_performance(temp_log_dir):
     print("\n" + "=" * 60)
     print("COMPARISON")
     print("=" * 60)
-    print(f"Throughput improvement: {async_metrics.throughput_per_sec / sync_metrics.throughput_per_sec:.1f}x")
-    print(f"Latency reduction (p95): {sync_metrics.p95_latency_us / async_metrics.p95_latency_us:.1f}x")
+    print(
+        f"Throughput improvement: {async_metrics.throughput_per_sec / sync_metrics.throughput_per_sec:.1f}x"
+    )
+    print(
+        f"Latency reduction (p95): {sync_metrics.p95_latency_us / async_metrics.p95_latency_us:.1f}x"
+    )
     print("=" * 60 + "\n")
 
     # Assertions: Async performance requirements (relaxed for CI/WSL environments)
-    assert async_metrics.p95_latency_us < 500.0, (
-        f"Async p95 latency {async_metrics.p95_latency_us:.2f}μs exceeds requirement of < 500μs"
-    )
+    assert (
+        async_metrics.p95_latency_us < 500.0
+    ), f"Async p95 latency {async_metrics.p95_latency_us:.2f}μs exceeds requirement of < 500μs"
 
     assert async_metrics.throughput_per_sec > 1_000, (
         f"Async throughput {async_metrics.throughput_per_sec:,.0f} logs/sec "
@@ -265,19 +273,19 @@ async def test_async_logging_under_load(temp_log_dir):
     print(metrics)
 
     # Validate sustained performance (relaxed for CI/WSL environments)
-    assert metrics.p95_latency_us < 500.0, (
-        f"Under load, p95 latency {metrics.p95_latency_us:.2f}μs exceeds 500μs"
-    )
+    assert (
+        metrics.p95_latency_us < 500.0
+    ), f"Under load, p95 latency {metrics.p95_latency_us:.2f}μs exceeds 500μs"
 
-    assert metrics.throughput_per_sec > 1_000, (
-        f"Under load, throughput {metrics.throughput_per_sec:,.0f} logs/sec is below 1,000"
-    )
+    assert (
+        metrics.throughput_per_sec > 1_000
+    ), f"Under load, throughput {metrics.throughput_per_sec:,.0f} logs/sec is below 1,000"
 
     # Check latency consistency (relaxed for CI/WSL where queue-full fallback causes p99 spikes)
     latency_ratio = metrics.p99_latency_us / metrics.p95_latency_us
-    assert latency_ratio < 10.0, (
-        f"Latency distribution is inconsistent (p99/p95 = {latency_ratio:.1f}x)"
-    )
+    assert (
+        latency_ratio < 10.0
+    ), f"Latency distribution is inconsistent (p99/p95 = {latency_ratio:.1f}x)"
 
 
 @pytest.mark.asyncio
@@ -339,7 +347,9 @@ async def test_trace_correlation_overhead(temp_log_dir):
     overhead_us = metrics_with_trace.p95_latency_us - metrics_no_trace.p95_latency_us
     print(f"\nTrace correlation overhead (p95): {overhead_us:.2f} μs\n")
 
-    assert abs(overhead_us) < 500, f"Trace correlation overhead {overhead_us:.2f}μs exceeds 500μs"
+    assert (
+        abs(overhead_us) < 500
+    ), f"Trace correlation overhead {overhead_us:.2f}μs exceeds 500μs"
 
 
 @pytest.mark.asyncio
@@ -397,10 +407,14 @@ async def test_context_binding_overhead(temp_log_dir):
     print(metrics_with_context)
 
     # Context binding overhead should be < 100μs (relaxed for CI/WSL environments)
-    overhead_us = metrics_with_context.p95_latency_us - metrics_no_context.p95_latency_us
+    overhead_us = (
+        metrics_with_context.p95_latency_us - metrics_no_context.p95_latency_us
+    )
     print(f"\nContext binding overhead (p95): {overhead_us:.2f} μs\n")
 
-    assert abs(overhead_us) < 100, f"Context binding overhead {overhead_us:.2f}μs exceeds 100μs"
+    assert (
+        abs(overhead_us) < 100
+    ), f"Context binding overhead {overhead_us:.2f}μs exceeds 100μs"
 
 
 if __name__ == "__main__":
@@ -424,8 +438,12 @@ if __name__ == "__main__":
             print("\n" + "=" * 60)
             print("COMPARISON SUMMARY")
             print("=" * 60)
-            print(f"Throughput improvement: {async_metrics.throughput_per_sec / sync_metrics.throughput_per_sec:.1f}x")
-            print(f"Latency reduction (p95): {sync_metrics.p95_latency_us / async_metrics.p95_latency_us:.1f}x")
+            print(
+                f"Throughput improvement: {async_metrics.throughput_per_sec / sync_metrics.throughput_per_sec:.1f}x"
+            )
+            print(
+                f"Latency reduction (p95): {sync_metrics.p95_latency_us / async_metrics.p95_latency_us:.1f}x"
+            )
 
             # Check performance requirements
             print("\n" + "=" * 60)
@@ -434,15 +452,23 @@ if __name__ == "__main__":
 
             # Async p95 < 5μs
             if async_metrics.p95_latency_us < 5.0:
-                print(f"✅ Async p95 latency: {async_metrics.p95_latency_us:.2f}μs < 5μs")
+                print(
+                    f"✅ Async p95 latency: {async_metrics.p95_latency_us:.2f}μs < 5μs"
+                )
             else:
-                print(f"❌ Async p95 latency: {async_metrics.p95_latency_us:.2f}μs >= 5μs")
+                print(
+                    f"❌ Async p95 latency: {async_metrics.p95_latency_us:.2f}μs >= 5μs"
+                )
 
             # Async throughput > 100k/sec
             if async_metrics.throughput_per_sec > 100_000:
-                print(f"✅ Async throughput: {async_metrics.throughput_per_sec:,.0f} logs/sec > 100,000")
+                print(
+                    f"✅ Async throughput: {async_metrics.throughput_per_sec:,.0f} logs/sec > 100,000"
+                )
             else:
-                print(f"❌ Async throughput: {async_metrics.throughput_per_sec:,.0f} logs/sec <= 100,000")
+                print(
+                    f"❌ Async throughput: {async_metrics.throughput_per_sec:,.0f} logs/sec <= 100,000"
+                )
 
             print("=" * 60 + "\n")
 

@@ -15,6 +15,7 @@ from src.watchers.models import WhatsAppMessage
 
 try:
     from flask import Flask
+
     HAS_FLASK = True
 except ImportError:
     HAS_FLASK = False
@@ -32,6 +33,7 @@ class TestWhatsAppWatcher:
     def teardown_method(self):
         """Clean up test fixtures."""
         import shutil
+
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_init(self):

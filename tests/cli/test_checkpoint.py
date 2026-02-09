@@ -65,10 +65,7 @@ class TestWatcherCheckpoint:
     def test_watcher_checkpoint_with_values(self):
         """Test watcher checkpoint with custom values"""
         watcher = WatcherCheckpoint(
-            status="running",
-            pid=12345,
-            uptime=3600,
-            last_start="2026-01-28T10:00:00Z"
+            status="running", pid=12345, uptime=3600, last_start="2026-01-28T10:00:00Z"
         )
 
         assert watcher.status == "running"
@@ -99,7 +96,7 @@ class TestCheckpointManager:
             "vault": {
                 "path": "~/AI_Employee_Vault",
                 "initialized": True,
-                "last_status_check": "2026-01-28T10:00:00Z"
+                "last_status_check": "2026-01-28T10:00:00Z",
             },
             "watchers": {
                 "gmail": {
@@ -107,47 +104,47 @@ class TestCheckpointManager:
                     "pid": 12345,
                     "uptime": 3600,
                     "last_start": "2026-01-28T09:00:00Z",
-                    "last_stop": None
+                    "last_stop": None,
                 },
                 "whatsapp": {
                     "status": "stopped",
                     "pid": None,
                     "uptime": None,
                     "last_start": None,
-                    "last_stop": None
+                    "last_stop": None,
                 },
                 "filesystem": {
                     "status": "stopped",
                     "pid": None,
                     "uptime": None,
                     "last_start": None,
-                    "last_stop": None
-                }
+                    "last_stop": None,
+                },
             },
             "mcp_servers": {
                 "registry_loaded": True,
                 "last_health_check": "2026-01-28T10:00:00Z",
-                "servers": []
+                "servers": [],
             },
             "approvals": {
                 "pending_count": 2,
                 "last_review": "2026-01-28T09:30:00Z",
                 "last_approval": None,
-                "last_rejection": None
+                "last_rejection": None,
             },
             "briefings": {
                 "last_generated": "2026-01-27T08:00:00Z",
                 "last_viewed": "2026-01-28T09:00:00Z",
-                "total_generated": 5
+                "total_generated": 5,
             },
             "cli_usage": {
                 "total_commands": 42,
                 "last_command": "fte status",
-                "last_command_time": "2026-01-28T10:00:00Z"
-            }
+                "last_command_time": "2026-01-28T10:00:00Z",
+            },
         }
 
-        with open(checkpoint_file, 'w') as f:
+        with open(checkpoint_file, "w") as f:
             json.dump(checkpoint_data, f)
 
         manager = CheckpointManager(checkpoint_file)
@@ -165,7 +162,7 @@ class TestCheckpointManager:
         """Test loading invalid checkpoint returns default"""
         checkpoint_file = tmp_path / "checkpoint.json"
 
-        with open(checkpoint_file, 'w') as f:
+        with open(checkpoint_file, "w") as f:
             f.write("invalid json content")
 
         manager = CheckpointManager(checkpoint_file)
@@ -188,7 +185,7 @@ class TestCheckpointManager:
         assert checkpoint_file.exists()
 
         # Verify saved data
-        with open(checkpoint_file, 'r') as f:
+        with open(checkpoint_file, "r") as f:
             data = json.load(f)
 
         assert data["vault"]["path"] == "~/Test"

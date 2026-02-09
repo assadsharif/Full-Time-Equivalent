@@ -16,7 +16,7 @@ class TestCLIVersion:
     def test_version_flag(self):
         """Test --version displays version"""
         runner = CliRunner()
-        result = runner.invoke(cli, ['--version'])
+        result = runner.invoke(cli, ["--version"])
 
         assert result.exit_code == 0
         assert "version 0.1.0" in result.output.lower()
@@ -25,7 +25,7 @@ class TestCLIVersion:
         """Test -V displays version (if supported)"""
         runner = CliRunner()
         # Click's version_option uses --version only by default
-        result = runner.invoke(cli, ['--version'])
+        result = runner.invoke(cli, ["--version"])
 
         assert result.exit_code == 0
         assert "0.1.0" in result.output
@@ -37,7 +37,7 @@ class TestCLIHelp:
     def test_help_flag(self):
         """Test --help displays help"""
         runner = CliRunner()
-        result = runner.invoke(cli, ['--help'])
+        result = runner.invoke(cli, ["--help"])
 
         assert result.exit_code == 0
         assert "FTE - Digital Full-Time Employee CLI" in result.output
@@ -49,7 +49,7 @@ class TestCLIHelp:
     def test_help_flag_short(self):
         """Test -h flag (Click doesn't support -h by default, only --help)"""
         runner = CliRunner()
-        result = runner.invoke(cli, ['-h'])
+        result = runner.invoke(cli, ["-h"])
 
         # Click will show error for unknown option -h
         assert result.exit_code != 0 or "--help" in result.output
@@ -57,7 +57,7 @@ class TestCLIHelp:
     def test_help_shows_commands(self):
         """Test help shows all command groups"""
         runner = CliRunner()
-        result = runner.invoke(cli, ['--help'])
+        result = runner.invoke(cli, ["--help"])
 
         assert result.exit_code == 0
         # Check for command groups
@@ -72,7 +72,7 @@ class TestCLIHelp:
     def test_help_shows_options(self):
         """Test help shows global options"""
         runner = CliRunner()
-        result = runner.invoke(cli, ['--help'])
+        result = runner.invoke(cli, ["--help"])
 
         assert result.exit_code == 0
         assert "--verbose" in result.output or "-v" in result.output
@@ -86,7 +86,7 @@ class TestGlobalOptions:
     def test_verbose_flag(self):
         """Test --verbose flag is accepted"""
         runner = CliRunner()
-        result = runner.invoke(cli, ['--verbose', '--help'])
+        result = runner.invoke(cli, ["--verbose", "--help"])
 
         # Should not error, help should still display
         assert result.exit_code == 0
@@ -94,7 +94,7 @@ class TestGlobalOptions:
     def test_quiet_flag(self):
         """Test --quiet flag is accepted"""
         runner = CliRunner()
-        result = runner.invoke(cli, ['--quiet', '--help'])
+        result = runner.invoke(cli, ["--quiet", "--help"])
 
         # Should not error, help should still display
         assert result.exit_code == 0
@@ -102,7 +102,7 @@ class TestGlobalOptions:
     def test_no_color_flag(self):
         """Test --no-color flag is accepted"""
         runner = CliRunner()
-        result = runner.invoke(cli, ['--no-color', '--help'])
+        result = runner.invoke(cli, ["--no-color", "--help"])
 
         # Should not error, help should still display
         assert result.exit_code == 0
@@ -110,7 +110,7 @@ class TestGlobalOptions:
     def test_vault_path_option(self):
         """Test --vault-path option is accepted"""
         runner = CliRunner()
-        result = runner.invoke(cli, ['--vault-path', '/test/path', '--help'])
+        result = runner.invoke(cli, ["--vault-path", "/test/path", "--help"])
 
         # Should not error, help should still display
         assert result.exit_code == 0
@@ -118,7 +118,7 @@ class TestGlobalOptions:
     def test_combined_flags(self):
         """Test multiple flags together"""
         runner = CliRunner()
-        result = runner.invoke(cli, ['--verbose', '--no-color', '--help'])
+        result = runner.invoke(cli, ["--verbose", "--no-color", "--help"])
 
         assert result.exit_code == 0
 
@@ -129,7 +129,7 @@ class TestCommandGroups:
     def test_vault_command_group_exists(self):
         """Test vault command group exists"""
         runner = CliRunner()
-        result = runner.invoke(cli, ['vault', '--help'])
+        result = runner.invoke(cli, ["vault", "--help"])
 
         assert result.exit_code == 0
         assert "vault" in result.output.lower()
@@ -137,7 +137,7 @@ class TestCommandGroups:
     def test_watcher_command_group_exists(self):
         """Test watcher command group exists"""
         runner = CliRunner()
-        result = runner.invoke(cli, ['watcher', '--help'])
+        result = runner.invoke(cli, ["watcher", "--help"])
 
         assert result.exit_code == 0
         assert "watcher" in result.output.lower()
@@ -145,7 +145,7 @@ class TestCommandGroups:
     def test_mcp_command_group_exists(self):
         """Test mcp command group exists"""
         runner = CliRunner()
-        result = runner.invoke(cli, ['mcp', '--help'])
+        result = runner.invoke(cli, ["mcp", "--help"])
 
         assert result.exit_code == 0
         assert "mcp" in result.output.lower()
@@ -153,7 +153,7 @@ class TestCommandGroups:
     def test_approval_command_group_exists(self):
         """Test approval command group exists"""
         runner = CliRunner()
-        result = runner.invoke(cli, ['approval', '--help'])
+        result = runner.invoke(cli, ["approval", "--help"])
 
         assert result.exit_code == 0
         assert "approval" in result.output.lower()
@@ -161,7 +161,7 @@ class TestCommandGroups:
     def test_briefing_command_group_exists(self):
         """Test briefing command group exists"""
         runner = CliRunner()
-        result = runner.invoke(cli, ['briefing', '--help'])
+        result = runner.invoke(cli, ["briefing", "--help"])
 
         assert result.exit_code == 0
         assert "briefing" in result.output.lower()
@@ -173,7 +173,7 @@ class TestInvalidCommands:
     def test_invalid_command(self):
         """Test invalid command shows error"""
         runner = CliRunner()
-        result = runner.invoke(cli, ['invalid-command'])
+        result = runner.invoke(cli, ["invalid-command"])
 
         assert result.exit_code != 0
         # Click shows "No such command" or similar error
@@ -181,6 +181,6 @@ class TestInvalidCommands:
     def test_invalid_option(self):
         """Test invalid option shows error"""
         runner = CliRunner()
-        result = runner.invoke(cli, ['--invalid-option'])
+        result = runner.invoke(cli, ["--invalid-option"])
 
         assert result.exit_code != 0

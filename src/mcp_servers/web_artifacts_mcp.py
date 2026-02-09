@@ -431,6 +431,10 @@ async def artifacts_generate_layout(
             responsive=responsive,
         )
 
+        # Define template content
+        header_content = '<header className="h-14 border-b flex items-center px-4">\n          <button className="md:hidden">Menu</button>\n          <span className="ml-auto">User</span>\n        </header>'
+        footer_content = '<footer className="border-t p-4 text-center text-sm text-muted-foreground">\n          Footer'
+
         layouts = {
             "sidebar": f'''export function SidebarLayout({{ children }}: {{ children: React.ReactNode }}) {{
   return (
@@ -448,15 +452,11 @@ async def artifacts_generate_layout(
 
       {{/* Main Content */}}
       <div className="flex-1 flex flex-col">
-        {f'''<header className="h-14 border-b flex items-center px-4">
-          <button className="md:hidden">Menu</button>
-          <span className="ml-auto">User</span>
-        </header>''' if inp.include_nav else ""}
+        {header_content if inp.include_nav else ""}
         <main className="flex-1 p-6">
           {{children}}
         </main>
-        {f'''<footer className="border-t p-4 text-center text-sm text-muted-foreground">
-          Footer
+        {footer_content
         </footer>''' if inp.include_footer else ""}
       </div>
     </div>

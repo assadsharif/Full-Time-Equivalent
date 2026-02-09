@@ -43,7 +43,6 @@ from src.mcp_servers.nextjs_app_router_mcp import (
     FetchCacheOption,
 )
 
-
 # =============================================================================
 # Test: Server Registration
 # =============================================================================
@@ -185,9 +184,7 @@ class TestInputValidation:
     # ValidateStructureInput
     def test_validate_structure_valid(self):
         """Valid structure input should pass."""
-        inp = ValidateStructureInput(
-            files=["app/page.tsx", "app/layout.tsx"]
-        )
+        inp = ValidateStructureInput(files=["app/page.tsx", "app/layout.tsx"])
         assert len(inp.files) == 2
 
     def test_validate_structure_empty_files_rejected(self):
@@ -455,7 +452,9 @@ class TestGenerateApiClient:
         result = json.loads(result_json)
 
         assert result["success"] is True
-        assert "NEXT_PUBLIC_API_URL" in result["code"] or "process.env" in result["code"]
+        assert (
+            "NEXT_PUBLIC_API_URL" in result["code"] or "process.env" in result["code"]
+        )
 
 
 # =============================================================================
@@ -524,9 +523,7 @@ class TestValidateStructure:
     @pytest.mark.asyncio
     async def test_validate_missing_layout(self):
         """Missing layout should be flagged."""
-        result_json = await nextjs_validate_structure(
-            files=["app/page.tsx"]
-        )
+        result_json = await nextjs_validate_structure(files=["app/page.tsx"])
         result = json.loads(result_json)
 
         assert result["valid"] is False

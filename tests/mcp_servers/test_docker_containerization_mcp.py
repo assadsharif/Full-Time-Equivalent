@@ -30,10 +30,10 @@ from mcp_servers.docker_containerization_mcp import (
     docker_list_templates,
 )
 
-
 # ---------------------------------------------------------------------------
 # Server Registration
 # ---------------------------------------------------------------------------
+
 
 class TestServerRegistration:
     def test_server_name(self):
@@ -41,7 +41,9 @@ class TestServerRegistration:
 
     def test_server_has_eight_tools(self):
         tools = mcp._tool_manager._tools
-        assert len(tools) == 8, f"Expected 8 tools, got {len(tools)}: {list(tools.keys())}"
+        assert (
+            len(tools) == 8
+        ), f"Expected 8 tools, got {len(tools)}: {list(tools.keys())}"
 
     def test_tool_names(self):
         tool_names = set(mcp._tool_manager._tools.keys())
@@ -61,6 +63,7 @@ class TestServerRegistration:
 # ---------------------------------------------------------------------------
 # Input Validation — DockerfileGenerateInput
 # ---------------------------------------------------------------------------
+
 
 class TestDockerfileGenerateInputValidation:
     def test_valid_backend(self):
@@ -162,9 +165,12 @@ class TestDockerfileGenerateInputValidation:
 # Input Validation — BuildCommandInput
 # ---------------------------------------------------------------------------
 
+
 class TestBuildCommandInputValidation:
     def test_valid_input(self):
-        inp = BuildCommandInput(image_name="myapp-backend", dockerfile_path="Dockerfile")
+        inp = BuildCommandInput(
+            image_name="myapp-backend", dockerfile_path="Dockerfile"
+        )
         assert inp.image_name == "myapp-backend"
 
     def test_rejects_empty_image_name(self):
@@ -173,12 +179,15 @@ class TestBuildCommandInputValidation:
 
     def test_rejects_path_traversal(self):
         with pytest.raises(ValidationError, match="[Pp]ath traversal"):
-            BuildCommandInput(image_name="myapp", dockerfile_path="../../etc/Dockerfile")
+            BuildCommandInput(
+                image_name="myapp", dockerfile_path="../../etc/Dockerfile"
+            )
 
 
 # ---------------------------------------------------------------------------
 # Input Validation — RunCommandInput
 # ---------------------------------------------------------------------------
+
 
 class TestRunCommandInputValidation:
     def test_valid_input(self):
@@ -194,6 +203,7 @@ class TestRunCommandInputValidation:
 # Input Validation — GordonPromptInput
 # ---------------------------------------------------------------------------
 
+
 class TestGordonPromptInputValidation:
     def test_valid_category(self):
         inp = GordonPromptInput(category="security_audit")
@@ -208,9 +218,12 @@ class TestGordonPromptInputValidation:
 # Input Validation — DockerfileValidateInput
 # ---------------------------------------------------------------------------
 
+
 class TestDockerfileValidateInputValidation:
     def test_valid_input(self):
-        inp = DockerfileValidateInput(dockerfile_content="FROM python:3.13-slim\nRUN echo hello")
+        inp = DockerfileValidateInput(
+            dockerfile_content="FROM python:3.13-slim\nRUN echo hello"
+        )
         assert "FROM" in inp.dockerfile_content
 
     def test_rejects_empty(self):
@@ -221,6 +234,7 @@ class TestDockerfileValidateInputValidation:
 # ---------------------------------------------------------------------------
 # Tool: docker_generate_dockerfile
 # ---------------------------------------------------------------------------
+
 
 class TestDockerGenerateDockerfile:
     @pytest.mark.asyncio
@@ -348,6 +362,7 @@ class TestDockerGenerateDockerfile:
 # Tool: docker_suggest_build_command
 # ---------------------------------------------------------------------------
 
+
 class TestDockerSuggestBuildCommand:
     @pytest.mark.asyncio
     async def test_returns_build_command(self):
@@ -395,6 +410,7 @@ class TestDockerSuggestBuildCommand:
 # Tool: docker_suggest_run_command
 # ---------------------------------------------------------------------------
 
+
 class TestDockerSuggestRunCommand:
     @pytest.mark.asyncio
     async def test_returns_run_command(self):
@@ -441,6 +457,7 @@ class TestDockerSuggestRunCommand:
 # Tool: docker_suggest_gordon_prompt
 # ---------------------------------------------------------------------------
 
+
 class TestDockerSuggestGordonPrompt:
     @pytest.mark.asyncio
     async def test_security_audit_prompt(self):
@@ -483,6 +500,7 @@ class TestDockerSuggestGordonPrompt:
 # Tool: docker_recommend_base_image
 # ---------------------------------------------------------------------------
 
+
 class TestDockerRecommendBaseImage:
     @pytest.mark.asyncio
     async def test_python_recommendation(self):
@@ -517,6 +535,7 @@ class TestDockerRecommendBaseImage:
 # Tool: docker_generate_dockerignore
 # ---------------------------------------------------------------------------
 
+
 class TestDockerGenerateDockerignore:
     @pytest.mark.asyncio
     async def test_python_dockerignore(self):
@@ -549,6 +568,7 @@ class TestDockerGenerateDockerignore:
 # Tool: docker_validate_dockerfile
 # ---------------------------------------------------------------------------
 
+
 class TestDockerValidateDockerfile:
     @pytest.mark.asyncio
     async def test_valid_dockerfile_passes(self):
@@ -558,7 +578,7 @@ class TestDockerValidateDockerfile:
             "USER app\n"
             "EXPOSE 8000\n"
             "HEALTHCHECK CMD curl -f http://localhost:8000/health || exit 1\n"
-            "CMD [\"uvicorn\", \"main:app\"]\n"
+            'CMD ["uvicorn", "main:app"]\n'
         )
         result = await docker_validate_dockerfile(dockerfile_content=dockerfile)
         data = json.loads(result)
@@ -567,22 +587,24 @@ class TestDockerValidateDockerfile:
 
     @pytest.mark.asyncio
     async def test_detects_missing_user(self):
-        dockerfile = "FROM python:3.13-slim\nCMD [\"python\", \"app.py\"]\n"
+        dockerfile = 'FROM python:3.13-slim\nCMD ["python", "app.py"]\n'
         result = await docker_validate_dockerfile(dockerfile_content=dockerfile)
         data = json.loads(result)
         assert data["has_nonroot_user"] is False
-        assert any("non-root" in w.lower() or "user" in w.lower() for w in data["warnings"])
+        assert any(
+            "non-root" in w.lower() or "user" in w.lower() for w in data["warnings"]
+        )
 
     @pytest.mark.asyncio
     async def test_detects_missing_healthcheck(self):
-        dockerfile = "FROM python:3.13-slim\nUSER app\nCMD [\"python\", \"app.py\"]\n"
+        dockerfile = 'FROM python:3.13-slim\nUSER app\nCMD ["python", "app.py"]\n'
         result = await docker_validate_dockerfile(dockerfile_content=dockerfile)
         data = json.loads(result)
         assert data["has_healthcheck"] is False
 
     @pytest.mark.asyncio
     async def test_detects_latest_tag(self):
-        dockerfile = "FROM python:latest\nUSER app\nCMD [\"python\", \"app.py\"]\n"
+        dockerfile = 'FROM python:latest\nUSER app\nCMD ["python", "app.py"]\n'
         result = await docker_validate_dockerfile(dockerfile_content=dockerfile)
         data = json.loads(result)
         assert any("latest" in w.lower() for w in data["warnings"])
@@ -593,15 +615,17 @@ class TestDockerValidateDockerfile:
             "FROM python:3.13-slim\n"
             "ENV SECRET_KEY=mysecretvalue123\n"
             "ENV PASSWORD=admin\n"
-            "CMD [\"python\", \"app.py\"]\n"
+            'CMD ["python", "app.py"]\n'
         )
         result = await docker_validate_dockerfile(dockerfile_content=dockerfile)
         data = json.loads(result)
-        assert any("secret" in w.lower() or "credential" in w.lower() for w in data["warnings"])
+        assert any(
+            "secret" in w.lower() or "credential" in w.lower() for w in data["warnings"]
+        )
 
     @pytest.mark.asyncio
     async def test_detects_no_from(self):
-        dockerfile = "RUN echo hello\nCMD [\"echo\", \"hi\"]\n"
+        dockerfile = 'RUN echo hello\nCMD ["echo", "hi"]\n'
         result = await docker_validate_dockerfile(dockerfile_content=dockerfile)
         data = json.loads(result)
         assert any("FROM" in w for w in data["warnings"])
@@ -610,6 +634,7 @@ class TestDockerValidateDockerfile:
 # ---------------------------------------------------------------------------
 # Tool: docker_list_templates
 # ---------------------------------------------------------------------------
+
 
 class TestDockerListTemplates:
     @pytest.mark.asyncio

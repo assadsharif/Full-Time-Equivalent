@@ -9,7 +9,6 @@ import pytest
 
 from src.orchestrator.dashboard import OrchestratorDashboard
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -34,6 +33,7 @@ def _seed_checkpoint(vault_path: Path, data: dict, age_seconds: int = 0) -> None
     ckpt_path.write_text(json.dumps(data))
     if age_seconds > 0:
         import os
+
         mtime = time.time() - age_seconds
         os.utime(ckpt_path, (mtime, mtime))
 
@@ -96,10 +96,13 @@ class TestGetQueue:
         assert queue == []
 
     def test_returns_tasks_with_priorities(self, vault_path, dashboard):
-        _seed_queue(vault_path, [
-            ("task1.md", "# Task 1\n**Priority**: High\n**Urgency**: ASAP\n"),
-            ("task2.md", "# Task 2\n**Priority**: Low\n"),
-        ])
+        _seed_queue(
+            vault_path,
+            [
+                ("task1.md", "# Task 1\n**Priority**: High\n**Urgency**: ASAP\n"),
+                ("task2.md", "# Task 2\n**Priority**: Low\n"),
+            ],
+        )
         queue = dashboard.get_queue()
         assert len(queue) == 2
         assert all("name" in t and "priority" in t and "path" in t for t in queue)
@@ -108,20 +111,26 @@ class TestGetQueue:
         assert queue[0]["priority"] > queue[1]["priority"]
 
     def test_queue_sorted_descending_by_priority(self, vault_path, dashboard):
-        _seed_queue(vault_path, [
-            ("low.md", "# Low Priority\n"),
-            ("high.md", "# High Priority\n**Priority**: High\n**Urgency**: ASAP\n"),
-            ("mid.md", "# Mid Priority\n**Priority**: Medium\n"),
-        ])
+        _seed_queue(
+            vault_path,
+            [
+                ("low.md", "# Low Priority\n"),
+                ("high.md", "# High Priority\n**Priority**: High\n**Urgency**: ASAP\n"),
+                ("mid.md", "# Mid Priority\n**Priority**: Medium\n"),
+            ],
+        )
         queue = dashboard.get_queue()
         priorities = [t["priority"] for t in queue]
         assert priorities == sorted(priorities, reverse=True)
 
     def test_skips_malformed_tasks(self, vault_path, dashboard):
-        _seed_queue(vault_path, [
-            ("good.md", "# Good Task\n"),
-            ("bad.md", ""),  # Empty file might cause scoring issues
-        ])
+        _seed_queue(
+            vault_path,
+            [
+                ("good.md", "# Good Task\n"),
+                ("bad.md", ""),  # Empty file might cause scoring issues
+            ],
+        )
         queue = dashboard.get_queue()
         # At least the good task should be present
         assert any(t["name"] == "good.md" for t in queue)
@@ -143,13 +152,16 @@ class TestGetActiveTasks:
         assert active == []
 
     def test_returns_active_tasks_from_checkpoint(self, vault_path, dashboard):
-        _seed_checkpoint(vault_path, {
-            "last_iteration": 2,
-            "active_tasks": {
-                "task1.md": {"state": "executing", "priority": 3.5, "attempts": 1},
-                "task2.md": {"state": "planning", "priority": 2.0, "attempts": 0},
-            }
-        })
+        _seed_checkpoint(
+            vault_path,
+            {
+                "last_iteration": 2,
+                "active_tasks": {
+                    "task1.md": {"state": "executing", "priority": 3.5, "attempts": 1},
+                    "task2.md": {"state": "planning", "priority": 2.0, "attempts": 0},
+                },
+            },
+        )
         active = dashboard.get_active_tasks()
         assert len(active) == 2
         names = {t["name"] for t in active}
@@ -183,13 +195,28 @@ class TestGetRecentCompletions:
         assert recent == []
 
     def test_returns_recent_completions_from_exit_log(self, vault_path, dashboard):
-        _seed_checkpoint(vault_path, {
-            "last_iteration": 1,
-            "exit_log": [
-                {"task": "task1.md", "success": True, "final_state": "done", "duration_s": 10.5, "timestamp": "2026-02-05T12:00:00Z"},
-                {"task": "task2.md", "success": False, "final_state": "rejected", "duration_s": 5.2, "timestamp": "2026-02-05T12:05:00Z"},
-            ]
-        })
+        _seed_checkpoint(
+            vault_path,
+            {
+                "last_iteration": 1,
+                "exit_log": [
+                    {
+                        "task": "task1.md",
+                        "success": True,
+                        "final_state": "done",
+                        "duration_s": 10.5,
+                        "timestamp": "2026-02-05T12:00:00Z",
+                    },
+                    {
+                        "task": "task2.md",
+                        "success": False,
+                        "final_state": "rejected",
+                        "duration_s": 5.2,
+                        "timestamp": "2026-02-05T12:05:00Z",
+                    },
+                ],
+            },
+        )
         recent = dashboard.get_recent_completions(limit=10)
         assert len(recent) == 2
         # Most recent first
@@ -200,7 +227,13 @@ class TestGetRecentCompletions:
 
     def test_respects_limit(self, vault_path, dashboard):
         exit_log = [
-            {"task": f"task{i}.md", "success": True, "final_state": "done", "duration_s": 1.0, "timestamp": f"2026-02-05T12:{i:02d}:00Z"}
+            {
+                "task": f"task{i}.md",
+                "success": True,
+                "final_state": "done",
+                "duration_s": 1.0,
+                "timestamp": f"2026-02-05T12:{i:02d}:00Z",
+            }
             for i in range(20)
         ]
         _seed_checkpoint(vault_path, {"last_iteration": 1, "exit_log": exit_log})
@@ -212,7 +245,13 @@ class TestGetRecentCompletions:
 
     def test_less_than_limit_returns_all(self, vault_path, dashboard):
         exit_log = [
-            {"task": "task1.md", "success": True, "final_state": "done", "duration_s": 1.0, "timestamp": "2026-02-05T12:00:00Z"},
+            {
+                "task": "task1.md",
+                "success": True,
+                "final_state": "done",
+                "duration_s": 1.0,
+                "timestamp": "2026-02-05T12:00:00Z",
+            },
         ]
         _seed_checkpoint(vault_path, {"last_iteration": 1, "exit_log": exit_log})
         recent = dashboard.get_recent_completions(limit=10)
@@ -227,21 +266,44 @@ class TestGetRecentCompletions:
 class TestIntegration:
     def test_dashboard_with_realistic_checkpoint(self, vault_path, dashboard):
         """Smoke test: create a realistic checkpoint and verify all methods work."""
-        _seed_checkpoint(vault_path, {
-            "last_iteration": 10,
-            "active_tasks": {
-                "executing.md": {"state": "executing", "priority": 4.0, "attempts": 1},
+        _seed_checkpoint(
+            vault_path,
+            {
+                "last_iteration": 10,
+                "active_tasks": {
+                    "executing.md": {
+                        "state": "executing",
+                        "priority": 4.0,
+                        "attempts": 1,
+                    },
+                },
+                "exit_log": [
+                    {
+                        "task": "done1.md",
+                        "success": True,
+                        "final_state": "done",
+                        "duration_s": 15.3,
+                        "timestamp": "2026-02-05T10:00:00Z",
+                    },
+                    {
+                        "task": "done2.md",
+                        "success": True,
+                        "final_state": "done",
+                        "duration_s": 8.7,
+                        "timestamp": "2026-02-05T10:10:00Z",
+                    },
+                ],
             },
-            "exit_log": [
-                {"task": "done1.md", "success": True, "final_state": "done", "duration_s": 15.3, "timestamp": "2026-02-05T10:00:00Z"},
-                {"task": "done2.md", "success": True, "final_state": "done", "duration_s": 8.7, "timestamp": "2026-02-05T10:10:00Z"},
-            ]
-        }, age_seconds=30)
+            age_seconds=30,
+        )
 
-        _seed_queue(vault_path, [
-            ("pending1.md", "# Pending 1\n**Priority**: High\n"),
-            ("pending2.md", "# Pending 2\n"),
-        ])
+        _seed_queue(
+            vault_path,
+            [
+                ("pending1.md", "# Pending 1\n**Priority**: High\n"),
+                ("pending2.md", "# Pending 2\n"),
+            ],
+        )
 
         # All methods should work
         status = dashboard.get_status()

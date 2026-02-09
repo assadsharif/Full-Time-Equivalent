@@ -25,7 +25,7 @@ class TestVaultInit:
     def test_vault_init_help(self):
         """Test vault init command help"""
         runner = CliRunner()
-        result = runner.invoke(vault_init_command, ['--help'])
+        result = runner.invoke(vault_init_command, ["--help"])
 
         assert result.exit_code == 0
         assert "Initialize vault folder structure" in result.output
@@ -37,7 +37,7 @@ class TestVaultInit:
         runner = CliRunner()
         vault_path = tmp_path / "new_vault"
 
-        result = runner.invoke(vault_init_command, ['--vault-path', str(vault_path)])
+        result = runner.invoke(vault_init_command, ["--vault-path", str(vault_path)])
 
         assert result.exit_code == 0
         assert "Vault initialized successfully" in result.output
@@ -56,7 +56,7 @@ class TestVaultInit:
         runner = CliRunner()
         vault_path = tmp_path / "new_vault"
 
-        result = runner.invoke(vault_init_command, ['--vault-path', str(vault_path)])
+        result = runner.invoke(vault_init_command, ["--vault-path", str(vault_path)])
 
         assert result.exit_code == 0
 
@@ -83,7 +83,9 @@ class TestVaultInit:
         (vault_path / "Done").mkdir()
 
         # Try to init again without force
-        result = runner.invoke(vault_init_command, ['--vault-path', str(vault_path)], input="n\n")
+        result = runner.invoke(
+            vault_init_command, ["--vault-path", str(vault_path)], input="n\n"
+        )
 
         # Should prompt and cancel
         assert "already exists" in result.output.lower()
@@ -100,7 +102,9 @@ class TestVaultInit:
         (vault_path / "Done").mkdir()
 
         # Init with force
-        result = runner.invoke(vault_init_command, ['--vault-path', str(vault_path), '--force'])
+        result = runner.invoke(
+            vault_init_command, ["--vault-path", str(vault_path), "--force"]
+        )
 
         assert result.exit_code == 0
         assert "Vault initialized successfully" in result.output
@@ -112,7 +116,7 @@ class TestVaultStatus:
     def test_vault_status_help(self):
         """Test vault status command help"""
         runner = CliRunner()
-        result = runner.invoke(vault_status_command, ['--help'])
+        result = runner.invoke(vault_status_command, ["--help"])
 
         assert result.exit_code == 0
         assert "detailed vault statistics" in result.output.lower()
@@ -128,7 +132,7 @@ class TestVaultStatus:
         for folder in ["Inbox", "Needs_Action", "Done", "Approvals"]:
             (vault_path / folder).mkdir()
 
-        result = runner.invoke(vault_status_command, ['--vault-path', str(vault_path)])
+        result = runner.invoke(vault_status_command, ["--vault-path", str(vault_path)])
 
         assert result.exit_code == 0
         assert "Vault Statistics" in result.output
@@ -152,7 +156,7 @@ class TestVaultStatus:
         (inbox / "task2.md").write_text("# Task 2")
         (inbox / "task3.md").write_text("# Task 3")
 
-        result = runner.invoke(vault_status_command, ['--vault-path', str(vault_path)])
+        result = runner.invoke(vault_status_command, ["--vault-path", str(vault_path)])
 
         assert result.exit_code == 0
         assert "3" in result.output  # Should show 3 tasks in Inbox
@@ -163,7 +167,7 @@ class TestVaultStatus:
         vault_path = tmp_path / "invalid_vault"
         vault_path.mkdir()
 
-        result = runner.invoke(vault_status_command, ['--vault-path', str(vault_path)])
+        result = runner.invoke(vault_status_command, ["--vault-path", str(vault_path)])
 
         assert result.exit_code == 1
         assert "Invalid vault" in result.output or "Error" in result.output
@@ -182,7 +186,7 @@ class TestVaultStatus:
         (approvals / "approval1.md").write_text("# Approval 1")
         (approvals / "approval2.md").write_text("# Approval 2")
 
-        result = runner.invoke(vault_status_command, ['--vault-path', str(vault_path)])
+        result = runner.invoke(vault_status_command, ["--vault-path", str(vault_path)])
 
         assert result.exit_code == 0
         assert "pending approval" in result.output.lower() or "2" in result.output
@@ -194,7 +198,7 @@ class TestVaultApprove:
     def test_vault_approve_help(self):
         """Test vault approve command help"""
         runner = CliRunner()
-        result = runner.invoke(vault_approve_command, ['--help'])
+        result = runner.invoke(vault_approve_command, ["--help"])
 
         assert result.exit_code == 0
         assert "Approve a pending action" in result.output
@@ -228,8 +232,7 @@ This is a test approval.
         approval_file.write_text(approval_content)
 
         result = runner.invoke(
-            vault_approve_command,
-            ['TEST_APPROVAL', '--vault-path', str(vault_path)]
+            vault_approve_command, ["TEST_APPROVAL", "--vault-path", str(vault_path)]
         )
 
         assert result.exit_code == 0
@@ -251,7 +254,7 @@ This is a test approval.
 
         result = runner.invoke(
             vault_approve_command,
-            ['NONEXISTENT_APPROVAL', '--vault-path', str(vault_path)]
+            ["NONEXISTENT_APPROVAL", "--vault-path", str(vault_path)],
         )
 
         assert result.exit_code == 1
@@ -282,8 +285,7 @@ approval_status: pending
         approval_file.write_text(approval_content)
 
         result = runner.invoke(
-            vault_approve_command,
-            ['INVALID_NONCE', '--vault-path', str(vault_path)]
+            vault_approve_command, ["INVALID_NONCE", "--vault-path", str(vault_path)]
         )
 
         assert result.exit_code == 1
@@ -296,7 +298,7 @@ class TestVaultReject:
     def test_vault_reject_help(self):
         """Test vault reject command help"""
         runner = CliRunner()
-        result = runner.invoke(vault_reject_command, ['--help'])
+        result = runner.invoke(vault_reject_command, ["--help"])
 
         assert result.exit_code == 0
         assert "Reject a pending action" in result.output
@@ -329,7 +331,13 @@ approval_status: pending
 
         result = runner.invoke(
             vault_reject_command,
-            ['TEST_REJECTION', '--vault-path', str(vault_path), '--reason', 'Test rejection']
+            [
+                "TEST_REJECTION",
+                "--vault-path",
+                str(vault_path),
+                "--reason",
+                "Test rejection",
+            ],
         )
 
         assert result.exit_code == 0
@@ -367,8 +375,8 @@ approval_status: pending
         # Provide reason via input
         result = runner.invoke(
             vault_reject_command,
-            ['TEST_PROMPT', '--vault-path', str(vault_path)],
-            input="Not needed\n"
+            ["TEST_PROMPT", "--vault-path", str(vault_path)],
+            input="Not needed\n",
         )
 
         assert result.exit_code == 0
@@ -386,7 +394,7 @@ approval_status: pending
 
         result = runner.invoke(
             vault_reject_command,
-            ['NONEXISTENT', '--vault-path', str(vault_path), '--reason', 'Test']
+            ["NONEXISTENT", "--vault-path", str(vault_path), "--reason", "Test"],
         )
 
         assert result.exit_code == 1
@@ -403,27 +411,28 @@ class TestVaultErrorHandling:
         invalid_vault.mkdir()
 
         # Test status
-        result = runner.invoke(vault_status_command, ['--vault-path', str(invalid_vault)])
+        result = runner.invoke(
+            vault_status_command, ["--vault-path", str(invalid_vault)]
+        )
         assert result.exit_code == 1
 
         # Test approve
         result = runner.invoke(
-            vault_approve_command,
-            ['TEST', '--vault-path', str(invalid_vault)]
+            vault_approve_command, ["TEST", "--vault-path", str(invalid_vault)]
         )
         assert result.exit_code == 1
 
         # Test reject
         result = runner.invoke(
             vault_reject_command,
-            ['TEST', '--vault-path', str(invalid_vault), '--reason', 'Test']
+            ["TEST", "--vault-path", str(invalid_vault), "--reason", "Test"],
         )
         assert result.exit_code == 1
 
     def test_vault_group_exists(self):
         """Test vault command group is properly registered"""
         runner = CliRunner()
-        result = runner.invoke(vault_group, ['--help'])
+        result = runner.invoke(vault_group, ["--help"])
 
         assert result.exit_code == 0
         assert "vault" in result.output.lower()

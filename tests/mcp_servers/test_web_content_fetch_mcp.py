@@ -49,7 +49,9 @@ class TestServerRegistration:
 
     def test_tool_count(self):
         tools = mcp._tool_manager._tools
-        assert len(tools) == 8, f"Expected 8 tools, got {len(tools)}: {list(tools.keys())}"
+        assert (
+            len(tools) == 8
+        ), f"Expected 8 tools, got {len(tools)}: {list(tools.keys())}"
 
     def test_all_tool_names_present(self):
         tools = set(mcp._tool_manager._tools.keys())
@@ -208,7 +210,9 @@ def _mock_response(status_code=200, content=b"Hello World", headers=None):
     resp.raise_for_status = MagicMock()
     if status_code >= 400:
         resp.raise_for_status.side_effect = httpx.HTTPStatusError(
-            "Error", request=MagicMock(), response=resp,
+            "Error",
+            request=MagicMock(),
+            response=resp,
         )
     return resp
 
@@ -219,29 +223,46 @@ class TestFetchUrl:
     @pytest.mark.asyncio
     async def test_fetch_url_success(self):
         mock_resp = _mock_response(content=b"<html>Hello</html>")
-        with patch("mcp_servers.web_content_fetch_mcp._http_get", new_callable=AsyncMock, return_value=mock_resp):
-            result = _parse(await mcp._tool_manager._tools["fetch_url"].run(
-                {"url": "https://example.com"},
-            ))
+        with patch(
+            "mcp_servers.web_content_fetch_mcp._http_get",
+            new_callable=AsyncMock,
+            return_value=mock_resp,
+        ):
+            result = _parse(
+                await mcp._tool_manager._tools["fetch_url"].run(
+                    {"url": "https://example.com"},
+                )
+            )
             assert result["status"] == "success"
             assert "content" in result
             assert result["status_code"] == 200
 
     @pytest.mark.asyncio
     async def test_fetch_url_private_ip_blocked(self):
-        result = _parse(await mcp._tool_manager._tools["fetch_url"].run(
-            {"url": "http://127.0.0.1/secret"},
-        ))
+        result = _parse(
+            await mcp._tool_manager._tools["fetch_url"].run(
+                {"url": "http://127.0.0.1/secret"},
+            )
+        )
         assert result["status"] == "error"
-        assert "private" in result["message"].lower() or "blocked" in result["message"].lower()
+        assert (
+            "private" in result["message"].lower()
+            or "blocked" in result["message"].lower()
+        )
 
     @pytest.mark.asyncio
     async def test_fetch_url_http_error(self):
         mock_resp = _mock_response(status_code=404)
-        with patch("mcp_servers.web_content_fetch_mcp._http_get", new_callable=AsyncMock, return_value=mock_resp):
-            result = _parse(await mcp._tool_manager._tools["fetch_url"].run(
-                {"url": "https://example.com/missing"},
-            ))
+        with patch(
+            "mcp_servers.web_content_fetch_mcp._http_get",
+            new_callable=AsyncMock,
+            return_value=mock_resp,
+        ):
+            result = _parse(
+                await mcp._tool_manager._tools["fetch_url"].run(
+                    {"url": "https://example.com/missing"},
+                )
+            )
             assert result["status"] == "error"
             assert "404" in result["message"]
 
@@ -249,10 +270,16 @@ class TestFetchUrl:
     async def test_fetch_url_with_max_length(self):
         long_content = b"x" * 1000
         mock_resp = _mock_response(content=long_content)
-        with patch("mcp_servers.web_content_fetch_mcp._http_get", new_callable=AsyncMock, return_value=mock_resp):
-            result = _parse(await mcp._tool_manager._tools["fetch_url"].run(
-                {"url": "https://example.com", "max_length": 100},
-            ))
+        with patch(
+            "mcp_servers.web_content_fetch_mcp._http_get",
+            new_callable=AsyncMock,
+            return_value=mock_resp,
+        ):
+            result = _parse(
+                await mcp._tool_manager._tools["fetch_url"].run(
+                    {"url": "https://example.com", "max_length": 100},
+                )
+            )
             assert result["status"] == "success"
             assert len(result["content"]) <= 100 or result.get("truncated", False)
 
@@ -269,10 +296,16 @@ class TestFetchHtml:
     async def test_fetch_html_success(self):
         html = b"<html><body><h1>Title</h1><p>Content</p></body></html>"
         mock_resp = _mock_response(content=html, headers={"content-type": "text/html"})
-        with patch("mcp_servers.web_content_fetch_mcp._http_get", new_callable=AsyncMock, return_value=mock_resp):
-            result = _parse(await mcp._tool_manager._tools["fetch_html"].run(
-                {"url": "https://example.com"},
-            ))
+        with patch(
+            "mcp_servers.web_content_fetch_mcp._http_get",
+            new_callable=AsyncMock,
+            return_value=mock_resp,
+        ):
+            result = _parse(
+                await mcp._tool_manager._tools["fetch_html"].run(
+                    {"url": "https://example.com"},
+                )
+            )
             assert result["status"] == "success"
             assert "html" in result
 
@@ -280,19 +313,27 @@ class TestFetchHtml:
     async def test_fetch_html_extract_text(self):
         html = b"<html><body><h1>Title</h1><p>Content</p></body></html>"
         mock_resp = _mock_response(content=html, headers={"content-type": "text/html"})
-        with patch("mcp_servers.web_content_fetch_mcp._http_get", new_callable=AsyncMock, return_value=mock_resp):
-            result = _parse(await mcp._tool_manager._tools["fetch_html"].run(
-                {"url": "https://example.com", "extract_text": True},
-            ))
+        with patch(
+            "mcp_servers.web_content_fetch_mcp._http_get",
+            new_callable=AsyncMock,
+            return_value=mock_resp,
+        ):
+            result = _parse(
+                await mcp._tool_manager._tools["fetch_html"].run(
+                    {"url": "https://example.com", "extract_text": True},
+                )
+            )
             assert result["status"] == "success"
             assert "text" in result
             assert "Title" in result["text"]
 
     @pytest.mark.asyncio
     async def test_fetch_html_private_blocked(self):
-        result = _parse(await mcp._tool_manager._tools["fetch_html"].run(
-            {"url": "http://localhost:8080/admin"},
-        ))
+        result = _parse(
+            await mcp._tool_manager._tools["fetch_html"].run(
+                {"url": "http://localhost:8080/admin"},
+            )
+        )
         assert result["status"] == "error"
 
 
@@ -307,12 +348,20 @@ class TestFetchJson:
     @pytest.mark.asyncio
     async def test_fetch_json_success(self):
         json_data = b'{"name": "test", "version": "1.0"}'
-        mock_resp = _mock_response(content=json_data, headers={"content-type": "application/json"})
+        mock_resp = _mock_response(
+            content=json_data, headers={"content-type": "application/json"}
+        )
         mock_resp.json = MagicMock(return_value={"name": "test", "version": "1.0"})
-        with patch("mcp_servers.web_content_fetch_mcp._http_get", new_callable=AsyncMock, return_value=mock_resp):
-            result = _parse(await mcp._tool_manager._tools["fetch_json"].run(
-                {"url": "https://api.example.com/data"},
-            ))
+        with patch(
+            "mcp_servers.web_content_fetch_mcp._http_get",
+            new_callable=AsyncMock,
+            return_value=mock_resp,
+        ):
+            result = _parse(
+                await mcp._tool_manager._tools["fetch_json"].run(
+                    {"url": "https://api.example.com/data"},
+                )
+            )
             assert result["status"] == "success"
             assert "data" in result
             assert result["data"]["name"] == "test"
@@ -321,18 +370,26 @@ class TestFetchJson:
     async def test_fetch_json_invalid_json(self):
         mock_resp = _mock_response(content=b"not json")
         mock_resp.json = MagicMock(side_effect=json.JSONDecodeError("err", "doc", 0))
-        with patch("mcp_servers.web_content_fetch_mcp._http_get", new_callable=AsyncMock, return_value=mock_resp):
-            result = _parse(await mcp._tool_manager._tools["fetch_json"].run(
-                {"url": "https://api.example.com/bad"},
-            ))
+        with patch(
+            "mcp_servers.web_content_fetch_mcp._http_get",
+            new_callable=AsyncMock,
+            return_value=mock_resp,
+        ):
+            result = _parse(
+                await mcp._tool_manager._tools["fetch_json"].run(
+                    {"url": "https://api.example.com/bad"},
+                )
+            )
             assert result["status"] == "error"
             assert "json" in result["message"].lower()
 
     @pytest.mark.asyncio
     async def test_fetch_json_private_blocked(self):
-        result = _parse(await mcp._tool_manager._tools["fetch_json"].run(
-            {"url": "http://10.0.0.1/api/internal"},
-        ))
+        result = _parse(
+            await mcp._tool_manager._tools["fetch_json"].run(
+                {"url": "http://10.0.0.1/api/internal"},
+            )
+        )
         assert result["status"] == "error"
 
 
@@ -346,20 +403,30 @@ class TestFetchText:
 
     @pytest.mark.asyncio
     async def test_fetch_text_success(self):
-        mock_resp = _mock_response(content=b"Plain text content here", headers={"content-type": "text/plain"})
-        with patch("mcp_servers.web_content_fetch_mcp._http_get", new_callable=AsyncMock, return_value=mock_resp):
-            result = _parse(await mcp._tool_manager._tools["fetch_text"].run(
-                {"url": "https://example.com/readme.txt"},
-            ))
+        mock_resp = _mock_response(
+            content=b"Plain text content here", headers={"content-type": "text/plain"}
+        )
+        with patch(
+            "mcp_servers.web_content_fetch_mcp._http_get",
+            new_callable=AsyncMock,
+            return_value=mock_resp,
+        ):
+            result = _parse(
+                await mcp._tool_manager._tools["fetch_text"].run(
+                    {"url": "https://example.com/readme.txt"},
+                )
+            )
             assert result["status"] == "success"
             assert "content" in result
             assert "Plain text" in result["content"]
 
     @pytest.mark.asyncio
     async def test_fetch_text_private_blocked(self):
-        result = _parse(await mcp._tool_manager._tools["fetch_text"].run(
-            {"url": "http://192.168.0.1/config"},
-        ))
+        result = _parse(
+            await mcp._tool_manager._tools["fetch_text"].run(
+                {"url": "http://192.168.0.1/config"},
+            )
+        )
         assert result["status"] == "error"
 
 
@@ -380,19 +447,27 @@ class TestFetchHeaders:
                 "server": "nginx",
             },
         )
-        with patch("mcp_servers.web_content_fetch_mcp._http_head", new_callable=AsyncMock, return_value=mock_resp):
-            result = _parse(await mcp._tool_manager._tools["fetch_headers"].run(
-                {"url": "https://example.com"},
-            ))
+        with patch(
+            "mcp_servers.web_content_fetch_mcp._http_head",
+            new_callable=AsyncMock,
+            return_value=mock_resp,
+        ):
+            result = _parse(
+                await mcp._tool_manager._tools["fetch_headers"].run(
+                    {"url": "https://example.com"},
+                )
+            )
             assert result["status"] == "success"
             assert "headers" in result
             assert result["headers"]["content-type"] == "text/html"
 
     @pytest.mark.asyncio
     async def test_fetch_headers_private_blocked(self):
-        result = _parse(await mcp._tool_manager._tools["fetch_headers"].run(
-            {"url": "http://localhost:3000"},
-        ))
+        result = _parse(
+            await mcp._tool_manager._tools["fetch_headers"].run(
+                {"url": "http://localhost:3000"},
+            )
+        )
         assert result["status"] == "error"
 
 
@@ -407,17 +482,23 @@ class TestFetchExtractLinks:
     @pytest.mark.asyncio
     async def test_extract_links_success(self):
         html = (
-            b'<html><body>'
+            b"<html><body>"
             b'<a href="https://example.com/page1">Page 1</a>'
             b'<a href="/page2">Page 2</a>'
             b'<a href="https://other.com">Other</a>'
-            b'</body></html>'
+            b"</body></html>"
         )
         mock_resp = _mock_response(content=html, headers={"content-type": "text/html"})
-        with patch("mcp_servers.web_content_fetch_mcp._http_get", new_callable=AsyncMock, return_value=mock_resp):
-            result = _parse(await mcp._tool_manager._tools["fetch_extract_links"].run(
-                {"url": "https://example.com"},
-            ))
+        with patch(
+            "mcp_servers.web_content_fetch_mcp._http_get",
+            new_callable=AsyncMock,
+            return_value=mock_resp,
+        ):
+            result = _parse(
+                await mcp._tool_manager._tools["fetch_extract_links"].run(
+                    {"url": "https://example.com"},
+                )
+            )
             assert result["status"] == "success"
             assert "links" in result
             assert len(result["links"]) >= 2
@@ -426,18 +507,26 @@ class TestFetchExtractLinks:
     async def test_extract_links_no_links(self):
         html = b"<html><body><p>No links here</p></body></html>"
         mock_resp = _mock_response(content=html, headers={"content-type": "text/html"})
-        with patch("mcp_servers.web_content_fetch_mcp._http_get", new_callable=AsyncMock, return_value=mock_resp):
-            result = _parse(await mcp._tool_manager._tools["fetch_extract_links"].run(
-                {"url": "https://example.com"},
-            ))
+        with patch(
+            "mcp_servers.web_content_fetch_mcp._http_get",
+            new_callable=AsyncMock,
+            return_value=mock_resp,
+        ):
+            result = _parse(
+                await mcp._tool_manager._tools["fetch_extract_links"].run(
+                    {"url": "https://example.com"},
+                )
+            )
             assert result["status"] == "success"
             assert result["links"] == []
 
     @pytest.mark.asyncio
     async def test_extract_links_private_blocked(self):
-        result = _parse(await mcp._tool_manager._tools["fetch_extract_links"].run(
-            {"url": "http://172.16.0.1/admin"},
-        ))
+        result = _parse(
+            await mcp._tool_manager._tools["fetch_extract_links"].run(
+                {"url": "http://172.16.0.1/admin"},
+            )
+        )
         assert result["status"] == "error"
 
 
@@ -451,39 +540,49 @@ class TestFetchValidateUrl:
 
     @pytest.mark.asyncio
     async def test_validate_public_https_valid(self):
-        result = _parse(await mcp._tool_manager._tools["fetch_validate_url"].run(
-            {"url": "https://example.com"},
-        ))
+        result = _parse(
+            await mcp._tool_manager._tools["fetch_validate_url"].run(
+                {"url": "https://example.com"},
+            )
+        )
         assert result["valid"] is True
         assert len(result.get("errors", [])) == 0
 
     @pytest.mark.asyncio
     async def test_validate_private_ip_invalid(self):
-        result = _parse(await mcp._tool_manager._tools["fetch_validate_url"].run(
-            {"url": "http://192.168.1.1/api"},
-        ))
+        result = _parse(
+            await mcp._tool_manager._tools["fetch_validate_url"].run(
+                {"url": "http://192.168.1.1/api"},
+            )
+        )
         assert result["valid"] is False
         assert len(result["errors"]) > 0
 
     @pytest.mark.asyncio
     async def test_validate_file_scheme_invalid(self):
-        result = _parse(await mcp._tool_manager._tools["fetch_validate_url"].run(
-            {"url": "file:///etc/passwd"},
-        ))
+        result = _parse(
+            await mcp._tool_manager._tools["fetch_validate_url"].run(
+                {"url": "file:///etc/passwd"},
+            )
+        )
         assert result["valid"] is False
 
     @pytest.mark.asyncio
     async def test_validate_no_scheme_invalid(self):
-        result = _parse(await mcp._tool_manager._tools["fetch_validate_url"].run(
-            {"url": "example.com"},
-        ))
+        result = _parse(
+            await mcp._tool_manager._tools["fetch_validate_url"].run(
+                {"url": "example.com"},
+            )
+        )
         assert result["valid"] is False
 
     @pytest.mark.asyncio
     async def test_validate_localhost_invalid(self):
-        result = _parse(await mcp._tool_manager._tools["fetch_validate_url"].run(
-            {"url": "http://localhost:8000"},
-        ))
+        result = _parse(
+            await mcp._tool_manager._tools["fetch_validate_url"].run(
+                {"url": "http://localhost:8000"},
+            )
+        )
         assert result["valid"] is False
 
 
@@ -500,10 +599,16 @@ class TestFetchCheckAvailability:
         mock_resp = _mock_response(
             headers={"content-type": "text/html", "content-length": "5000"},
         )
-        with patch("mcp_servers.web_content_fetch_mcp._http_head", new_callable=AsyncMock, return_value=mock_resp):
-            result = _parse(await mcp._tool_manager._tools["fetch_check_availability"].run(
-                {"url": "https://example.com"},
-            ))
+        with patch(
+            "mcp_servers.web_content_fetch_mcp._http_head",
+            new_callable=AsyncMock,
+            return_value=mock_resp,
+        ):
+            result = _parse(
+                await mcp._tool_manager._tools["fetch_check_availability"].run(
+                    {"url": "https://example.com"},
+                )
+            )
             assert result["status"] == "success"
             assert result["reachable"] is True
             assert result["status_code"] == 200
@@ -511,26 +616,40 @@ class TestFetchCheckAvailability:
     @pytest.mark.asyncio
     async def test_check_unavailable(self):
         mock_resp = _mock_response(status_code=503)
-        with patch("mcp_servers.web_content_fetch_mcp._http_head", new_callable=AsyncMock, return_value=mock_resp):
-            result = _parse(await mcp._tool_manager._tools["fetch_check_availability"].run(
-                {"url": "https://example.com"},
-            ))
+        with patch(
+            "mcp_servers.web_content_fetch_mcp._http_head",
+            new_callable=AsyncMock,
+            return_value=mock_resp,
+        ):
+            result = _parse(
+                await mcp._tool_manager._tools["fetch_check_availability"].run(
+                    {"url": "https://example.com"},
+                )
+            )
             assert result["status"] == "success"
             assert result["reachable"] is False
 
     @pytest.mark.asyncio
     async def test_check_private_blocked(self):
-        result = _parse(await mcp._tool_manager._tools["fetch_check_availability"].run(
-            {"url": "http://127.0.0.1:9999"},
-        ))
+        result = _parse(
+            await mcp._tool_manager._tools["fetch_check_availability"].run(
+                {"url": "http://127.0.0.1:9999"},
+            )
+        )
         assert result["status"] == "error"
 
     @pytest.mark.asyncio
     async def test_check_timeout(self):
-        with patch("mcp_servers.web_content_fetch_mcp._http_head", new_callable=AsyncMock, side_effect=httpx.TimeoutException("timeout")):
-            result = _parse(await mcp._tool_manager._tools["fetch_check_availability"].run(
-                {"url": "https://example.com"},
-            ))
+        with patch(
+            "mcp_servers.web_content_fetch_mcp._http_head",
+            new_callable=AsyncMock,
+            side_effect=httpx.TimeoutException("timeout"),
+        ):
+            result = _parse(
+                await mcp._tool_manager._tools["fetch_check_availability"].run(
+                    {"url": "https://example.com"},
+                )
+            )
             assert result["status"] == "success"
             assert result["reachable"] is False
             assert "timeout" in result.get("message", "").lower()

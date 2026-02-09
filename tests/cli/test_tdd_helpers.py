@@ -6,11 +6,11 @@ run_pytest subprocess invocation (via mock).
 """
 
 import sys
+
 sys.path.insert(0, ".")
 
 from unittest.mock import patch, MagicMock
 from src.cli.tdd_helpers import run_pytest, parse_pytest_summary
-
 
 # ---------------------------------------------------------------------------
 # parse_pytest_summary
@@ -74,7 +74,9 @@ def test_parse_warnings_line_ignored():
 
 
 def test_parse_large_numbers():
-    output = "=============== 1234 passed, 56 failed, 7 errors in 42.00s ==============="
+    output = (
+        "=============== 1234 passed, 56 failed, 7 errors in 42.00s ==============="
+    )
     passed, failed, errors = parse_pytest_summary(output)
     assert passed == 1234
     assert failed == 56

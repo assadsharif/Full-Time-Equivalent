@@ -119,7 +119,7 @@ This is a test task.
             modified_at=datetime(2026, 1, 27, 10, 0, 0),
             metadata={"tags": ["test"]},
             file_path=task_path,
-            content="# Task: Another test\n\nTest content."
+            content="# Task: Another test\n\nTest content.",
         )
 
         # Write to file
@@ -165,8 +165,9 @@ Content"""
             task = TaskFile.from_file(task_path)
             derived_state = task.derive_state_from_location()
 
-            assert derived_state == expected_state, \
-                f"Failed for folder {folder_name}: expected {expected_state}, got {derived_state}"
+            assert (
+                derived_state == expected_state
+            ), f"Failed for folder {folder_name}: expected {expected_state}, got {derived_state}"
 
     def test_yaml_parsing_with_nested_metadata(self, isolated_fs):
         """
@@ -215,7 +216,7 @@ class TestStateTransition:
             reason="Validation complete",
             actor="system",
             logged=True,
-            error=None
+            error=None,
         )
 
         assert transition.transition_id == "trans-001"
@@ -243,7 +244,7 @@ class TestStateTransition:
             reason="Execution failed",
             actor="system",
             logged=True,
-            error="Disk full"
+            error="Disk full",
         )
 
         assert transition.error == "Disk full"
@@ -264,7 +265,7 @@ class TestStateTransition:
             timestamp=datetime(2026, 1, 27, 11, 0, 0),
             reason="Planning started",
             actor="system",
-            logged=True
+            logged=True,
         )
         assert system_transition.actor == "system"
 
@@ -277,7 +278,7 @@ class TestStateTransition:
             timestamp=datetime(2026, 1, 27, 11, 30, 0),
             reason="Approved by human",
             actor="human",
-            logged=True
+            logged=True,
         )
         assert human_transition.actor == "human"
 
@@ -295,7 +296,7 @@ class TestStateTransition:
             timestamp=datetime(2026, 1, 27, 12, 0, 0),
             reason="Execution complete",
             actor="system",
-            logged=True
+            logged=True,
         )
 
         assert transition.logged is True

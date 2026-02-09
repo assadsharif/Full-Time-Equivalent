@@ -26,7 +26,7 @@ class TestStatusCommand:
     def test_status_help(self):
         """Test status command help"""
         runner = CliRunner()
-        result = runner.invoke(status_command, ['--help'])
+        result = runner.invoke(status_command, ["--help"])
 
         assert result.exit_code == 0
         assert "comprehensive system status" in result.output.lower()
@@ -44,7 +44,7 @@ class TestStatusCommand:
         (vault_path / "Needs_Action").mkdir()
         (vault_path / "Done").mkdir()
 
-        result = runner.invoke(status_command, ['--vault-path', str(vault_path)])
+        result = runner.invoke(status_command, ["--vault-path", str(vault_path)])
 
         assert "Vault" in result.output
         # Should succeed with valid vault
@@ -58,11 +58,15 @@ class TestStatusCommand:
         vault_path = tmp_path / "invalid_vault"
         vault_path.mkdir()
 
-        result = runner.invoke(status_command, ['--vault-path', str(vault_path)])
+        result = runner.invoke(status_command, ["--vault-path", str(vault_path)])
 
         # Should exit with error code 1
         assert result.exit_code == 1
-        assert "Vault" in result.output or "Invalid" in result.output or "Error" in result.output
+        assert (
+            "Vault" in result.output
+            or "Invalid" in result.output
+            or "Error" in result.output
+        )
 
     def test_status_json_output(self, tmp_path):
         """Test status with JSON output format"""
@@ -75,7 +79,9 @@ class TestStatusCommand:
         (vault_path / "Needs_Action").mkdir()
         (vault_path / "Done").mkdir()
 
-        result = runner.invoke(status_command, ['--vault-path', str(vault_path), '--json'])
+        result = runner.invoke(
+            status_command, ["--vault-path", str(vault_path), "--json"]
+        )
 
         # Should output JSON
         assert "{" in result.output or "vault" in result.output.lower()
@@ -94,7 +100,7 @@ class TestStatusVaultCheck:
         (vault_path / "Needs_Action").mkdir()
         (vault_path / "Done").mkdir()
 
-        result = runner.invoke(status_command, ['--vault-path', str(vault_path)])
+        result = runner.invoke(status_command, ["--vault-path", str(vault_path)])
 
         assert str(vault_path) in result.output or "Vault" in result.output
 
@@ -111,7 +117,7 @@ class TestStatusVaultCheck:
         (vault_path / "Briefings").mkdir()
         (vault_path / "Attachments").mkdir()
 
-        result = runner.invoke(status_command, ['--vault-path', str(vault_path)])
+        result = runner.invoke(status_command, ["--vault-path", str(vault_path)])
 
         assert result.exit_code == 0
         assert "Vault" in result.output
@@ -122,7 +128,7 @@ class TestStatusVaultCheck:
 
         vault_path = tmp_path / "nonexistent_vault"
 
-        result = runner.invoke(status_command, ['--vault-path', str(vault_path)])
+        result = runner.invoke(status_command, ["--vault-path", str(vault_path)])
 
         assert result.exit_code == 1
         # Should show error about missing vault
@@ -143,7 +149,7 @@ class TestStatusVaultCheck:
         (inbox / "task1.md").write_text("# Task 1")
         (inbox / "task2.md").write_text("# Task 2")
 
-        result = runner.invoke(status_command, ['--vault-path', str(vault_path)])
+        result = runner.invoke(status_command, ["--vault-path", str(vault_path)])
 
         assert "Inbox" in result.output or "Task" in result.output
 
@@ -162,7 +168,7 @@ class TestStatusWatcherCheck:
         (vault_path / "Needs_Action").mkdir()
         (vault_path / "Done").mkdir()
 
-        result = runner.invoke(status_command, ['--vault-path', str(vault_path)])
+        result = runner.invoke(status_command, ["--vault-path", str(vault_path)])
 
         # Should show watcher section
         assert "Watcher" in result.output or "Status" in result.output
@@ -177,7 +183,7 @@ class TestStatusWatcherCheck:
         (vault_path / "Needs_Action").mkdir()
         (vault_path / "Done").mkdir()
 
-        result = runner.invoke(status_command, ['--vault-path', str(vault_path)])
+        result = runner.invoke(status_command, ["--vault-path", str(vault_path)])
 
         # Watchers should be stopped initially
         assert "stopped" in result.output.lower() or "Watcher" in result.output
@@ -196,7 +202,7 @@ class TestStatusMCPCheck:
         (vault_path / "Needs_Action").mkdir()
         (vault_path / "Done").mkdir()
 
-        result = runner.invoke(status_command, ['--vault-path', str(vault_path)])
+        result = runner.invoke(status_command, ["--vault-path", str(vault_path)])
 
         # Should show MCP section
         assert "MCP" in result.output or "Server" in result.output
@@ -216,7 +222,7 @@ class TestStatusApprovalCheck:
         (vault_path / "Done").mkdir()
         (vault_path / "Approvals").mkdir()
 
-        result = runner.invoke(status_command, ['--vault-path', str(vault_path)])
+        result = runner.invoke(status_command, ["--vault-path", str(vault_path)])
 
         # Should show approval section
         assert "Approval" in result.output or "Status" in result.output
@@ -241,7 +247,7 @@ approval_status: pending
 """
         (approvals / "test_approval.md").write_text(approval_content)
 
-        result = runner.invoke(status_command, ['--vault-path', str(vault_path)])
+        result = runner.invoke(status_command, ["--vault-path", str(vault_path)])
 
         # Should show pending approval
         assert "Approval" in result.output or "pending" in result.output.lower()
@@ -256,7 +262,7 @@ class TestStatusErrorHandling:
 
         nonexistent = tmp_path / "nonexistent"
 
-        result = runner.invoke(status_command, ['--vault-path', str(nonexistent)])
+        result = runner.invoke(status_command, ["--vault-path", str(nonexistent)])
 
         # Should exit with error code 1 (T035)
         assert result.exit_code == 1
@@ -269,7 +275,7 @@ class TestStatusErrorHandling:
         invalid = tmp_path / "invalid"
         invalid.mkdir()
 
-        result = runner.invoke(status_command, ['--vault-path', str(invalid)])
+        result = runner.invoke(status_command, ["--vault-path", str(invalid)])
 
         # Should exit with error code 1 (T035)
         assert result.exit_code == 1

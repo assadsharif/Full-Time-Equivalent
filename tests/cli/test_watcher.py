@@ -53,22 +53,18 @@ class TestWatcherStart:
     def test_watcher_start_help(self):
         """Test watcher start command help"""
         runner = CliRunner()
-        result = runner.invoke(watcher_start_command, ['--help'])
+        result = runner.invoke(watcher_start_command, ["--help"])
 
         assert result.exit_code == 0
         assert "Start watcher daemon" in result.output
         assert "NAME" in result.output.upper()
 
-    @patch('cli.watcher.check_pm2_installed')
-    @patch('cli.watcher.get_watcher_process')
-    @patch('cli.watcher.subprocess.run')
-    @patch('cli.watcher.Path.exists')
+    @patch("cli.watcher.check_pm2_installed")
+    @patch("cli.watcher.get_watcher_process")
+    @patch("cli.watcher.subprocess.run")
+    @patch("cli.watcher.Path.exists")
     def test_watcher_start_success(
-        self,
-        mock_exists,
-        mock_subprocess,
-        mock_get_watcher,
-        mock_pm2_check
+        self, mock_exists, mock_subprocess, mock_get_watcher, mock_pm2_check
     ):
         """Test starting a watcher successfully"""
         runner = CliRunner()
@@ -83,18 +79,14 @@ class TestWatcherStart:
         mock_exists.return_value = True
 
         # Mock successful PM2 start
-        mock_subprocess.return_value = MagicMock(
-            returncode=0,
-            stdout="",
-            stderr=""
-        )
+        mock_subprocess.return_value = MagicMock(returncode=0, stdout="", stderr="")
 
-        result = runner.invoke(watcher_start_command, ['gmail'])
+        result = runner.invoke(watcher_start_command, ["gmail"])
 
         assert result.exit_code == 0
         assert "started successfully" in result.output.lower()
 
-    @patch('cli.watcher.check_pm2_installed')
+    @patch("cli.watcher.check_pm2_installed")
     def test_watcher_start_pm2_not_installed(self, mock_pm2_check):
         """Test start fails when PM2 not installed"""
         runner = CliRunner()
@@ -102,7 +94,7 @@ class TestWatcherStart:
         # Mock PM2 not installed
         mock_pm2_check.return_value = False
 
-        result = runner.invoke(watcher_start_command, ['gmail'])
+        result = runner.invoke(watcher_start_command, ["gmail"])
 
         assert result.exit_code == 1
         assert "PM2 is not installed" in result.output
@@ -111,18 +103,14 @@ class TestWatcherStart:
         """Test start fails with invalid watcher name"""
         runner = CliRunner()
 
-        result = runner.invoke(watcher_start_command, ['invalid'])
+        result = runner.invoke(watcher_start_command, ["invalid"])
 
         assert result.exit_code == 1
         assert "Invalid watcher name" in result.output
 
-    @patch('cli.watcher.check_pm2_installed')
-    @patch('cli.watcher.get_watcher_process')
-    def test_watcher_start_already_running(
-        self,
-        mock_get_watcher,
-        mock_pm2_check
-    ):
+    @patch("cli.watcher.check_pm2_installed")
+    @patch("cli.watcher.get_watcher_process")
+    def test_watcher_start_already_running(self, mock_get_watcher, mock_pm2_check):
         """Test start when watcher is already running"""
         runner = CliRunner()
 
@@ -132,10 +120,10 @@ class TestWatcherStart:
         # Mock watcher already running
         mock_get_watcher.return_value = {
             "name": "fte-watcher-gmail",
-            "pm2_env": {"status": "online"}
+            "pm2_env": {"status": "online"},
         }
 
-        result = runner.invoke(watcher_start_command, ['gmail'])
+        result = runner.invoke(watcher_start_command, ["gmail"])
 
         assert result.exit_code == 0
         assert "already running" in result.output.lower()
@@ -147,19 +135,16 @@ class TestWatcherStop:
     def test_watcher_stop_help(self):
         """Test watcher stop command help"""
         runner = CliRunner()
-        result = runner.invoke(watcher_stop_command, ['--help'])
+        result = runner.invoke(watcher_stop_command, ["--help"])
 
         assert result.exit_code == 0
         assert "Stop watcher daemon" in result.output
 
-    @patch('cli.watcher.check_pm2_installed')
-    @patch('cli.watcher.get_watcher_process')
-    @patch('cli.watcher.subprocess.run')
+    @patch("cli.watcher.check_pm2_installed")
+    @patch("cli.watcher.get_watcher_process")
+    @patch("cli.watcher.subprocess.run")
     def test_watcher_stop_success(
-        self,
-        mock_subprocess,
-        mock_get_watcher,
-        mock_pm2_check
+        self, mock_subprocess, mock_get_watcher, mock_pm2_check
     ):
         """Test stopping a watcher successfully"""
         runner = CliRunner()
@@ -170,22 +155,18 @@ class TestWatcherStop:
         # Mock watcher is running
         mock_get_watcher.return_value = {
             "name": "fte-watcher-gmail",
-            "pm2_env": {"status": "online"}
+            "pm2_env": {"status": "online"},
         }
 
         # Mock successful PM2 stop
-        mock_subprocess.return_value = MagicMock(
-            returncode=0,
-            stdout="",
-            stderr=""
-        )
+        mock_subprocess.return_value = MagicMock(returncode=0, stdout="", stderr="")
 
-        result = runner.invoke(watcher_stop_command, ['gmail'])
+        result = runner.invoke(watcher_stop_command, ["gmail"])
 
         assert result.exit_code == 0
         assert "stopped successfully" in result.output.lower()
 
-    @patch('cli.watcher.check_pm2_installed')
+    @patch("cli.watcher.check_pm2_installed")
     def test_watcher_stop_pm2_not_installed(self, mock_pm2_check):
         """Test stop fails when PM2 not installed"""
         runner = CliRunner()
@@ -193,7 +174,7 @@ class TestWatcherStop:
         # Mock PM2 not installed
         mock_pm2_check.return_value = False
 
-        result = runner.invoke(watcher_stop_command, ['gmail'])
+        result = runner.invoke(watcher_stop_command, ["gmail"])
 
         assert result.exit_code == 1
         assert "PM2 is not installed" in result.output
@@ -202,18 +183,14 @@ class TestWatcherStop:
         """Test stop fails with invalid watcher name"""
         runner = CliRunner()
 
-        result = runner.invoke(watcher_stop_command, ['invalid'])
+        result = runner.invoke(watcher_stop_command, ["invalid"])
 
         assert result.exit_code == 1
         assert "Invalid watcher name" in result.output
 
-    @patch('cli.watcher.check_pm2_installed')
-    @patch('cli.watcher.get_watcher_process')
-    def test_watcher_stop_not_running(
-        self,
-        mock_get_watcher,
-        mock_pm2_check
-    ):
+    @patch("cli.watcher.check_pm2_installed")
+    @patch("cli.watcher.get_watcher_process")
+    def test_watcher_stop_not_running(self, mock_get_watcher, mock_pm2_check):
         """Test stop when watcher is not running"""
         runner = CliRunner()
 
@@ -223,7 +200,7 @@ class TestWatcherStop:
         # Mock watcher not running
         mock_get_watcher.return_value = None
 
-        result = runner.invoke(watcher_stop_command, ['gmail'])
+        result = runner.invoke(watcher_stop_command, ["gmail"])
 
         assert result.exit_code == 1
         assert "not running" in result.output.lower()
@@ -235,12 +212,12 @@ class TestWatcherStatus:
     def test_watcher_status_help(self):
         """Test watcher status command help"""
         runner = CliRunner()
-        result = runner.invoke(watcher_status_command, ['--help'])
+        result = runner.invoke(watcher_status_command, ["--help"])
 
         assert result.exit_code == 0
         assert "Show watcher status" in result.output
 
-    @patch('cli.watcher.get_pm2_list')
+    @patch("cli.watcher.get_pm2_list")
     def test_watcher_status_no_watchers(self, mock_get_pm2_list):
         """Test status when no watchers are running"""
         runner = CliRunner()
@@ -253,7 +230,7 @@ class TestWatcherStatus:
         assert result.exit_code == 0
         assert "No watchers" in result.output
 
-    @patch('cli.watcher.get_pm2_list')
+    @patch("cli.watcher.get_pm2_list")
     def test_watcher_status_with_watchers(self, mock_get_pm2_list):
         """Test status with running watchers"""
         runner = CliRunner()
@@ -266,12 +243,9 @@ class TestWatcherStatus:
                 "pm2_env": {
                     "status": "online",
                     "pm_uptime": 3600000,  # 1 hour
-                    "restart_time": 0
+                    "restart_time": 0,
                 },
-                "monit": {
-                    "cpu": 2.5,
-                    "memory": 52428800  # 50MB
-                }
+                "monit": {"cpu": 2.5, "memory": 52428800},  # 50MB
             }
         ]
 
@@ -281,7 +255,7 @@ class TestWatcherStatus:
         assert "gmail" in result.output
         assert "online" in result.output.lower()
 
-    @patch('cli.watcher.check_pm2_installed')
+    @patch("cli.watcher.check_pm2_installed")
     def test_watcher_status_pm2_not_installed(self, mock_pm2_check):
         """Test status fails when PM2 not installed"""
         runner = CliRunner()
@@ -290,8 +264,9 @@ class TestWatcherStatus:
         mock_pm2_check.return_value = False
 
         # Mock get_pm2_list to raise error
-        with patch('cli.watcher.get_pm2_list') as mock_list:
+        with patch("cli.watcher.get_pm2_list") as mock_list:
             from cli.errors import PM2NotFoundError
+
             mock_list.side_effect = PM2NotFoundError("PM2 is not installed")
 
             result = runner.invoke(watcher_status_command)
@@ -306,21 +281,18 @@ class TestWatcherLogs:
     def test_watcher_logs_help(self):
         """Test watcher logs command help"""
         runner = CliRunner()
-        result = runner.invoke(watcher_logs_command, ['--help'])
+        result = runner.invoke(watcher_logs_command, ["--help"])
 
         assert result.exit_code == 0
         assert "Display watcher logs" in result.output
         assert "--tail" in result.output
         assert "--follow" in result.output
 
-    @patch('cli.watcher.check_pm2_installed')
-    @patch('cli.watcher.get_watcher_process')
-    @patch('cli.watcher.subprocess.run')
+    @patch("cli.watcher.check_pm2_installed")
+    @patch("cli.watcher.get_watcher_process")
+    @patch("cli.watcher.subprocess.run")
     def test_watcher_logs_success(
-        self,
-        mock_subprocess,
-        mock_get_watcher,
-        mock_pm2_check
+        self, mock_subprocess, mock_get_watcher, mock_pm2_check
     ):
         """Test viewing watcher logs successfully"""
         runner = CliRunner()
@@ -331,28 +303,22 @@ class TestWatcherLogs:
         # Mock watcher is running
         mock_get_watcher.return_value = {
             "name": "fte-watcher-gmail",
-            "pm2_env": {"status": "online"}
+            "pm2_env": {"status": "online"},
         }
 
         # Mock logs output
         mock_subprocess.return_value = MagicMock(
-            returncode=0,
-            stdout="Log line 1\nLog line 2\nLog line 3",
-            stderr=""
+            returncode=0, stdout="Log line 1\nLog line 2\nLog line 3", stderr=""
         )
 
-        result = runner.invoke(watcher_logs_command, ['gmail', '--tail', '10'])
+        result = runner.invoke(watcher_logs_command, ["gmail", "--tail", "10"])
 
         assert result.exit_code == 0
         assert "Log line" in result.output
 
-    @patch('cli.watcher.check_pm2_installed')
-    @patch('cli.watcher.get_watcher_process')
-    def test_watcher_logs_not_running(
-        self,
-        mock_get_watcher,
-        mock_pm2_check
-    ):
+    @patch("cli.watcher.check_pm2_installed")
+    @patch("cli.watcher.get_watcher_process")
+    def test_watcher_logs_not_running(self, mock_get_watcher, mock_pm2_check):
         """Test logs when watcher is not running"""
         runner = CliRunner()
 
@@ -362,7 +328,7 @@ class TestWatcherLogs:
         # Mock watcher not running
         mock_get_watcher.return_value = None
 
-        result = runner.invoke(watcher_logs_command, ['gmail'])
+        result = runner.invoke(watcher_logs_command, ["gmail"])
 
         assert result.exit_code == 1
         assert "not running" in result.output.lower()
@@ -371,7 +337,7 @@ class TestWatcherLogs:
         """Test logs fails with invalid watcher name"""
         runner = CliRunner()
 
-        result = runner.invoke(watcher_logs_command, ['invalid'])
+        result = runner.invoke(watcher_logs_command, ["invalid"])
 
         assert result.exit_code == 1
         assert "Invalid watcher name" in result.output
@@ -405,7 +371,7 @@ class TestWatcherUtilities:
         assert format_uptime(0) == "0s"
         assert format_uptime(-100) == "0s"
 
-    @patch('cli.watcher.subprocess.run')
+    @patch("cli.watcher.subprocess.run")
     def test_check_pm2_installed_true(self, mock_subprocess):
         """Test PM2 check when installed"""
         mock_subprocess.return_value = MagicMock(returncode=0)
@@ -414,7 +380,7 @@ class TestWatcherUtilities:
 
         assert result is True
 
-    @patch('cli.watcher.subprocess.run')
+    @patch("cli.watcher.subprocess.run")
     def test_check_pm2_installed_false(self, mock_subprocess):
         """Test PM2 check when not installed"""
         mock_subprocess.side_effect = FileNotFoundError()
@@ -430,7 +396,7 @@ class TestWatcherGroup:
     def test_watcher_group_help(self):
         """Test watcher group help"""
         runner = CliRunner()
-        result = runner.invoke(watcher_group, ['--help'])
+        result = runner.invoke(watcher_group, ["--help"])
 
         assert result.exit_code == 0
         assert "watcher" in result.output.lower()

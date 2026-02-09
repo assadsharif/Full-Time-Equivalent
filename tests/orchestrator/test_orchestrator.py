@@ -18,7 +18,14 @@ import pytest
 
 def _vault(tmp: Path) -> Path:
     """Create a minimal vault structure under tmp and return vault root."""
-    for folder in ("Inbox", "Needs_Action", "In_Progress", "Done", "Approvals", "Briefings"):
+    for folder in (
+        "Inbox",
+        "Needs_Action",
+        "In_Progress",
+        "Done",
+        "Approvals",
+        "Briefings",
+    ):
         (tmp / folder).mkdir(exist_ok=True)
     return tmp
 
@@ -227,7 +234,9 @@ class TestApprovalChecker:
         cfg = OrchestratorConfig(vault_path=vault_dir)
         checker = ApprovalChecker(cfg)
 
-        path = _task_md(vault_dir, body="Review the dashboard mockups and leave comments")
+        path = _task_md(
+            vault_dir, body="Review the dashboard mockups and leave comments"
+        )
         assert checker.requires_approval(path) is False
 
     def test_create_approval_request(self, vault_dir):
@@ -242,7 +251,7 @@ class TestApprovalChecker:
 
         assert approval_path.exists()
         content = approval_path.read_text()
-        assert "pending" in content          # approval_status: pending (YAML frontmatter)
+        assert "pending" in content  # approval_status: pending (YAML frontmatter)
         assert "deploy" in content
         assert "production" in content
 
@@ -281,7 +290,9 @@ class TestStateMachine:
         from src.orchestrator.state_machine import StateMachine
         from src.orchestrator.models import TaskState
 
-        assert StateMachine.is_valid_transition(TaskState.NEEDS_ACTION, TaskState.PLANNING)
+        assert StateMachine.is_valid_transition(
+            TaskState.NEEDS_ACTION, TaskState.PLANNING
+        )
         assert StateMachine.is_valid_transition(TaskState.PLANNING, TaskState.EXECUTING)
         assert StateMachine.is_valid_transition(TaskState.EXECUTING, TaskState.DONE)
 
@@ -289,7 +300,10 @@ class TestStateMachine:
         from src.orchestrator.state_machine import StateMachine, TransitionError
         from src.orchestrator.models import TaskState
 
-        assert StateMachine.is_valid_transition(TaskState.DONE, TaskState.PLANNING) is False
+        assert (
+            StateMachine.is_valid_transition(TaskState.DONE, TaskState.PLANNING)
+            is False
+        )
 
     def test_transition_moves_file(self, vault_dir):
         from src.orchestrator.state_machine import StateMachine
@@ -333,7 +347,9 @@ class TestStateMachine:
 
         sm = StateMachine(vault_dir)
         with pytest.raises(FileNotFoundError):
-            sm.transition(vault_dir / "ghost.md", TaskState.NEEDS_ACTION, TaskState.PLANNING)
+            sm.transition(
+                vault_dir / "ghost.md", TaskState.NEEDS_ACTION, TaskState.PLANNING
+            )
 
     def test_terminal_states_have_no_successors(self):
         from src.orchestrator.state_machine import StateMachine
@@ -428,11 +444,21 @@ class TestOrchestratorLoop:
         cfg = OrchestratorConfig(vault_path=vault_dir)
 
         # Low priority first (alphabetically) — should be processed second
-        _task_md(vault_dir, name="aaa-low.md", priority="low",
-                 sender="newsletter@spam.com", body="No rush on this one")
+        _task_md(
+            vault_dir,
+            name="aaa-low.md",
+            priority="low",
+            sender="newsletter@spam.com",
+            body="No rush on this one",
+        )
         # High priority — should be processed first
-        _task_md(vault_dir, name="zzz-urgent.md", priority="urgent",
-                 sender="ceo@company.com", body="[URGENT] Handle this ASAP")
+        _task_md(
+            vault_dir,
+            name="zzz-urgent.md",
+            priority="urgent",
+            sender="ceo@company.com",
+            body="[URGENT] Handle this ASAP",
+        )
 
         orch = Orchestrator(config=cfg, dry_run=True)
         exits = orch.run_once()

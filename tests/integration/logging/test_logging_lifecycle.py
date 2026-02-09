@@ -37,11 +37,7 @@ class TestLoggingLifecycle:
     async def test_basic_logging_lifecycle(self, temp_log_dir):
         """Test basic logging workflow: init -> log -> flush -> verify."""
         # Initialize logging
-        logger = init_logging(
-            log_dir=temp_log_dir,
-            level="INFO",
-            async_enabled=True
-        )
+        logger = init_logging(log_dir=temp_log_dir, level="INFO", async_enabled=True)
 
         # Start async writer
         await logger.start_async_writer()
@@ -127,8 +123,8 @@ class TestLoggingLifecycle:
                 "duration_ms": 145.32,
                 "from_state": "Inbox",
                 "to_state": "Done",
-                "files_processed": 5
-            }
+                "files_processed": 5,
+            },
         )
 
         await logger.flush()
@@ -167,10 +163,7 @@ class TestLoggingLifecycle:
     @pytest.mark.asyncio
     async def test_graceful_shutdown(self, temp_log_dir):
         """Test graceful shutdown with pending logs."""
-        logger = init_logging(
-            log_dir=temp_log_dir,
-            async_enabled=True
-        )
+        logger = init_logging(log_dir=temp_log_dir, async_enabled=True)
         await logger.start_async_writer()
 
         # Log entries

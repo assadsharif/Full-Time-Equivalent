@@ -238,7 +238,9 @@ class TestSecretsScanner:
     def test_scan_directory(self, tmp_dir):
         scanner = self._scanner()
         (tmp_dir / "clean.md").write_text("# Hello\nJust a doc.\n")
-        (tmp_dir / "leaky.md").write_text('secret_key = "abcdefghijklmnopqrstuvwxyz1234"\n')
+        (tmp_dir / "leaky.md").write_text(
+            'secret_key = "abcdefghijklmnopqrstuvwxyz1234"\n'
+        )
         findings = scanner.scan_directory(tmp_dir, glob="*.md")
         # At least the leaky file should produce a finding
         assert len(findings) >= 1
@@ -366,7 +368,8 @@ class TestRateLimiter:
 
         return RateLimiter(
             state_path=tmp / "rate_limits.json",
-            default_limits=limits or {
+            default_limits=limits
+            or {
                 "email": {"per_minute": 10, "per_hour": 100},
                 "payment": {"per_minute": 1, "per_hour": 10},
             },
@@ -481,7 +484,12 @@ class TestMCPGuard:
             default_limits={"email": {"per_minute": 10, "per_hour": 100}},
         )
         audit = SecurityAuditLogger(tmp / "audit.log")
-        return MCPGuard(rate_limiter=rl, audit_logger=audit, failure_threshold=2, recovery_timeout=0.1)
+        return MCPGuard(
+            rate_limiter=rl,
+            audit_logger=audit,
+            failure_threshold=2,
+            recovery_timeout=0.1,
+        )
 
     def test_successful_call_logged(self, tmp_dir):
         from src.security.audit_logger import SecurityAuditLogger
@@ -542,7 +550,11 @@ class TestMCPGuard:
         # Two failures trip the circuit
         for _ in range(2):
             with pytest.raises(RuntimeError):
-                guard.call("flaky", "email", lambda: (_ for _ in ()).throw(RuntimeError("fail")))
+                guard.call(
+                    "flaky",
+                    "email",
+                    lambda: (_ for _ in ()).throw(RuntimeError("fail")),
+                )
 
         # Third call should hit open circuit
         with pytest.raises(CircuitBreakerError):

@@ -16,6 +16,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, ".")
 
+
 # ---------------------------------------------------------------------------
 # Stub cli.config before importing telemetry to avoid the logging shadow.
 # telemetry.py does "from cli.config import get_config" which requires src/
@@ -25,8 +26,10 @@ sys.path.insert(0, ".")
 class _StubConfig:
     class telemetry:
         enabled = False
+
     class vault:
         path = "/tmp"
+
 
 _cli_config_stub = types.ModuleType("cli.config")
 _cli_config_stub.get_config = lambda: _StubConfig()
@@ -39,7 +42,6 @@ from src.cli.telemetry import (
     TelemetryContext,
     get_telemetry_status,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -239,6 +241,7 @@ def test_telemetry_context_records_success(tmp_path):
     c = _collector(tmp_path)
     # Monkey-patch the global instance used by TelemetryContext
     import src.cli.telemetry as tel_mod
+
     original = tel_mod._telemetry
     tel_mod._telemetry = c
 
@@ -258,6 +261,7 @@ def test_telemetry_context_records_success(tmp_path):
 def test_telemetry_context_records_failure(tmp_path):
     c = _collector(tmp_path)
     import src.cli.telemetry as tel_mod
+
     original = tel_mod._telemetry
     tel_mod._telemetry = c
 
@@ -282,6 +286,7 @@ def test_telemetry_context_records_failure(tmp_path):
 
 def test_get_telemetry_status_shape():
     import src.cli.telemetry as tel_mod
+
     original = tel_mod._telemetry
     tel_mod._telemetry = TelemetryCollector(enabled=False)
 

@@ -64,7 +64,7 @@ This is an integration test task.
             task=task,
             to_state=WorkflowState.NEEDS_ACTION,
             reason="Initial validation complete",
-            actor="system"
+            actor="system",
         )
         assert new_task.state == WorkflowState.NEEDS_ACTION
         assert new_task.file_path == isolated_fs / "Needs_Action" / "task-001.md"
@@ -75,7 +75,7 @@ This is an integration test task.
             task=new_task,
             to_state=WorkflowState.PLANS,
             reason="Planning started",
-            actor="system"
+            actor="system",
         )
         assert new_task.state == WorkflowState.PLANS
         assert new_task.file_path == isolated_fs / "Plans" / "task-001.md"
@@ -86,7 +86,7 @@ This is an integration test task.
             task=new_task,
             to_state=WorkflowState.PENDING_APPROVAL,
             reason="Plan ready for review",
-            actor="system"
+            actor="system",
         )
         assert new_task.state == WorkflowState.PENDING_APPROVAL
         assert new_task.file_path == isolated_fs / "Pending_Approval" / "task-001.md"
@@ -98,7 +98,7 @@ This is an integration test task.
             task=new_task,
             to_state=WorkflowState.APPROVED,
             reason="Plan approved by human",
-            actor="human"
+            actor="human",
         )
         assert new_task.state == WorkflowState.APPROVED
         assert new_task.file_path == isolated_fs / "Approved" / "task-001.md"
@@ -109,7 +109,7 @@ This is an integration test task.
             task=new_task,
             to_state=WorkflowState.DONE,
             reason="Execution complete",
-            actor="system"
+            actor="system",
         )
         assert new_task.state == WorkflowState.DONE
         assert new_task.file_path == isolated_fs / "Done" / "task-001.md"
@@ -119,7 +119,7 @@ This is an integration test task.
         log_file = isolated_fs / "Logs" / f"{datetime.now().strftime('%Y-%m-%d')}.log"
         assert log_file.exists(), "Log file should exist"
 
-        log_lines = log_file.read_text().strip().split('\n')
+        log_lines = log_file.read_text().strip().split("\n")
         assert len(log_lines) == 5, "Should have 5 logged transitions"
 
         # Verify log entries are valid JSON
@@ -164,7 +164,7 @@ This task will be rejected.
             task=task,
             to_state=WorkflowState.PENDING_APPROVAL,
             reason="Plan ready for review",
-            actor="system"
+            actor="system",
         )
         assert new_task.state == WorkflowState.PENDING_APPROVAL
 
@@ -173,7 +173,7 @@ This task will be rejected.
             task=new_task,
             to_state=WorkflowState.REJECTED,
             reason="Plan rejected by human - needs revision",
-            actor="human"
+            actor="human",
         )
         assert new_task.state == WorkflowState.REJECTED
         assert new_task.file_path == isolated_fs / "Rejected" / "task-002.md"
@@ -183,7 +183,7 @@ This task will be rejected.
             task=new_task,
             to_state=WorkflowState.INBOX,
             reason="Retry with revised approach",
-            actor="system"
+            actor="system",
         )
         assert new_task.state == WorkflowState.INBOX
         assert new_task.file_path == isolated_fs / "Inbox" / "task-002.md"
@@ -224,10 +224,13 @@ This task will attempt forbidden transition.
                 task=task,
                 to_state=WorkflowState.APPROVED,
                 reason="Attempt to skip approval",
-                actor="system"
+                actor="system",
             )
 
-        assert "Plans → Approved" in str(exc_info.value) or "invalid" in str(exc_info.value).lower()
+        assert (
+            "Plans → Approved" in str(exc_info.value)
+            or "invalid" in str(exc_info.value).lower()
+        )
 
     def test_workflow_atomicity_on_failure(self, isolated_fs):
         """
@@ -261,19 +264,26 @@ This task tests atomicity on failure.
         task = TaskFile.from_file(task_path)
 
         # Mock atomic_move to fail
-        with patch('src.control_plane.state_machine.atomic_move', side_effect=FileOperationError("Disk full")):
+        with patch(
+            "src.control_plane.state_machine.atomic_move",
+            side_effect=FileOperationError("Disk full"),
+        ):
             with pytest.raises(FileOperationError):
                 state_machine.transition(
                     task=task,
                     to_state=WorkflowState.NEEDS_ACTION,
                     reason="Test atomicity",
-                    actor="system"
+                    actor="system",
                 )
 
         # Verify source file still exists (no partial state)
-        assert task_path.exists(), "Source file should still exist after failed transition"
+        assert (
+            task_path.exists()
+        ), "Source file should still exist after failed transition"
         destination_path = isolated_fs / "Needs_Action" / "task-004.md"
-        assert not destination_path.exists(), "Destination file should not exist after failed transition"
+        assert (
+            not destination_path.exists()
+        ), "Destination file should not exist after failed transition"
 
     def test_workflow_logging_completeness(self, isolated_fs):
         """
@@ -307,12 +317,12 @@ metadata:
             task=task,
             to_state=WorkflowState.NEEDS_ACTION,
             reason="Testing logging",
-            actor="system"
+            actor="system",
         )
 
         # Verify log entry has all required fields
         log_file = isolated_fs / "Logs" / f"{datetime.now().strftime('%Y-%m-%d')}.log"
-        log_content = log_file.read_text().strip().split('\n')[-1]
+        log_content = log_file.read_text().strip().split("\n")[-1]
         log_entry = json.loads(log_content)
 
         # Constitutional requirement (Section 8): Required fields
@@ -320,6 +330,8 @@ metadata:
         assert "action" in log_entry, "Log must include action type"
         assert "task_id" in log_entry, "Log must include triggering file"
         assert log_entry["task_id"] == "task-005"
-        assert "result" in log_entry or "to_state" in log_entry, "Log must include result"
+        assert (
+            "result" in log_entry or "to_state" in log_entry
+        ), "Log must include result"
         assert "actor" in log_entry, "Log must include approval status/actor"
         assert log_entry["actor"] == "system"

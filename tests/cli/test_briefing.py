@@ -118,6 +118,7 @@ Priority: high
         # Set modification time to 30 days ago
         old_time = (datetime.now(timezone.utc) - timedelta(days=30)).timestamp()
         import os
+
         os.utime(old_task, (old_time, old_time))
 
         # Scan last 7 days
@@ -178,12 +179,14 @@ class TestGenerateBriefingContent:
         start_date = datetime.now(timezone.utc) - timedelta(days=7)
         end_date = datetime.now(timezone.utc)
 
-        tasks = [{
-            "title": "Task 1",
-            "completed_at": datetime.now(timezone.utc),
-            "priority": "high",
-            "content": "Test task"
-        }]
+        tasks = [
+            {
+                "title": "Task 1",
+                "completed_at": datetime.now(timezone.utc),
+                "priority": "high",
+                "content": "Test task",
+            }
+        ]
 
         content = generate_briefing_content(tasks, start_date, end_date)
 
@@ -201,20 +204,20 @@ class TestGenerateBriefingContent:
                 "title": "High Task",
                 "completed_at": datetime.now(timezone.utc),
                 "priority": "high",
-                "content": "Test"
+                "content": "Test",
             },
             {
                 "title": "Medium Task",
                 "completed_at": datetime.now(timezone.utc),
                 "priority": "medium",
-                "content": "Test"
+                "content": "Test",
             },
             {
                 "title": "Low Task",
                 "completed_at": datetime.now(timezone.utc),
                 "priority": "low",
-                "content": "Test"
-            }
+                "content": "Test",
+            },
         ]
 
         content = generate_briefing_content(tasks, start_date, end_date)
@@ -261,7 +264,7 @@ class TestSaveBriefing:
 class TestCheckWkhtmltopdfInstalled:
     """Test wkhtmltopdf availability check"""
 
-    @patch('cli.briefing.shutil.which')
+    @patch("cli.briefing.shutil.which")
     def test_wkhtmltopdf_installed(self, mock_which):
         """Test when wkhtmltopdf is installed"""
         mock_which.return_value = "/usr/bin/wkhtmltopdf"
@@ -271,7 +274,7 @@ class TestCheckWkhtmltopdfInstalled:
         assert result is True
         mock_which.assert_called_once_with("wkhtmltopdf")
 
-    @patch('cli.briefing.shutil.which')
+    @patch("cli.briefing.shutil.which")
     def test_wkhtmltopdf_not_installed(self, mock_which):
         """Test when wkhtmltopdf is not installed"""
         mock_which.return_value = None
@@ -320,6 +323,7 @@ class TestFindLatestBriefing:
         # Set modification times
         import os
         import time
+
         old_time = time.time() - 86400  # 1 day ago
         new_time = time.time()
         os.utime(old_briefing, (old_time, old_time))
@@ -333,7 +337,7 @@ class TestFindLatestBriefing:
 class TestDetectMarkdownViewer:
     """Test markdown viewer detection"""
 
-    @patch('cli.briefing.shutil.which')
+    @patch("cli.briefing.shutil.which")
     def test_detect_typora(self, mock_which):
         """Test detecting typora"""
         mock_which.side_effect = lambda x: "/usr/bin/typora" if x == "typora" else None
@@ -342,9 +346,10 @@ class TestDetectMarkdownViewer:
 
         assert result == "typora"
 
-    @patch('cli.briefing.shutil.which')
+    @patch("cli.briefing.shutil.which")
     def test_detect_cat_fallback(self, mock_which):
         """Test fallback to cat"""
+
         def which_side_effect(cmd):
             if cmd == "cat":
                 return "/usr/bin/cat"
@@ -356,7 +361,7 @@ class TestDetectMarkdownViewer:
 
         assert result == "cat"
 
-    @patch('cli.briefing.shutil.which')
+    @patch("cli.briefing.shutil.which")
     def test_detect_no_viewer(self, mock_which):
         """Test when no viewer is available"""
         mock_which.return_value = None
@@ -372,14 +377,14 @@ class TestBriefingGenerate:
     def test_briefing_generate_help(self):
         """Test briefing generate command help"""
         runner = CliRunner()
-        result = runner.invoke(briefing_generate_command, ['--help'])
+        result = runner.invoke(briefing_generate_command, ["--help"])
 
         assert result.exit_code == 0
         assert "Generate CEO briefing" in result.output
         assert "--days" in result.output
         assert "--pdf" in result.output
 
-    @patch('cli.briefing.get_checkpoint_manager')
+    @patch("cli.briefing.get_checkpoint_manager")
     def test_briefing_generate_success(self, mock_checkpoint, tmp_path):
         """Test successful briefing generation"""
         runner = CliRunner()
@@ -398,8 +403,7 @@ class TestBriefingGenerate:
         mock_checkpoint.return_value = mock_mgr
 
         result = runner.invoke(
-            briefing_generate_command,
-            ['--vault-path', str(vault_path)]
+            briefing_generate_command, ["--vault-path", str(vault_path)]
         )
 
         assert result.exit_code == 0
@@ -411,7 +415,7 @@ class TestBriefingGenerate:
         briefings = list(briefings_dir.glob("briefing_*.md"))
         assert len(briefings) == 1
 
-    @patch('cli.briefing.get_checkpoint_manager')
+    @patch("cli.briefing.get_checkpoint_manager")
     def test_briefing_generate_no_tasks(self, mock_checkpoint, tmp_path):
         """Test briefing generation with no completed tasks"""
         runner = CliRunner()
@@ -425,15 +429,14 @@ class TestBriefingGenerate:
         mock_checkpoint.return_value = mock_mgr
 
         result = runner.invoke(
-            briefing_generate_command,
-            ['--vault-path', str(vault_path)]
+            briefing_generate_command, ["--vault-path", str(vault_path)]
         )
 
         assert result.exit_code == 0
         assert "No tasks completed" in result.output
         assert "Briefing generated successfully" in result.output
 
-    @patch('cli.briefing.get_checkpoint_manager')
+    @patch("cli.briefing.get_checkpoint_manager")
     def test_briefing_generate_custom_days(self, mock_checkpoint, tmp_path):
         """Test briefing generation with custom days"""
         runner = CliRunner()
@@ -447,20 +450,16 @@ class TestBriefingGenerate:
         mock_checkpoint.return_value = mock_mgr
 
         result = runner.invoke(
-            briefing_generate_command,
-            ['--vault-path', str(vault_path), '--days', '14']
+            briefing_generate_command, ["--vault-path", str(vault_path), "--days", "14"]
         )
 
         assert result.exit_code == 0
         assert "Briefing generated successfully" in result.output
 
-    @patch('cli.briefing.check_wkhtmltopdf_installed')
-    @patch('cli.briefing.get_checkpoint_manager')
+    @patch("cli.briefing.check_wkhtmltopdf_installed")
+    @patch("cli.briefing.get_checkpoint_manager")
     def test_briefing_generate_with_pdf_not_installed(
-        self,
-        mock_checkpoint,
-        mock_wkhtmltopdf,
-        tmp_path
+        self, mock_checkpoint, mock_wkhtmltopdf, tmp_path
     ):
         """Test PDF generation when wkhtmltopdf not installed"""
         runner = CliRunner()
@@ -477,8 +476,7 @@ class TestBriefingGenerate:
         mock_wkhtmltopdf.return_value = False
 
         result = runner.invoke(
-            briefing_generate_command,
-            ['--vault-path', str(vault_path), '--pdf']
+            briefing_generate_command, ["--vault-path", str(vault_path), "--pdf"]
         )
 
         assert result.exit_code == 0
@@ -492,8 +490,7 @@ class TestBriefingGenerate:
         invalid_vault.mkdir()
 
         result = runner.invoke(
-            briefing_generate_command,
-            ['--vault-path', str(invalid_vault)]
+            briefing_generate_command, ["--vault-path", str(invalid_vault)]
         )
 
         assert result.exit_code == 1
@@ -505,14 +502,14 @@ class TestBriefingView:
     def test_briefing_view_help(self):
         """Test briefing view command help"""
         runner = CliRunner()
-        result = runner.invoke(briefing_view_command, ['--help'])
+        result = runner.invoke(briefing_view_command, ["--help"])
 
         assert result.exit_code == 0
         assert "View most recent briefing" in result.output
         assert "--vault-path" in result.output
 
-    @patch('cli.briefing.detect_markdown_viewer')
-    @patch('cli.briefing.subprocess.run')
+    @patch("cli.briefing.detect_markdown_viewer")
+    @patch("cli.briefing.subprocess.run")
     def test_briefing_view_success(self, mock_subprocess, mock_viewer, tmp_path):
         """Test successful briefing viewing"""
         runner = CliRunner()
@@ -530,16 +527,13 @@ class TestBriefingView:
         # Mock viewer
         mock_viewer.return_value = "typora"
 
-        result = runner.invoke(
-            briefing_view_command,
-            ['--vault-path', str(vault_path)]
-        )
+        result = runner.invoke(briefing_view_command, ["--vault-path", str(vault_path)])
 
         assert result.exit_code == 0
         assert "Briefing opened in viewer" in result.output
 
-    @patch('cli.briefing.detect_markdown_viewer')
-    @patch('cli.briefing.console.print')
+    @patch("cli.briefing.detect_markdown_viewer")
+    @patch("cli.briefing.console.print")
     def test_briefing_view_with_cat(self, mock_print, mock_viewer, tmp_path):
         """Test briefing viewing with cat viewer"""
         runner = CliRunner()
@@ -557,10 +551,7 @@ class TestBriefingView:
         # Mock cat viewer
         mock_viewer.return_value = "cat"
 
-        result = runner.invoke(
-            briefing_view_command,
-            ['--vault-path', str(vault_path)]
-        )
+        result = runner.invoke(briefing_view_command, ["--vault-path", str(vault_path)])
 
         assert result.exit_code == 0
         # Cat displays inline, so no "opened in viewer" message
@@ -575,10 +566,7 @@ class TestBriefingView:
             (vault_path / folder).mkdir()
         (vault_path / "Briefings").mkdir()
 
-        result = runner.invoke(
-            briefing_view_command,
-            ['--vault-path', str(vault_path)]
-        )
+        result = runner.invoke(briefing_view_command, ["--vault-path", str(vault_path)])
 
         assert result.exit_code == 1
         assert "no briefings found" in result.output.lower()
@@ -590,8 +578,7 @@ class TestBriefingView:
         invalid_vault.mkdir()
 
         result = runner.invoke(
-            briefing_view_command,
-            ['--vault-path', str(invalid_vault)]
+            briefing_view_command, ["--vault-path", str(invalid_vault)]
         )
 
         assert result.exit_code == 1
@@ -603,7 +590,7 @@ class TestBriefingGroup:
     def test_briefing_group_help(self):
         """Test briefing group help"""
         runner = CliRunner()
-        result = runner.invoke(briefing_group, ['--help'])
+        result = runner.invoke(briefing_group, ["--help"])
 
         assert result.exit_code == 0
         assert "briefing" in result.output.lower()

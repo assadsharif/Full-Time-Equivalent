@@ -77,7 +77,9 @@ class TestAuditRoundTrip:
         # Verify chronological order (earliest first)
         for i in range(4):
             t1 = datetime.fromisoformat(events[i]["timestamp"].replace("Z", "+00:00"))
-            t2 = datetime.fromisoformat(events[i + 1]["timestamp"].replace("Z", "+00:00"))
+            t2 = datetime.fromisoformat(
+                events[i + 1]["timestamp"].replace("Z", "+00:00")
+            )
             assert t1 <= t2
 
 
@@ -89,28 +91,40 @@ class TestAuditRoundTrip:
 class TestMetricsReadBack:
     def test_mcp_action_count(self, env):
         for _ in range(7):
-            env["logger"].log_mcp_action("srv", "read", True, RiskLevel.LOW, result="success")
+            env["logger"].log_mcp_action(
+                "srv", "read", True, RiskLevel.LOW, result="success"
+            )
 
         assert env["metrics"].mcp_action_count() == 7
 
     def test_error_rate(self, env):
         # 3 successes, 2 errors
         for _ in range(3):
-            env["logger"].log_mcp_action("srv", "read", True, RiskLevel.LOW, result="success")
+            env["logger"].log_mcp_action(
+                "srv", "read", True, RiskLevel.LOW, result="success"
+            )
         for _ in range(2):
-            env["logger"].log_mcp_action("srv", "read", True, RiskLevel.HIGH, result="error:TimeoutError")
+            env["logger"].log_mcp_action(
+                "srv", "read", True, RiskLevel.HIGH, result="error:TimeoutError"
+            )
 
         rate = env["metrics"].error_rate()
         assert abs(rate - 0.4) < 0.01  # 2/5
 
     def test_rate_limit_hit_count(self, env):
-        env["logger"].log_mcp_action("srv", "send", True, RiskLevel.MEDIUM, result="rate_limit_exceeded")
-        env["logger"].log_mcp_action("srv", "send", True, RiskLevel.MEDIUM, result="rate_limit_exceeded")
+        env["logger"].log_mcp_action(
+            "srv", "send", True, RiskLevel.MEDIUM, result="rate_limit_exceeded"
+        )
+        env["logger"].log_mcp_action(
+            "srv", "send", True, RiskLevel.MEDIUM, result="rate_limit_exceeded"
+        )
 
         assert env["metrics"].rate_limit_hit_count() == 2
 
     def test_circuit_open_count(self, env):
-        env["logger"].log_mcp_action("srv", "call", True, RiskLevel.HIGH, result="circuit_open")
+        env["logger"].log_mcp_action(
+            "srv", "call", True, RiskLevel.HIGH, result="circuit_open"
+        )
 
         assert env["metrics"].circuit_open_count() == 1
 
@@ -142,7 +156,10 @@ class TestIncidentLifecycle:
         # Write several failure events
         for i in range(6):
             env["logger"].log_mcp_action(
-                "failing-svc", "call", True, RiskLevel.HIGH,
+                "failing-svc",
+                "call",
+                True,
+                RiskLevel.HIGH,
                 result=f"error:ConnectionError",
             )
 
@@ -162,6 +179,7 @@ class TestDashboardAfterActivity:
     def test_snapshot_reflects_alerts(self, env):
         # Seed alert log
         import json as _json
+
         alert = {
             "alert_id": "alert-e2e-001",
             "timestamp": datetime.now(timezone.utc).isoformat(),

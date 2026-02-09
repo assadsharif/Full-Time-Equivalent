@@ -23,7 +23,6 @@ from src.vault.validator import (
     VaultValidator,
 )
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -32,7 +31,14 @@ from src.vault.validator import (
 @pytest.fixture
 def vault_dir():
     d = Path(tempfile.mkdtemp())
-    for folder in ("Inbox", "Needs_Action", "In_Progress", "Done", "Approvals", "Briefings"):
+    for folder in (
+        "Inbox",
+        "Needs_Action",
+        "In_Progress",
+        "Done",
+        "Approvals",
+        "Briefings",
+    ):
         (d / folder).mkdir()
     yield d
     shutil.rmtree(d, ignore_errors=True)
@@ -51,7 +57,8 @@ class TestTaskValidator:
 
     def test_valid_task(self, vault_dir):
         p = self._file(
-            vault_dir, "good.md",
+            vault_dir,
+            "good.md",
             "# good.md\n\n**Priority**: High\n**From**: alice@x.com\n\n---\n\nDone.\n",
         )
         result = TaskValidator().validate(p)
@@ -59,13 +66,17 @@ class TestTaskValidator:
         assert result.errors == []
 
     def test_missing_priority(self, vault_dir):
-        p = self._file(vault_dir, "no-pri.md", "# t\n\n**From**: a@b.com\n\n---\nBody\n")
+        p = self._file(
+            vault_dir, "no-pri.md", "# t\n\n**From**: a@b.com\n\n---\nBody\n"
+        )
         result = TaskValidator().validate(p)
         assert not result.is_valid
         assert any("Priority" in e for e in result.errors)
 
     def test_missing_from(self, vault_dir):
-        p = self._file(vault_dir, "no-from.md", "# t\n\n**Priority**: Low\n\n---\nBody\n")
+        p = self._file(
+            vault_dir, "no-from.md", "# t\n\n**Priority**: Low\n\n---\nBody\n"
+        )
         result = TaskValidator().validate(p)
         assert not result.is_valid
         assert any("From" in e for e in result.errors)
@@ -111,7 +122,9 @@ class TestApprovalValidator:
         assert "missing YAML frontmatter" in result.errors[0]
 
     def test_unclosed_frontmatter(self, vault_dir):
-        p = self._file(vault_dir, "unclosed.md", "---\napproval_id: x\n# Oops no closing\n")
+        p = self._file(
+            vault_dir, "unclosed.md", "---\napproval_id: x\n# Oops no closing\n"
+        )
         result = ApprovalValidator().validate(p)
         assert not result.is_valid
         assert "unclosed" in result.errors[0]
@@ -157,7 +170,9 @@ class TestApprovalValidator:
                 "---\n\n# Body\n"
             )
             p = self._file(vault_dir, f"status-{status}.md", fm)
-            assert ApprovalValidator().validate(p).is_valid, f"status={status} should be valid"
+            assert (
+                ApprovalValidator().validate(p).is_valid
+            ), f"status={status} should be valid"
 
 
 # ===========================================================================

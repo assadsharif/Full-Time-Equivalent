@@ -10,7 +10,6 @@ from pathlib import Path
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -82,12 +81,15 @@ def orchestrator(config_file, vault_path):
     return orch
 
 
-def _create_task(vault_path: Path, name: str, content: str, age_seconds: int = 0) -> Path:
+def _create_task(
+    vault_path: Path, name: str, content: str, age_seconds: int = 0
+) -> Path:
     """Helper to create a task file in Needs_Action."""
     task_path = vault_path / "Needs_Action" / name
     task_path.write_text(content)
     if age_seconds > 0:
         import os
+
         mtime = time.time() - age_seconds
         os.utime(task_path, (mtime, mtime))
     return task_path
@@ -137,6 +139,7 @@ class TestPriorityScoring:
 
         # Check that tasks are scored
         from src.orchestrator.priority_scorer import PriorityScorer
+
         scorer = PriorityScorer(orchestrator.config)
 
         urgent_score = scorer.score(vault_path / "Needs_Action" / "urgent.md")
@@ -147,10 +150,18 @@ class TestPriorityScoring:
 
     def test_age_based_priority_boost(self, orchestrator, vault_path):
         """Old tasks get priority boost."""
-        _create_task(vault_path, "fresh.md", "# Fresh\n**Priority**: Low\n", age_seconds=60)
-        _create_task(vault_path, "old.md", "# Old\n**Priority**: Low\n", age_seconds=7*86400+3600)
+        _create_task(
+            vault_path, "fresh.md", "# Fresh\n**Priority**: Low\n", age_seconds=60
+        )
+        _create_task(
+            vault_path,
+            "old.md",
+            "# Old\n**Priority**: Low\n",
+            age_seconds=7 * 86400 + 3600,
+        )
 
         from src.orchestrator.priority_scorer import PriorityScorer
+
         scorer = PriorityScorer(orchestrator.config)
 
         fresh_score = scorer.score(vault_path / "Needs_Action" / "fresh.md")
@@ -166,12 +177,11 @@ class TestApprovalGate:
     def test_approval_required_for_dangerous_keywords(self, orchestrator, vault_path):
         """Tasks with approval keywords require HITL approval."""
         task_path = _create_task(
-            vault_path,
-            "deploy.md",
-            "# Deploy to production\nPlease deploy the app.\n"
+            vault_path, "deploy.md", "# Deploy to production\nPlease deploy the app.\n"
         )
 
         from src.orchestrator.approval_checker import ApprovalChecker
+
         checker = ApprovalChecker(orchestrator.config)
 
         assert checker.requires_approval(task_path) is True
@@ -179,12 +189,11 @@ class TestApprovalGate:
     def test_no_approval_for_safe_tasks(self, orchestrator, vault_path):
         """Normal tasks don't require approval."""
         task_path = _create_task(
-            vault_path,
-            "safe.md",
-            "# Update documentation\nFix the README typo.\n"
+            vault_path, "safe.md", "# Update documentation\nFix the README typo.\n"
         )
 
         from src.orchestrator.approval_checker import ApprovalChecker
+
         checker = ApprovalChecker(orchestrator.config)
 
         assert checker.requires_approval(task_path) is False
@@ -310,19 +319,19 @@ class TestCompleteE2E:
             vault_path,
             "urgent.md",
             "# URGENT Task\n**Priority**: High\n**Urgency**: ASAP\n",
-            age_seconds=3600
+            age_seconds=3600,
         )
         _create_task(
             vault_path,
             "normal.md",
             "# Normal Task\n**Priority**: Medium\n",
-            age_seconds=1800
+            age_seconds=1800,
         )
         _create_task(
             vault_path,
             "old_low.md",
             "# Old Low Priority\n**Priority**: Low\n",
-            age_seconds=10*86400  # 10 days old
+            age_seconds=10 * 86400,  # 10 days old
         )
 
         # Run orchestrator

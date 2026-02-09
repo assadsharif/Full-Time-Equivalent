@@ -6,6 +6,7 @@ safe_execute, ErrorMetrics, and the error_context context manager.
 """
 
 import sys
+
 sys.path.insert(0, ".")
 
 from src.cli.errors import (
@@ -31,7 +32,6 @@ from src.cli.errors import (
     format_error_for_user,
     ErrorMetrics,
 )
-
 
 # ---------------------------------------------------------------------------
 # Exception hierarchy

@@ -35,7 +35,6 @@ from cli.status import status_command
 from cli.vault import vault_group
 from cli.watcher import watcher_group
 
-
 # Performance thresholds (in milliseconds)
 THRESHOLDS = {
     "cli_startup": 100,
@@ -134,7 +133,7 @@ class TestCLIStartup:
             [sys.executable, "-m", "cli.main", "--version"],
             capture_output=True,
             text=True,
-            timeout=10
+            timeout=10,
         )
 
         # Note: Actual timing would be measured externally
@@ -145,15 +144,11 @@ class TestCLIStartup:
         """Test --help command performance (should be fast)"""
         runner = CliRunner()
 
-        stats = benchmark_runs(
-            runner.invoke,
-            runs=5,
-            cli=vault_group,
-            args=["--help"]
-        )
+        stats = benchmark_runs(runner.invoke, runs=5, cli=vault_group, args=["--help"])
 
-        assert stats["median"] < THRESHOLDS["simple_command"], \
-            f"--help command too slow: {stats['median']:.2f}ms (threshold: {THRESHOLDS['simple_command']}ms)"
+        assert (
+            stats["median"] < THRESHOLDS["simple_command"]
+        ), f"--help command too slow: {stats['median']:.2f}ms (threshold: {THRESHOLDS['simple_command']}ms)"
 
         print(f"\n--help performance: {stats['median']:.2f}ms (median)")
 
@@ -168,8 +163,9 @@ class TestCLIStartup:
             runner.invoke(vault_group, ["--help"])
         duration = (time.time() - start) * 100  # Per invocation in ms
 
-        assert duration < THRESHOLDS["simple_command"], \
-            f"Version command too slow: {duration:.2f}ms"
+        assert (
+            duration < THRESHOLDS["simple_command"]
+        ), f"Version command too slow: {duration:.2f}ms"
 
 
 class TestVaultOperations:
@@ -187,11 +183,12 @@ class TestVaultOperations:
             runner.invoke,
             runs=5,
             cli=vault_group,
-            args=["list", "inbox", "--vault-path", str(perf_vault)]
+            args=["list", "inbox", "--vault-path", str(perf_vault)],
         )
 
-        assert stats["median"] < THRESHOLDS["vault_list"], \
-            f"Vault list too slow: {stats['median']:.2f}ms (threshold: {THRESHOLDS['vault_list']}ms)"
+        assert (
+            stats["median"] < THRESHOLDS["vault_list"]
+        ), f"Vault list too slow: {stats['median']:.2f}ms (threshold: {THRESHOLDS['vault_list']}ms)"
 
         print(f"\nVault list (10 tasks) performance: {stats['median']:.2f}ms (median)")
 
@@ -205,14 +202,18 @@ class TestVaultOperations:
             cli=vault_group,
             args=[
                 "create",
-                "--vault-path", str(perf_vault),
-                "--task", "Performance test task",
-                "--folder", "inbox"
-            ]
+                "--vault-path",
+                str(perf_vault),
+                "--task",
+                "Performance test task",
+                "--folder",
+                "inbox",
+            ],
         )
 
-        assert stats["median"] < THRESHOLDS["vault_create"], \
-            f"Vault create too slow: {stats['median']:.2f}ms (threshold: {THRESHOLDS['vault_create']}ms)"
+        assert (
+            stats["median"] < THRESHOLDS["vault_create"]
+        ), f"Vault create too slow: {stats['median']:.2f}ms (threshold: {THRESHOLDS['vault_create']}ms)"
 
         print(f"\nVault create performance: {stats['median']:.2f}ms (median)")
 
@@ -233,12 +234,14 @@ class TestVaultOperations:
                 "test_task",
                 "inbox",
                 "done",
-                "--vault-path", str(perf_vault)
-            ]
+                "--vault-path",
+                str(perf_vault),
+            ],
         )
 
-        assert stats["median"] < THRESHOLDS["vault_move"], \
-            f"Vault move too slow: {stats['median']:.2f}ms (threshold: {THRESHOLDS['vault_move']}ms)"
+        assert (
+            stats["median"] < THRESHOLDS["vault_move"]
+        ), f"Vault move too slow: {stats['median']:.2f}ms (threshold: {THRESHOLDS['vault_move']}ms)"
 
         print(f"\nVault move performance: {stats['median']:.2f}ms (median)")
 
@@ -254,12 +257,13 @@ class TestVaultOperations:
             runner.invoke,
             runs=3,  # Fewer runs for large dataset
             cli=vault_group,
-            args=["list", "inbox", "--vault-path", str(perf_vault)]
+            args=["list", "inbox", "--vault-path", str(perf_vault)],
         )
 
         # Should still be reasonably fast even with 100 tasks
-        assert stats["median"] < 200, \
-            f"Vault list with 100 tasks too slow: {stats['median']:.2f}ms"
+        assert (
+            stats["median"] < 200
+        ), f"Vault list with 100 tasks too slow: {stats['median']:.2f}ms"
 
         print(f"\nVault list (100 tasks) performance: {stats['median']:.2f}ms (median)")
 
@@ -270,10 +274,7 @@ class TestStatusCheck:
     @patch("cli.status.check_watcher_status")
     @patch("cli.status.check_mcp_status")
     def test_status_command_performance(
-        self,
-        mock_mcp_status,
-        mock_watcher_status,
-        perf_vault
+        self, mock_mcp_status, mock_watcher_status, perf_vault
     ):
         """Test status command performance with parallel checks"""
         runner = CliRunner()
@@ -286,21 +287,19 @@ class TestStatusCheck:
             runner.invoke,
             runs=3,
             cli=status_command,
-            args=["--vault-path", str(perf_vault)]
+            args=["--vault-path", str(perf_vault)],
         )
 
-        assert stats["median"] < THRESHOLDS["status_check"], \
-            f"Status check too slow: {stats['median']:.2f}ms (threshold: {THRESHOLDS['status_check']}ms)"
+        assert (
+            stats["median"] < THRESHOLDS["status_check"]
+        ), f"Status check too slow: {stats['median']:.2f}ms (threshold: {THRESHOLDS['status_check']}ms)"
 
         print(f"\nStatus check performance: {stats['median']:.2f}ms (median)")
 
     @patch("cli.status.check_watcher_status")
     @patch("cli.status.check_mcp_status")
     def test_status_json_output_performance(
-        self,
-        mock_mcp_status,
-        mock_watcher_status,
-        perf_vault
+        self, mock_mcp_status, mock_watcher_status, perf_vault
     ):
         """Test status command with JSON output (should be same speed)"""
         runner = CliRunner()
@@ -312,11 +311,12 @@ class TestStatusCheck:
             runner.invoke,
             runs=5,
             cli=status_command,
-            args=["--vault-path", str(perf_vault), "--json"]
+            args=["--vault-path", str(perf_vault), "--json"],
         )
 
-        assert stats["median"] < THRESHOLDS["status_check"], \
-            f"Status check (JSON) too slow: {stats['median']:.2f}ms"
+        assert (
+            stats["median"] < THRESHOLDS["status_check"]
+        ), f"Status check (JSON) too slow: {stats['median']:.2f}ms"
 
         print(f"\nStatus check (JSON) performance: {stats['median']:.2f}ms (median)")
 
@@ -327,29 +327,24 @@ class TestWatcherOperations:
     @patch("cli.watcher.subprocess.run")
     @patch("cli.watcher.check_pm2_installed")
     def test_watcher_status_performance(
-        self,
-        mock_pm2_installed,
-        mock_subprocess,
-        perf_vault
+        self, mock_pm2_installed, mock_subprocess, perf_vault
     ):
         """Test watcher status command performance"""
         runner = CliRunner()
 
         mock_pm2_installed.return_value = True
-        mock_subprocess.return_value = MagicMock(
-            returncode=0,
-            stdout="[]"
-        )
+        mock_subprocess.return_value = MagicMock(returncode=0, stdout="[]")
 
         stats = benchmark_runs(
             runner.invoke,
             runs=5,
             cli=watcher_group,
-            args=["status", "--vault-path", str(perf_vault)]
+            args=["status", "--vault-path", str(perf_vault)],
         )
 
-        assert stats["median"] < THRESHOLDS["watcher_command"], \
-            f"Watcher status too slow: {stats['median']:.2f}ms"
+        assert (
+            stats["median"] < THRESHOLDS["watcher_command"]
+        ), f"Watcher status too slow: {stats['median']:.2f}ms"
 
         print(f"\nWatcher status performance: {stats['median']:.2f}ms (median)")
 
@@ -377,11 +372,12 @@ class TestMCPOperations:
             runner.invoke,
             runs=5,
             cli=mcp_group,
-            args=["list", "--vault-path", str(perf_vault)]
+            args=["list", "--vault-path", str(perf_vault)],
         )
 
-        assert stats["median"] < THRESHOLDS["mcp_command"], \
-            f"MCP list too slow: {stats['median']:.2f}ms"
+        assert (
+            stats["median"] < THRESHOLDS["mcp_command"]
+        ), f"MCP list too slow: {stats['median']:.2f}ms"
 
         print(f"\nMCP list performance: {stats['median']:.2f}ms (median)")
 
@@ -397,33 +393,35 @@ class TestMCPOperations:
                 "add",
                 "test-api",
                 "https://api.example.com",
-                "--vault-path", str(perf_vault)
-            ]
+                "--vault-path",
+                str(perf_vault),
+            ],
         )
 
         # Mock API response
         mock_get.return_value = MagicMock(
-            status_code=200,
-            json=lambda: [{"name": "tool1"}, {"name": "tool2"}]
+            status_code=200, json=lambda: [{"name": "tool1"}, {"name": "tool2"}]
         )
 
         # First call (cache miss)
         _, first_duration = time_command(
             runner.invoke,
             cli=mcp_group,
-            args=["tools", "test-api", "--vault-path", str(perf_vault)]
+            args=["tools", "test-api", "--vault-path", str(perf_vault)],
         )
 
         # Second call (should use cache)
         _, second_duration = time_command(
             runner.invoke,
             cli=mcp_group,
-            args=["tools", "test-api", "--vault-path", str(perf_vault)]
+            args=["tools", "test-api", "--vault-path", str(perf_vault)],
         )
 
         # Cached call should be faster (no actual HTTP request)
         # Allow for some variance but should see improvement
-        print(f"\nMCP tools - First: {first_duration:.2f}ms, Cached: {second_duration:.2f}ms")
+        print(
+            f"\nMCP tools - First: {first_duration:.2f}ms, Cached: {second_duration:.2f}ms"
+        )
 
 
 class TestBriefingOperations:
@@ -447,14 +445,17 @@ class TestBriefingOperations:
             runner.invoke,
             runs=3,
             cli=briefing_group,
-            args=["generate", "--vault-path", str(perf_vault)]
+            args=["generate", "--vault-path", str(perf_vault)],
         )
 
         # Briefing generation with 20 tasks should be fast
-        assert stats["median"] < 500, \
-            f"Briefing generation too slow: {stats['median']:.2f}ms"
+        assert (
+            stats["median"] < 500
+        ), f"Briefing generation too slow: {stats['median']:.2f}ms"
 
-        print(f"\nBriefing generate (20 tasks) performance: {stats['median']:.2f}ms (median)")
+        print(
+            f"\nBriefing generate (20 tasks) performance: {stats['median']:.2f}ms (median)"
+        )
 
 
 class TestScalability:
@@ -482,7 +483,7 @@ class TestScalability:
                 runner.invoke,
                 runs=3,
                 cli=vault_group,
-                args=["list", "inbox", "--vault-path", str(perf_vault)]
+                args=["list", "inbox", "--vault-path", str(perf_vault)],
             )
 
             results[count] = stats["median"]
@@ -514,10 +515,7 @@ class TestMemoryUsage:
         # Measure memory
         tracemalloc.start()
 
-        runner.invoke(
-            vault_group,
-            ["list", "inbox", "--vault-path", str(perf_vault)]
-        )
+        runner.invoke(vault_group, ["list", "inbox", "--vault-path", str(perf_vault)])
 
         current, peak = tracemalloc.get_traced_memory()
         tracemalloc.stop()
@@ -574,4 +572,5 @@ if __name__ == "__main__":
 
     # Run pytest with verbose output
     import sys
+
     sys.exit(pytest.main([__file__, "-v", "-s"]))

@@ -28,6 +28,7 @@ class TestGmailWatcher:
     def teardown_method(self):
         """Clean up test fixtures."""
         import shutil
+
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_init(self):

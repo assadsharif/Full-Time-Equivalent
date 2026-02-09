@@ -9,7 +9,6 @@ import pytest
 
 from src.briefing.email_delivery import EmailDeliveryService, SMTPConfig
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -207,7 +206,10 @@ class TestSMTPSend:
         server = _mock_smtp(mock_smtp_cls)
         start, end = _period()
         svc.send_briefing_email(
-            "ceo@x.com", briefing_md, start, end,
+            "ceo@x.com",
+            briefing_md,
+            start,
+            end,
             highlights=["47 tasks done", "100% SLA"],
         )
         body = _decode_text_body(server.sendmail.call_args[0][2])

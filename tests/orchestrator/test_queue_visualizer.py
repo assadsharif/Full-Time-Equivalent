@@ -7,7 +7,6 @@ import pytest
 
 from src.orchestrator.queue_visualizer import QueueVisualizer
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -33,6 +32,7 @@ def _seed_task(vault_path: Path, name: str, content: str, age_seconds: int = 0) 
     task_path.write_text(content)
     if age_seconds > 0:
         import os
+
         mtime = time.time() - age_seconds
         os.utime(task_path, (mtime, mtime))
 
@@ -44,7 +44,9 @@ def _seed_task(vault_path: Path, name: str, content: str, age_seconds: int = 0) 
 
 class TestFormatTaskEntry:
     def test_formats_entry_with_priority_and_wait_time(self, vault_path, visualizer):
-        _seed_task(vault_path, "task.md", "# Task\n**Priority**: High\n", age_seconds=120)
+        _seed_task(
+            vault_path, "task.md", "# Task\n**Priority**: High\n", age_seconds=120
+        )
         task_path = vault_path / "Needs_Action" / "task.md"
         entry = visualizer.format_task_entry(task_path)
         assert entry["name"] == "task.md"
@@ -115,8 +117,15 @@ class TestRenderQueueTable:
 
     def test_returns_sorted_queue(self, vault_path, visualizer):
         _seed_task(vault_path, "low.md", "# Low Task\n", age_seconds=60)
-        _seed_task(vault_path, "high.md", "# High Task\n**Priority**: High\n**Urgency**: ASAP\n", age_seconds=120)
-        _seed_task(vault_path, "mid.md", "# Mid Task\n**Priority**: Medium\n", age_seconds=90)
+        _seed_task(
+            vault_path,
+            "high.md",
+            "# High Task\n**Priority**: High\n**Urgency**: ASAP\n",
+            age_seconds=120,
+        )
+        _seed_task(
+            vault_path, "mid.md", "# Mid Task\n**Priority**: Medium\n", age_seconds=90
+        )
 
         queue = visualizer.render_queue_table()
         assert len(queue) == 3
@@ -165,9 +174,16 @@ class TestRenderQueueTable:
 class TestIntegration:
     def test_realistic_queue_rendering(self, vault_path, visualizer):
         """Smoke test: create a realistic queue and verify rendering."""
-        _seed_task(vault_path, "urgent.md", "# Urgent Task\n**Priority**: High\n**Urgency**: ASAP\n", age_seconds=3600)
+        _seed_task(
+            vault_path,
+            "urgent.md",
+            "# Urgent Task\n**Priority**: High\n**Urgency**: ASAP\n",
+            age_seconds=3600,
+        )
         _seed_task(vault_path, "normal.md", "# Normal Task\n", age_seconds=1800)
-        _seed_task(vault_path, "old.md", "# Old Task\n**Priority**: Low\n", age_seconds=86400)
+        _seed_task(
+            vault_path, "old.md", "# Old Task\n**Priority**: Low\n", age_seconds=86400
+        )
 
         queue = visualizer.render_queue_table(verbose=True)
         assert len(queue) == 3

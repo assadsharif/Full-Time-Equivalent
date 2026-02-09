@@ -10,7 +10,6 @@ from pathlib import Path
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -82,7 +81,9 @@ def orchestrator(config_file, vault_path):
     return orch
 
 
-def _create_task_batch(vault_path: Path, count: int, prefix: str = "task") -> list[Path]:
+def _create_task_batch(
+    vault_path: Path, count: int, prefix: str = "task"
+) -> list[Path]:
     """Helper to create a batch of tasks."""
     tasks = []
     for i in range(count):
@@ -117,7 +118,9 @@ class TestHighVolume:
         # Should complete in reasonable time (< 10 seconds for dry-run)
         assert elapsed < 10.0, f"100 tasks took {elapsed:.2f}s (expected < 10s)"
 
-        print(f"\n✓ Processed 100 tasks in {elapsed:.2f}s ({100/elapsed:.1f} tasks/sec)")
+        print(
+            f"\n✓ Processed 100 tasks in {elapsed:.2f}s ({100/elapsed:.1f} tasks/sec)"
+        )
 
     def test_priority_scoring_performance(self, orchestrator, vault_path):
         """Priority scoring should be fast even with many tasks."""
@@ -125,6 +128,7 @@ class TestHighVolume:
         tasks = _create_task_batch(vault_path, 100)
 
         from src.orchestrator.priority_scorer import PriorityScorer
+
         scorer = PriorityScorer(orchestrator.config)
 
         # Measure scoring time
@@ -168,7 +172,8 @@ class TestConcurrencySimulation:
 
         # High-priority tasks should be processed first
         high_priority_indices = [
-            idx for idx, exit in enumerate(exits)
+            idx
+            for idx, exit in enumerate(exits)
             if "URGENT" in (vault_path / "Needs_Action" / exit.task_name).read_text()
         ]
 
@@ -203,15 +208,16 @@ class TestConcurrencySimulation:
 
         # Old tasks should appear early despite lower base priority (age boost)
         old_task_indices = [
-            idx for idx, exit in enumerate(exits)
-            if exit.task_name.startswith("old_")
+            idx for idx, exit in enumerate(exits) if exit.task_name.startswith("old_")
         ]
 
         # At least some old tasks should be in first half
         early_old_tasks = sum(1 for idx in old_task_indices if idx < 50)
         assert early_old_tasks >= 20, "Old tasks should get priority boost"
 
-        print(f"\n✓ Age-based boosting working under load ({early_old_tasks}/50 old tasks in first half)")
+        print(
+            f"\n✓ Age-based boosting working under load ({early_old_tasks}/50 old tasks in first half)"
+        )
 
 
 class TestMetricsUnderLoad:
@@ -264,7 +270,9 @@ class TestCheckpointingUnderLoad:
 
         # Checkpoint should be reasonably sized (< 1MB for 100 tasks)
         checkpoint_size = checkpoint_path.stat().st_size
-        assert checkpoint_size < 1024 * 1024, f"Checkpoint too large: {checkpoint_size} bytes"
+        assert (
+            checkpoint_size < 1024 * 1024
+        ), f"Checkpoint too large: {checkpoint_size} bytes"
 
         # Should contain all exits
         data = json.loads(checkpoint_path.read_text())
@@ -317,7 +325,9 @@ class TestStressScenarios:
 
         # Memory growth should be reasonable (< 10MB)
         growth = final_size - initial_size
-        print(f"\n✓ Memory growth: {growth} bytes (initial: {initial_size}, final: {final_size})")
+        print(
+            f"\n✓ Memory growth: {growth} bytes (initial: {initial_size}, final: {final_size})"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -338,14 +348,14 @@ class TestPerformanceBenchmarks:
 
         throughput = len(exits) / elapsed
 
-        print(f"\n" + "="*60)
+        print(f"\n" + "=" * 60)
         print(f"PERFORMANCE BENCHMARK")
-        print(f"="*60)
+        print(f"=" * 60)
         print(f"Tasks processed: {len(exits)}")
         print(f"Total time:      {elapsed:.2f}s")
         print(f"Throughput:      {throughput:.1f} tasks/sec")
         print(f"Avg latency:     {(elapsed/len(exits)*1000):.1f}ms/task")
-        print(f"="*60)
+        print(f"=" * 60)
 
         # Baseline: should achieve at least 10 tasks/sec in dry-run
         assert throughput >= 10.0, f"Throughput too low: {throughput:.1f} tasks/sec"

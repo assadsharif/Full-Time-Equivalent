@@ -89,7 +89,9 @@ class TestAsyncWriterLifecycle:
         assert "Test log message" in content
 
     @pytest.mark.asyncio
-    async def test_write_before_start_raises_error(self, temp_log_dir, sample_log_entry):
+    async def test_write_before_start_raises_error(
+        self, temp_log_dir, sample_log_entry
+    ):
         """write() should raise error if called before start()."""
         writer = AsyncWriter(log_dir=temp_log_dir)
 
@@ -104,8 +106,7 @@ class TestAsyncWriting:
     async def test_write_single_entry(self, temp_log_dir, sample_log_entry):
         """Should write a single log entry to file."""
         writer = AsyncWriter(
-            log_dir=temp_log_dir,
-            flush_interval_s=0.1  # Fast flush for testing
+            log_dir=temp_log_dir, flush_interval_s=0.1  # Fast flush for testing
         )
         await writer.start()
 
@@ -131,10 +132,7 @@ class TestAsyncWriting:
     @pytest.mark.asyncio
     async def test_write_multiple_entries(self, temp_log_dir):
         """Should write multiple log entries."""
-        writer = AsyncWriter(
-            log_dir=temp_log_dir,
-            flush_interval_s=0.1
-        )
+        writer = AsyncWriter(log_dir=temp_log_dir, flush_interval_s=0.1)
         await writer.start()
 
         # Write multiple entries
@@ -174,9 +172,9 @@ class TestAsyncWriting:
                     file="test.py",
                     line=42,
                     function="test_func",
-                    code="raise ValueError()"
+                    code="raise ValueError()",
                 )
-            ]
+            ],
         )
 
         entry = LogEntry(
@@ -223,7 +221,7 @@ class TestBuffering:
         writer = AsyncWriter(
             log_dir=temp_log_dir,
             buffer_size=10,
-            flush_interval_s=10.0  # Long interval - shouldn't trigger
+            flush_interval_s=10.0,  # Long interval - shouldn't trigger
         )
         await writer.start()
 
@@ -256,7 +254,7 @@ class TestBuffering:
         writer = AsyncWriter(
             log_dir=temp_log_dir,
             buffer_size=1000,  # Large buffer - shouldn't trigger
-            flush_interval_s=0.1
+            flush_interval_s=0.1,
         )
         await writer.start()
 
@@ -286,7 +284,7 @@ class TestBuffering:
         writer = AsyncWriter(
             log_dir=temp_log_dir,
             buffer_size=1000,
-            flush_interval_s=10.0  # Long interval
+            flush_interval_s=10.0,  # Long interval
         )
         await writer.start()
 
@@ -412,9 +410,7 @@ class TestPerformance:
         import time
 
         writer = AsyncWriter(
-            log_dir=temp_log_dir,
-            buffer_size=10000,
-            flush_interval_s=10.0
+            log_dir=temp_log_dir, buffer_size=10000, flush_interval_s=10.0
         )
         await writer.start()
 

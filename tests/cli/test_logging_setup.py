@@ -16,7 +16,9 @@ sys.path.insert(0, ".")
 # Structural / contract tests (no runtime import of the module)
 # ---------------------------------------------------------------------------
 
-_LOGGING_SETUP_PY = Path(__file__).resolve().parent.parent.parent / "src" / "cli" / "logging_setup.py"
+_LOGGING_SETUP_PY = (
+    Path(__file__).resolve().parent.parent.parent / "src" / "cli" / "logging_setup.py"
+)
 
 
 def _parse_source():
@@ -100,13 +102,17 @@ def test_setup_logging_calls_basicConfig():
     fake_config.logging.colored = True
     fake_config.logging.file = None
 
-    with patch.dict("sys.modules", {
-        "structlog": MagicMock(),
-        "rich.console": MagicMock(),
-        "rich.logging": MagicMock(),
-        "cli.config": MagicMock(get_config=lambda: fake_config),
-    }):
+    with patch.dict(
+        "sys.modules",
+        {
+            "structlog": MagicMock(),
+            "rich.console": MagicMock(),
+            "rich.logging": MagicMock(),
+            "cli.config": MagicMock(get_config=lambda: fake_config),
+        },
+    ):
         import importlib
+
         # Force re-import with mocked deps
         spec = __import__("importlib").util.spec_from_file_location(
             "_logging_setup_test", str(_LOGGING_SETUP_PY)

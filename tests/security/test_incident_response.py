@@ -6,7 +6,11 @@ from pathlib import Path
 
 import pytest
 
-from src.security.incident_response import IncidentResponse, IncidentReport, IsolationRecord
+from src.security.incident_response import (
+    IncidentResponse,
+    IncidentReport,
+    IsolationRecord,
+)
 from src.security.models import RiskLevel
 
 
@@ -70,8 +74,7 @@ class TestIncidentReportGeneration:
 
         # Create some events
         events = [
-            create_audit_event(timestamp=now - timedelta(minutes=i))
-            for i in range(10)
+            create_audit_event(timestamp=now - timedelta(minutes=i)) for i in range(10)
         ]
         write_audit_events(audit_log, events)
 
@@ -91,8 +94,7 @@ class TestIncidentReportGeneration:
 
         # Create events spanning 3 hours
         events = [
-            create_audit_event(timestamp=now - timedelta(hours=i))
-            for i in range(3)
+            create_audit_event(timestamp=now - timedelta(hours=i)) for i in range(3)
         ]
         write_audit_events(audit_log, events)
 
@@ -111,13 +113,17 @@ class TestIncidentReportGeneration:
         events = [
             create_audit_event(risk_level="low", timestamp=now - timedelta(minutes=1)),
             create_audit_event(risk_level="high", timestamp=now - timedelta(minutes=2)),
-            create_audit_event(risk_level="critical", timestamp=now - timedelta(minutes=3)),
+            create_audit_event(
+                risk_level="critical", timestamp=now - timedelta(minutes=3)
+            ),
             create_audit_event(risk_level="low", timestamp=now - timedelta(minutes=4)),
         ]
         write_audit_events(audit_log, events)
 
         # Generate report
-        report = incident_response.generate_incident_report(min_risk_level=RiskLevel.HIGH)
+        report = incident_response.generate_incident_report(
+            min_risk_level=RiskLevel.HIGH
+        )
 
         assert report.total_events == 4
         assert report.high_risk_events == 2  # high + critical
@@ -130,9 +136,15 @@ class TestIncidentReportGeneration:
         # Mix of successful and failed operations
         events = [
             create_audit_event(result="success", timestamp=now - timedelta(minutes=1)),
-            create_audit_event(result="error:TimeoutError", timestamp=now - timedelta(minutes=2)),
-            create_audit_event(result="rate_limit_exceeded", timestamp=now - timedelta(minutes=3)),
-            create_audit_event(result="circuit_open", timestamp=now - timedelta(minutes=4)),
+            create_audit_event(
+                result="error:TimeoutError", timestamp=now - timedelta(minutes=2)
+            ),
+            create_audit_event(
+                result="rate_limit_exceeded", timestamp=now - timedelta(minutes=3)
+            ),
+            create_audit_event(
+                result="circuit_open", timestamp=now - timedelta(minutes=4)
+            ),
         ]
         write_audit_events(audit_log, events)
 
@@ -161,7 +173,9 @@ class TestIncidentReportGeneration:
         report = incident_response.generate_incident_report()
 
         # Should identify as suspicious
-        suspicious = [s for s in report.suspicious_actions if s["type"] == "multiple_failures"]
+        suspicious = [
+            s for s in report.suspicious_actions if s["type"] == "multiple_failures"
+        ]
         assert len(suspicious) > 0
         assert suspicious[0]["server"] == "failing-server"
         assert suspicious[0]["count"] >= 5
@@ -372,13 +386,19 @@ class TestReportSummaryGeneration:
             create_audit_event(risk_level="high", timestamp=now - timedelta(minutes=i))
             for i in range(3)
         ]
-        events.extend([
-            create_audit_event(risk_level="low", timestamp=now - timedelta(minutes=i))
-            for i in range(3, 5)
-        ])
+        events.extend(
+            [
+                create_audit_event(
+                    risk_level="low", timestamp=now - timedelta(minutes=i)
+                )
+                for i in range(3, 5)
+            ]
+        )
         write_audit_events(audit_log, events)
 
-        report = incident_response.generate_incident_report(min_risk_level=RiskLevel.MEDIUM)
+        report = incident_response.generate_incident_report(
+            min_risk_level=RiskLevel.MEDIUM
+        )
         assert "Security incident detected" in report.summary
         assert report.high_risk_events == 3
 

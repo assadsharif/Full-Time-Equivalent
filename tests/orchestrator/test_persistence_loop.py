@@ -24,14 +24,20 @@ from src.orchestrator.persistence_loop import PersistenceLoop, RetryPolicy, Chec
 from src.orchestrator.claude_invoker import ClaudeInvoker, InvocationResult
 from src.orchestrator.stop_hook import StopHook
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
 
 def _vault(tmp: Path) -> Path:
-    for folder in ("Inbox", "Needs_Action", "In_Progress", "Done", "Approvals", "Briefings"):
+    for folder in (
+        "Inbox",
+        "Needs_Action",
+        "In_Progress",
+        "Done",
+        "Approvals",
+        "Briefings",
+    ):
         (tmp / folder).mkdir(exist_ok=True)
     return tmp
 
@@ -126,7 +132,9 @@ class TestTransientClassify:
 
     def test_timeout_in_stderr_is_transient(self):
         assert PersistenceLoop.is_transient(
-            InvocationResult(success=False, stderr="Claude invocation timed out after 3600s")
+            InvocationResult(
+                success=False, stderr="Claude invocation timed out after 3600s"
+            )
         )
 
     def test_rate_limit_is_transient(self):
@@ -171,7 +179,9 @@ class TestTransientClassify:
 
     def test_syntax_error_is_hard(self):
         assert not PersistenceLoop.is_transient(
-            InvocationResult(success=False, stderr="SyntaxError: invalid syntax at line 5")
+            InvocationResult(
+                success=False, stderr="SyntaxError: invalid syntax at line 5"
+            )
         )
 
     def test_empty_stderr_is_hard(self):
@@ -253,7 +263,9 @@ class TestPersistenceLoopRun:
     def test_immediate_success(self, vault_dir):
         loop, invoker, _ = _make_loop(vault_dir)
         path = _task_md(vault_dir)
-        invoker.dry_run.return_value = InvocationResult(success=True, stdout="ok", returncode=0)
+        invoker.dry_run.return_value = InvocationResult(
+            success=True, stdout="ok", returncode=0
+        )
 
         result = loop.run(path, dry_run=True)
 
@@ -331,7 +343,9 @@ class TestPersistenceLoopRun:
     def test_invoke_mode_calls_invoke_not_dry_run(self, vault_dir):
         loop, invoker, _ = _make_loop(vault_dir)
         path = _task_md(vault_dir)
-        invoker.invoke.return_value = InvocationResult(success=True, stdout="real", returncode=0)
+        invoker.invoke.return_value = InvocationResult(
+            success=True, stdout="real", returncode=0
+        )
 
         result = loop.run(path, dry_run=False)
 
@@ -345,7 +359,9 @@ class TestPersistenceLoopRun:
         path = _task_md(vault_dir)
         PersistenceLoop._write_checkpoint(path, Checkpoint(iteration=2))
 
-        invoker.dry_run.return_value = InvocationResult(success=True, stdout="resumed", returncode=0)
+        invoker.dry_run.return_value = InvocationResult(
+            success=True, stdout="resumed", returncode=0
+        )
 
         result = loop.run(path, dry_run=True)
 
@@ -431,8 +447,10 @@ class TestPersistenceWarning:
         PersistenceLoop._write_checkpoint(path, Checkpoint(iteration=3))
 
         invoker.dry_run.side_effect = [
-            InvocationResult(success=False, stderr="connection refused"),  # iter 3 (< 4, no warn)
-            InvocationResult(success=True, stdout="ok"),                   # iter 4 (>= 4, warn)
+            InvocationResult(
+                success=False, stderr="connection refused"
+            ),  # iter 3 (< 4, no warn)
+            InvocationResult(success=True, stdout="ok"),  # iter 4 (>= 4, warn)
         ]
 
         loop.run(path, dry_run=True)
@@ -499,9 +517,14 @@ class TestOrchestratorPersist:
         def _patched(task_path):
             call_n[0] += 1
             if call_n[0] == 1:
-                return InvocationResult(success=False, stderr="connection refused", returncode=1)
+                return InvocationResult(
+                    success=False, stderr="connection refused", returncode=1
+                )
             return InvocationResult(
-                success=True, stdout="[DRY-RUN] recovered", returncode=0, duration_seconds=0.1
+                success=True,
+                stdout="[DRY-RUN] recovered",
+                returncode=0,
+                duration_seconds=0.1,
             )
 
         orch._invoker.dry_run = _patched

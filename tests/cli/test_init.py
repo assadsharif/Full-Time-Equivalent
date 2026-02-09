@@ -33,7 +33,7 @@ class TestInitCommand:
     def test_init_help(self):
         """Test init command help"""
         runner = CliRunner()
-        result = runner.invoke(init_command, ['--help'])
+        result = runner.invoke(init_command, ["--help"])
 
         assert result.exit_code == 0
         assert "Initialize FTE configuration" in result.output
@@ -57,7 +57,7 @@ class TestInitCommand:
             Path(".fte").mkdir()
             Path("config/cli.yaml").touch()
 
-            result = runner.invoke(init_command, ['--vault-path', str(vault_path)])
+            result = runner.invoke(init_command, ["--vault-path", str(vault_path)])
 
             assert "Initializing FTE CLI configuration" in result.output
 
@@ -71,7 +71,7 @@ class TestInitCommand:
             Path(".fte").mkdir()
             Path("config/cli.yaml").touch()
 
-            result = runner.invoke(init_command, ['--force'], input="y\n")
+            result = runner.invoke(init_command, ["--force"], input="y\n")
 
             assert "Initializing FTE CLI configuration" in result.output
             # May see "Force flag set" in output
@@ -123,7 +123,9 @@ class TestInitCommand:
             result = runner.invoke(init_command, input="y\n")
 
             # Checkpoint should be mentioned in output
-            assert "checkpoint" in result.output.lower() or "Initializing" in result.output
+            assert (
+                "checkpoint" in result.output.lower() or "Initializing" in result.output
+            )
 
     def test_init_nonexistent_vault_warning(self):
         """Test init warns about nonexistent vault"""
@@ -137,7 +139,7 @@ class TestInitCommand:
 
             # Provide a nonexistent path
             nonexistent_path = "/nonexistent/vault/path"
-            result = runner.invoke(init_command, ['--vault-path', nonexistent_path])
+            result = runner.invoke(init_command, ["--vault-path", nonexistent_path])
 
             # Should mention vault not found or warning
             assert "Initializing" in result.output
@@ -181,7 +183,7 @@ class TestInitIntegration:
             Path("config/cli.yaml").touch()
 
             # Run init with valid vault
-            result = runner.invoke(init_command, ['--vault-path', str(vault_path)])
+            result = runner.invoke(init_command, ["--vault-path", str(vault_path)])
 
             assert "Initializing FTE CLI configuration" in result.output
             # Should complete successfully

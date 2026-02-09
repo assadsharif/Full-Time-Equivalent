@@ -25,7 +25,7 @@ class TestNewTraceId:
         # ULID is 26 characters, Base32 encoded
         assert len(trace_id) == 26
         # Base32 uses A-Z and 0-9 (case-insensitive, but typically uppercase)
-        assert re.match(r'^[0-9A-Z]{26}$', trace_id, re.IGNORECASE)
+        assert re.match(r"^[0-9A-Z]{26}$", trace_id, re.IGNORECASE)
 
     def test_new_trace_id_uniqueness(self):
         """new_trace_id should generate unique IDs."""

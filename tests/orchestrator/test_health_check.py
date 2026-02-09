@@ -10,7 +10,6 @@ import pytest
 from src.orchestrator.health_check import HealthCheck
 from src.orchestrator.metrics import MetricsCollector
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -43,6 +42,7 @@ def _seed_checkpoint(vault_path: Path, age_seconds: int = 0) -> None:
         # Backdate the file
         mtime = time.time() - age_seconds
         import os
+
         os.utime(ckpt_path, (mtime, mtime))
 
 
@@ -134,11 +134,30 @@ class TestErrorRateCheck:
 
     def test_below_threshold_returns_healthy(self, health_check, metrics_collector):
         now = datetime.now(timezone.utc)
-        _seed_metrics(metrics_collector, [
-            {"event": "task_completed", "task_name": "a.md", "duration_seconds": 5.0, "timestamp": (now - timedelta(hours=1)).isoformat()},
-            {"event": "task_completed", "task_name": "b.md", "duration_seconds": 5.0, "timestamp": (now - timedelta(hours=1)).isoformat()},
-            {"event": "task_failed", "task_name": "c.md", "duration_seconds": 5.0, "error": "e", "timestamp": (now - timedelta(hours=1)).isoformat()},
-        ])
+        _seed_metrics(
+            metrics_collector,
+            [
+                {
+                    "event": "task_completed",
+                    "task_name": "a.md",
+                    "duration_seconds": 5.0,
+                    "timestamp": (now - timedelta(hours=1)).isoformat(),
+                },
+                {
+                    "event": "task_completed",
+                    "task_name": "b.md",
+                    "duration_seconds": 5.0,
+                    "timestamp": (now - timedelta(hours=1)).isoformat(),
+                },
+                {
+                    "event": "task_failed",
+                    "task_name": "c.md",
+                    "duration_seconds": 5.0,
+                    "error": "e",
+                    "timestamp": (now - timedelta(hours=1)).isoformat(),
+                },
+            ],
+        )
         # 1/3 = 33% > 10%, but let's use a more realistic test
         ok, msg = health_check.check_error_rate(threshold=0.40)  # 40%
         assert ok is True
@@ -146,11 +165,31 @@ class TestErrorRateCheck:
 
     def test_above_threshold_returns_unhealthy(self, health_check, metrics_collector):
         now = datetime.now(timezone.utc)
-        _seed_metrics(metrics_collector, [
-            {"event": "task_completed", "task_name": "a.md", "duration_seconds": 5.0, "timestamp": (now - timedelta(hours=1)).isoformat()},
-            {"event": "task_failed", "task_name": "b.md", "duration_seconds": 5.0, "error": "e", "timestamp": (now - timedelta(hours=1)).isoformat()},
-            {"event": "task_failed", "task_name": "c.md", "duration_seconds": 5.0, "error": "e", "timestamp": (now - timedelta(hours=1)).isoformat()},
-        ])
+        _seed_metrics(
+            metrics_collector,
+            [
+                {
+                    "event": "task_completed",
+                    "task_name": "a.md",
+                    "duration_seconds": 5.0,
+                    "timestamp": (now - timedelta(hours=1)).isoformat(),
+                },
+                {
+                    "event": "task_failed",
+                    "task_name": "b.md",
+                    "duration_seconds": 5.0,
+                    "error": "e",
+                    "timestamp": (now - timedelta(hours=1)).isoformat(),
+                },
+                {
+                    "event": "task_failed",
+                    "task_name": "c.md",
+                    "duration_seconds": 5.0,
+                    "error": "e",
+                    "timestamp": (now - timedelta(hours=1)).isoformat(),
+                },
+            ],
+        )
         # 2/3 = 66.7% > 10%
         ok, msg = health_check.check_error_rate(threshold=0.10)
         assert ok is False
@@ -159,10 +198,24 @@ class TestErrorRateCheck:
 
     def test_window_excludes_old_events(self, health_check, metrics_collector):
         now = datetime.now(timezone.utc)
-        _seed_metrics(metrics_collector, [
-            {"event": "task_failed", "task_name": "old.md", "duration_seconds": 5.0, "error": "e", "timestamp": (now - timedelta(hours=48)).isoformat()},
-            {"event": "task_completed", "task_name": "new.md", "duration_seconds": 5.0, "timestamp": (now - timedelta(hours=1)).isoformat()},
-        ])
+        _seed_metrics(
+            metrics_collector,
+            [
+                {
+                    "event": "task_failed",
+                    "task_name": "old.md",
+                    "duration_seconds": 5.0,
+                    "error": "e",
+                    "timestamp": (now - timedelta(hours=48)).isoformat(),
+                },
+                {
+                    "event": "task_completed",
+                    "task_name": "new.md",
+                    "duration_seconds": 5.0,
+                    "timestamp": (now - timedelta(hours=1)).isoformat(),
+                },
+            ],
+        )
         # Only the completed event is in the 24h window → 0% error
         ok, msg = health_check.check_error_rate(threshold=0.10, window_hours=24)
         assert ok is True
@@ -182,18 +235,34 @@ class TestLastCompletionTime:
 
     def test_recent_completion_returns_healthy(self, health_check, metrics_collector):
         now = datetime.now(timezone.utc)
-        _seed_metrics(metrics_collector, [
-            {"event": "task_completed", "task_name": "a.md", "duration_seconds": 5.0, "timestamp": (now - timedelta(seconds=30)).isoformat()},
-        ])
+        _seed_metrics(
+            metrics_collector,
+            [
+                {
+                    "event": "task_completed",
+                    "task_name": "a.md",
+                    "duration_seconds": 5.0,
+                    "timestamp": (now - timedelta(seconds=30)).isoformat(),
+                },
+            ],
+        )
         ok, msg = health_check.check_last_completion_time(max_idle_seconds=3600)
         assert ok is True
         assert "30" in msg or "3" in msg  # "30s ago" or similar
 
     def test_stale_completion_returns_unhealthy(self, health_check, metrics_collector):
         now = datetime.now(timezone.utc)
-        _seed_metrics(metrics_collector, [
-            {"event": "task_completed", "task_name": "a.md", "duration_seconds": 5.0, "timestamp": (now - timedelta(seconds=7200)).isoformat()},
-        ])
+        _seed_metrics(
+            metrics_collector,
+            [
+                {
+                    "event": "task_completed",
+                    "task_name": "a.md",
+                    "duration_seconds": 5.0,
+                    "timestamp": (now - timedelta(seconds=7200)).isoformat(),
+                },
+            ],
+        )
         ok, msg = health_check.check_last_completion_time(max_idle_seconds=3600)
         assert ok is False
         assert "7200" in msg or "72" in msg
@@ -201,9 +270,17 @@ class TestLastCompletionTime:
 
     def test_custom_idle_threshold(self, health_check, metrics_collector):
         now = datetime.now(timezone.utc)
-        _seed_metrics(metrics_collector, [
-            {"event": "task_completed", "task_name": "a.md", "duration_seconds": 5.0, "timestamp": (now - timedelta(seconds=500)).isoformat()},
-        ])
+        _seed_metrics(
+            metrics_collector,
+            [
+                {
+                    "event": "task_completed",
+                    "task_name": "a.md",
+                    "duration_seconds": 5.0,
+                    "timestamp": (now - timedelta(seconds=500)).isoformat(),
+                },
+            ],
+        )
         ok, msg = health_check.check_last_completion_time(max_idle_seconds=600)
         assert ok is True
 
@@ -214,55 +291,102 @@ class TestLastCompletionTime:
 
 
 class TestAggregateHealthStatus:
-    def test_all_checks_pass_returns_healthy(self, vault_path, health_check, metrics_collector):
+    def test_all_checks_pass_returns_healthy(
+        self, vault_path, health_check, metrics_collector
+    ):
         # Seed checkpoint, low backlog, low error rate, recent completion
         _seed_checkpoint(vault_path, age_seconds=10)
         _seed_needs_action(vault_path, count=5)
         now = datetime.now(timezone.utc)
-        _seed_metrics(metrics_collector, [
-            {"event": "task_completed", "task_name": "a.md", "duration_seconds": 5.0, "timestamp": (now - timedelta(seconds=30)).isoformat()},
-        ])
+        _seed_metrics(
+            metrics_collector,
+            [
+                {
+                    "event": "task_completed",
+                    "task_name": "a.md",
+                    "duration_seconds": 5.0,
+                    "timestamp": (now - timedelta(seconds=30)).isoformat(),
+                },
+            ],
+        )
 
         result = health_check.get_health_status()
         assert result["status"] == "healthy"
         assert all(c["ok"] for c in result["checks"].values())
 
-    def test_one_check_fails_returns_degraded(self, vault_path, health_check, metrics_collector):
+    def test_one_check_fails_returns_degraded(
+        self, vault_path, health_check, metrics_collector
+    ):
         # Good checkpoint, high backlog, low error rate, recent completion
         _seed_checkpoint(vault_path, age_seconds=10)
         _seed_needs_action(vault_path, count=50)  # high backlog
         now = datetime.now(timezone.utc)
-        _seed_metrics(metrics_collector, [
-            {"event": "task_completed", "task_name": "a.md", "duration_seconds": 5.0, "timestamp": (now - timedelta(seconds=30)).isoformat()},
-        ])
+        _seed_metrics(
+            metrics_collector,
+            [
+                {
+                    "event": "task_completed",
+                    "task_name": "a.md",
+                    "duration_seconds": 5.0,
+                    "timestamp": (now - timedelta(seconds=30)).isoformat(),
+                },
+            ],
+        )
 
         result = health_check.get_health_status()
         assert result["status"] == "degraded"
         assert result["checks"]["task_backlog"]["ok"] is False
         assert result["checks"]["scheduler_alive"]["ok"] is True
 
-    def test_two_checks_fail_returns_degraded(self, vault_path, health_check, metrics_collector):
+    def test_two_checks_fail_returns_degraded(
+        self, vault_path, health_check, metrics_collector
+    ):
         # Stale checkpoint, high backlog, low error rate, recent completion
         _seed_checkpoint(vault_path, age_seconds=600)  # stale
         _seed_needs_action(vault_path, count=50)  # high backlog
         now = datetime.now(timezone.utc)
-        _seed_metrics(metrics_collector, [
-            {"event": "task_completed", "task_name": "a.md", "duration_seconds": 5.0, "timestamp": (now - timedelta(seconds=30)).isoformat()},
-        ])
+        _seed_metrics(
+            metrics_collector,
+            [
+                {
+                    "event": "task_completed",
+                    "task_name": "a.md",
+                    "duration_seconds": 5.0,
+                    "timestamp": (now - timedelta(seconds=30)).isoformat(),
+                },
+            ],
+        )
 
         result = health_check.get_health_status()
         assert result["status"] == "degraded"
         failed = [name for name, check in result["checks"].items() if not check["ok"]]
         assert len(failed) == 2
 
-    def test_three_checks_fail_returns_unhealthy(self, vault_path, health_check, metrics_collector):
+    def test_three_checks_fail_returns_unhealthy(
+        self, vault_path, health_check, metrics_collector
+    ):
         # No checkpoint, high backlog, high error rate, recent completion
         _seed_needs_action(vault_path, count=50)
         now = datetime.now(timezone.utc)
-        _seed_metrics(metrics_collector, [
-            {"event": "task_failed", "task_name": "a.md", "duration_seconds": 5.0, "error": "e", "timestamp": (now - timedelta(seconds=30)).isoformat()},
-            {"event": "task_failed", "task_name": "b.md", "duration_seconds": 5.0, "error": "e", "timestamp": (now - timedelta(seconds=30)).isoformat()},
-        ])
+        _seed_metrics(
+            metrics_collector,
+            [
+                {
+                    "event": "task_failed",
+                    "task_name": "a.md",
+                    "duration_seconds": 5.0,
+                    "error": "e",
+                    "timestamp": (now - timedelta(seconds=30)).isoformat(),
+                },
+                {
+                    "event": "task_failed",
+                    "task_name": "b.md",
+                    "duration_seconds": 5.0,
+                    "error": "e",
+                    "timestamp": (now - timedelta(seconds=30)).isoformat(),
+                },
+            ],
+        )
 
         result = health_check.get_health_status()
         assert result["status"] == "unhealthy"
@@ -275,7 +399,12 @@ class TestAggregateHealthStatus:
         assert "timestamp" in result
         assert "checks" in result
         assert isinstance(result["checks"], dict)
-        for check_name in ["scheduler_alive", "task_backlog", "error_rate", "last_completion"]:
+        for check_name in [
+            "scheduler_alive",
+            "task_backlog",
+            "error_rate",
+            "last_completion",
+        ]:
             assert check_name in result["checks"]
             assert "ok" in result["checks"][check_name]
             assert "message" in result["checks"][check_name]
@@ -284,9 +413,17 @@ class TestAggregateHealthStatus:
         _seed_checkpoint(vault_path, age_seconds=10)
         _seed_needs_action(vault_path, count=25)
         now = datetime.now(timezone.utc)
-        _seed_metrics(metrics_collector, [
-            {"event": "task_completed", "task_name": "a.md", "duration_seconds": 5.0, "timestamp": (now - timedelta(seconds=30)).isoformat()},
-        ])
+        _seed_metrics(
+            metrics_collector,
+            [
+                {
+                    "event": "task_completed",
+                    "task_name": "a.md",
+                    "duration_seconds": 5.0,
+                    "timestamp": (now - timedelta(seconds=30)).isoformat(),
+                },
+            ],
+        )
 
         # With default threshold (20), backlog fails
         result1 = health_check.get_health_status()
@@ -317,12 +454,17 @@ class TestIntegration:
         now = datetime.now(timezone.utc)
         orch._metrics._log_path.parent.mkdir(parents=True, exist_ok=True)
         with open(orch._metrics._log_path, "w") as fh:
-            fh.write(json.dumps({
-                "event": "task_completed",
-                "task_name": "test.md",
-                "duration_seconds": 2.5,
-                "timestamp": (now - timedelta(seconds=30)).isoformat(),
-            }) + "\n")
+            fh.write(
+                json.dumps(
+                    {
+                        "event": "task_completed",
+                        "task_name": "test.md",
+                        "duration_seconds": 2.5,
+                        "timestamp": (now - timedelta(seconds=30)).isoformat(),
+                    }
+                )
+                + "\n"
+            )
 
         # Create HealthCheck pointing at same vault + metrics
         health = HealthCheck(vault_path=vault, metrics_collector=orch._metrics)
