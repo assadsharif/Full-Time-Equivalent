@@ -456,8 +456,7 @@ async def artifacts_generate_layout(
         <main className="flex-1 p-6">
           {{children}}
         </main>
-        {footer_content
-        </footer>''' if inp.include_footer else ""}
+        {footer_content + "\n        </footer>" if inp.include_footer else ""}
       </div>
     </div>
   );
