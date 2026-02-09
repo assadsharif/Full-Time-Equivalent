@@ -3,27 +3,44 @@
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from functools import total_ordering
 from typing import Optional
 
 
-@total_ordering
 class RiskLevel(str, Enum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
 
-    def __lt__(self, other):
-        if not isinstance(other, RiskLevel):
-            return NotImplemented
-        order = {
+    @property
+    def _order(self):
+        """Return numeric order for comparison."""
+        return {
             RiskLevel.LOW: 0,
             RiskLevel.MEDIUM: 1,
             RiskLevel.HIGH: 2,
             RiskLevel.CRITICAL: 3,
-        }
-        return order[self] < order[other]
+        }[self]
+
+    def __lt__(self, other):
+        if not isinstance(other, RiskLevel):
+            return NotImplemented
+        return self._order < other._order
+
+    def __le__(self, other):
+        if not isinstance(other, RiskLevel):
+            return NotImplemented
+        return self._order <= other._order
+
+    def __gt__(self, other):
+        if not isinstance(other, RiskLevel):
+            return NotImplemented
+        return self._order > other._order
+
+    def __ge__(self, other):
+        if not isinstance(other, RiskLevel):
+            return NotImplemented
+        return self._order >= other._order
 
 
 @dataclass
