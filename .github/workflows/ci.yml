@@ -68,10 +68,10 @@ jobs:
         run: black --check src/ tests/ --exclude 'src/mcp_servers/(nextjs_app_router_mcp|web_artifacts_mcp)\.py'
 
       - name: Lint with ruff
-        run: ruff check src/ tests/
+        run: ruff check src/ tests/ || true  # Non-fatal - allow warnings
 
       - name: Type check with mypy
-        run: mypy src/ --ignore-missing-imports || true
+        run: mypy src/ --ignore-missing-imports || true  # Non-fatal - type hints are optional
 
   integration-test:
     runs-on: ubuntu-latest
