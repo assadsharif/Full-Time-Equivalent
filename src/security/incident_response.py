@@ -249,12 +249,7 @@ class IncidentResponse:
         Returns:
             Dict with rotation results
         """
-        if self._vault is None:
-            raise ValueError("CredentialVault not configured for credential rotation")
-
-        # Get all stored credentials from vault
-        # Note: This requires vault to expose a list_all method
-        # For now, we'll log the intent
+        # Log the action regardless of vault configuration
         self._log_action(
             "mass_credential_rotation",
             {
@@ -264,6 +259,17 @@ class IncidentResponse:
             },
         )
 
+        if self._vault is None:
+            # Vault not configured - log intent only
+            return {
+                "status": "initiated",
+                "reason": reason,
+                "rotated_by": rotated_by,
+                "note": "CredentialVault not configured. Manual rotation required per service.",
+            }
+
+        # Get all stored credentials from vault
+        # Note: This requires vault to expose a list_all method
         # TODO: Integrate with vault.list_all() when available
         # TODO: Implement actual rotation logic per service
 

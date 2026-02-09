@@ -225,8 +225,10 @@ class AnomalyDetector:
         # Build action sequence
         sequence = " → ".join(recent_actions[-5:])  # Last 5 actions
 
-        # Calculate baseline sequences
-        baseline_sequences = self._calculate_sequence_baseline(events, mcp_server)
+        # Calculate baseline sequences (excluding recent window to avoid contamination)
+        baseline_sequences = self._calculate_sequence_baseline(
+            events, mcp_server, exclude_after=window_start
+        )
 
         # Check if this sequence is rare
         sequence_count = baseline_sequences.get(sequence, 0)
@@ -396,10 +398,18 @@ class AnomalyDetector:
         self,
         events: list[dict],
         mcp_server: str,
+        exclude_after: Optional[datetime] = None,
     ) -> dict[str, int]:
-        """Calculate baseline action sequence frequencies."""
+        """Calculate baseline action sequence frequencies.
+
+        Args:
+            events: All events to analyze
+            mcp_server: MCP server to filter by
+            exclude_after: Exclude events after this timestamp (to avoid contamination)
+        """
         now = datetime.now(timezone.utc)
         baseline_start = now - timedelta(days=self._baseline_days)
+        baseline_end = exclude_after if exclude_after else now
 
         # Extract action sequences (5-action windows)
         actions = [
@@ -407,7 +417,7 @@ class AnomalyDetector:
             for e in events
             if e.get("mcp_server") == mcp_server
             and e.get("event_type") == "mcp_action"
-            and baseline_start <= self._parse_timestamp(e["timestamp"]) < now
+            and baseline_start <= self._parse_timestamp(e["timestamp"]) < baseline_end
             and e.get("action") is not None
         ]
 
