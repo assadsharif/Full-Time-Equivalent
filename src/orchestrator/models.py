@@ -121,7 +121,9 @@ class OrchestratorConfig:
             deadline_weight=prio.get("deadline", 0.3),
             sender_weight=prio.get("sender", 0.3),
             vip_senders=raw.get("vip_senders", cls.DEFAULT_VIP_SENDERS),
-            approval_keywords=raw.get("approval_keywords", cls.DEFAULT_APPROVAL_KEYWORDS),
+            approval_keywords=raw.get(
+                "approval_keywords", cls.DEFAULT_APPROVAL_KEYWORDS
+            ),
             retry_max_attempts=raw.get("retry", {}).get("max_attempts", 3),
             retry_base_delay=raw.get("retry", {}).get("base_delay", 1.0),
             retry_max_delay=raw.get("retry", {}).get("max_delay", 16.0),
