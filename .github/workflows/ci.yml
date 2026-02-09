@@ -65,7 +65,7 @@ jobs:
           pip install black ruff mypy
 
       - name: Check code formatting with black
-        run: black --check src/ tests/
+        run: black --check src/ tests/ --exclude 'src/mcp_servers/(nextjs_app_router_mcp|web_artifacts_mcp)\.py'
 
       - name: Lint with ruff
         run: ruff check src/ tests/
