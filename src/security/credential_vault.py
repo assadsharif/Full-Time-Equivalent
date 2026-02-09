@@ -39,8 +39,10 @@ class CredentialVault:
         self._security_dir.mkdir(parents=True, exist_ok=True)
         self._cred_file = self._security_dir / "credentials.json.enc"
         self._key_file = self._security_dir / ".vault_key"
+        self._using_fallback = False  # Track if we've fallen back to file storage
 
         if not _KEYRING_AVAILABLE:
+            self._using_fallback = True
             warnings.warn(
                 "keyring not installed — credentials stored in encrypted file. "
                 "Install 'keyring' for OS-native secure storage.",
@@ -53,20 +55,21 @@ class CredentialVault:
 
     def store(self, service: str, username: str, credential: str) -> None:
         """Store a credential for the given service / username."""
-        if _KEYRING_AVAILABLE:
+        if _KEYRING_AVAILABLE and not self._using_fallback:
             try:
                 _keyring.set_password(
                     self._SERVICE_PREFIX + service, username, credential
                 )
             except (keyring.errors.NoKeyringError, keyring.errors.KeyringError):
                 # Keyring available but no backend — fall back to file storage
+                self._using_fallback = True
                 self._store_fallback(service, username, credential)
         else:
             self._store_fallback(service, username, credential)
 
     def retrieve(self, service: str, username: str) -> str:
         """Retrieve a credential.  Raises CredentialNotFoundError if missing."""
-        if _KEYRING_AVAILABLE:
+        if _KEYRING_AVAILABLE and not self._using_fallback:
             try:
                 value = _keyring.get_password(self._SERVICE_PREFIX + service, username)
                 if value is None:
@@ -76,12 +79,13 @@ class CredentialVault:
                 return value
             except (keyring.errors.NoKeyringError, keyring.errors.KeyringError):
                 # Keyring available but no backend — fall back to file storage
+                self._using_fallback = True
                 return self._retrieve_fallback(service, username)
         return self._retrieve_fallback(service, username)
 
     def delete(self, service: str, username: str) -> None:
         """Delete a credential.  Raises CredentialNotFoundError if missing."""
-        if _KEYRING_AVAILABLE:
+        if _KEYRING_AVAILABLE and not self._using_fallback:
             try:
                 _keyring.delete_password(self._SERVICE_PREFIX + service, username)
             except keyring.errors.PasswordDeleteError:
@@ -89,6 +93,7 @@ class CredentialVault:
                 raise CredentialNotFoundError(f"No credential for {service}/{username}")
             except (keyring.errors.NoKeyringError, keyring.errors.KeyringError):
                 # Keyring available but no backend — fall back to file storage
+                self._using_fallback = True
                 self._delete_fallback(service, username)
         else:
             self._delete_fallback(service, username)
@@ -109,7 +114,7 @@ class CredentialVault:
         Note: OS keyring does not expose a list API — returns empty when
         keyring is the active backend.
         """
-        if _KEYRING_AVAILABLE:
+        if _KEYRING_AVAILABLE and not self._using_fallback:
             return []
         return list(self._load_store().keys())
 
