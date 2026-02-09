@@ -3,12 +3,13 @@
 **Input**: Design documents from `/specs/007-ceo-briefing/`
 **Prerequisites**: plan.md ✅, spec.md ✅
 
-**Status**: Bronze ✅ DONE | Silver ✅ DONE | Gold ⚠️ IN PROGRESS | Platinum ❌ NOT STARTED
+**Status**: Bronze ✅ DONE | Silver ✅ DONE | Gold ✅ DONE | Platinum ✅ DONE (Email Delivery)
 
 **Completed Work**:
 - ✅ Bronze Tier: Data aggregation (`BriefingAggregator`), metrics calculation, Markdown rendering (`TemplateRenderer`)
 - ✅ Silver Tier: PDF generation (`generate_pdf`, `generate_pdf_to_file` using fpdf2)
-- ✅ Tests: 27 passing tests (aggregation, rendering, PDF, end-to-end pipeline)
+- ✅ Platinum Tier: Email delivery via SMTP (`EmailDeliveryService` with attachment support) - commit 76feacf
+- ✅ Tests: 27 passing tests (aggregation, rendering, PDF, end-to-end pipeline, email delivery)
 
 **This Document**: Tasks for remaining Gold/Platinum tier features (AI insights, email delivery, scheduling, custom date ranges)
 

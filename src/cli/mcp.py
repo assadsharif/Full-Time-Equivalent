@@ -12,6 +12,8 @@ from typing import Dict, List, Optional
 from urllib.parse import urlparse
 
 import click
+import keyring
+import keyring.errors
 import requests
 import yaml
 from rich.console import Console
@@ -283,12 +285,53 @@ def store_credentials(name: str, auth_file: Path) -> None:
             except yaml.YAMLError:
                 raise MCPError("Auth file must be valid JSON or YAML")
 
-        # TODO: In production, use OS keyring for secure storage
-        display_info(f"Credentials validated for '{name}'")
-        display_warning("Note: Secure keyring storage not yet implemented")
+        # Store credentials in OS keyring
+        try:
+            keyring.set_password("fte-mcp", name, auth_data)
+            display_success(f"Credentials stored securely for '{name}' in OS keyring")
+        except Exception as keyring_error:
+            # Fallback: warn but don't fail if keyring unavailable
+            display_warning(f"Could not store in keyring ({keyring_error})")
+            display_info(f"Credentials validated for '{name}' but not stored securely")
 
     except Exception as e:
         raise MCPError(f"Failed to store credentials: {e}")
+
+
+def retrieve_credentials(name: str) -> Optional[str]:
+    """
+    Retrieve MCP server credentials from OS keyring.
+
+    Args:
+        name: Server name
+
+    Returns:
+        Credentials as string if found, None otherwise
+    """
+    try:
+        credentials = keyring.get_password("fte-mcp", name)
+        return credentials
+    except Exception:
+        return None
+
+
+def delete_credentials(name: str) -> bool:
+    """
+    Delete MCP server credentials from OS keyring.
+
+    Args:
+        name: Server name
+
+    Returns:
+        True if deleted successfully, False otherwise
+    """
+    try:
+        keyring.delete_password("fte-mcp", name)
+        return True
+    except keyring.errors.PasswordDeleteError:
+        return False
+    except Exception:
+        return False
 
 
 def display_server_list(registry: Dict) -> None:

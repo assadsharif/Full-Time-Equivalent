@@ -257,20 +257,67 @@ def verify_integrity(approval_data: Dict) -> bool:
     Returns:
         True if integrity check passes
 
-    Note:
-        Currently returns True as hash storage not yet implemented.
-        Full implementation requires storing hash at creation time.
+    Raises:
+        ApprovalIntegrityError: If integrity check fails
     """
-    # TODO: Implement hash storage and verification
-    # For now, just check file hasn't been tampered (basic checks)
     frontmatter = approval_data["frontmatter"]
+    body_text = approval_data.get("body", "")
 
+    # Check required fields exist
     required_fields = ["task_id", "approval_id", "nonce", "action_type", "approval_status"]
     for field in required_fields:
         if field not in frontmatter:
             raise ApprovalIntegrityError(approval_data["path"].name)
 
+    # Verify integrity hash if present
+    stored_hash = frontmatter.get("integrity_hash")
+    if stored_hash:
+        # Compute current hash of body content
+        current_hash = compute_file_hash(body_text)
+
+        # Compare hashes
+        if stored_hash != current_hash:
+            raise ApprovalIntegrityError(
+                approval_data["path"].name,
+                details=f"Hash mismatch: file has been modified"
+            )
+    else:
+        # No hash stored - warn but don't fail for backward compatibility
+        pass
+
     return True
+
+
+def add_integrity_hash(file_path: Path) -> None:
+    """
+    Add integrity hash to a file's frontmatter.
+
+    Args:
+        file_path: Path to the file
+
+    Raises:
+        ValueError: If file format is invalid
+    """
+    content = file_path.read_text()
+
+    # Extract frontmatter and body
+    match = re.match(r'^---\s*\n(.*?)\n---\s*\n(.*)$', content, re.DOTALL)
+    if not match:
+        raise ValueError(f"Invalid file format: {file_path.name}")
+
+    frontmatter_text = match.group(1)
+    body_text = match.group(2)
+
+    # Parse frontmatter
+    frontmatter = yaml.safe_load(frontmatter_text)
+
+    # Compute and store hash of body content
+    body_hash = compute_file_hash(body_text)
+    frontmatter["integrity_hash"] = body_hash
+
+    # Write updated content
+    updated_content = f"---\n{yaml.dump(frontmatter, default_flow_style=False)}---\n{body_text}"
+    file_path.write_text(updated_content)
 
 
 def update_approval_status(

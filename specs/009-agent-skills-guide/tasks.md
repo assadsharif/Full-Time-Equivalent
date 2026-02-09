@@ -5,9 +5,16 @@ description: "Task list for Agent Skills Guide implementation"
 # Tasks: Agent Skills Guide
 
 **Input**: Design documents from `/specs/009-agent-skills-guide/`
-**Prerequisites**: plan.md (required), spec.md (required for user stories)
+**Prerequisites**: plan.md ✅, spec.md ✅
 
-**Tests**: Not explicitly requested — focus on implementation and validation scripts.
+**Status**: Gold ✅ DONE (All user stories complete via PR #8)
+
+**Completed Work**:
+- ✅ Skill schema and template framework (US1)
+- ✅ Validation tooling, CLI registry, packaging scripts (US2)
+- ✅ 10 core FTE skills with constitutional compliance (US3)
+- ✅ Documentation suite: anatomy, best practices, naming conventions, registry
+- ✅ CLI commands: `fte skill list/show/search/validate`
 
 **Organization**: Tasks grouped by user story mapped from plan.md phases.
 Phase 1 → US1 (Skill Framework), Phase 2 → US2 (Skill Tooling), Phase 3 → US3 (Core Skills).

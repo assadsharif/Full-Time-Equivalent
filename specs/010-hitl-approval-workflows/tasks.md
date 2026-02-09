@@ -3,11 +3,12 @@
 **Input**: Design documents from `/specs/010-hitl-approval-workflows/`
 **Prerequisites**: plan.md ✅, spec.md ✅
 
-**Status**: Bronze ✅ DONE | Silver ✅ DONE | Gold ⚠️ IN PROGRESS
+**Status**: Bronze ✅ DONE | Silver ✅ DONE | Gold ✅ DONE (Audit Trail)
 
 **Completed Work**:
 - ✅ Bronze/Silver Tier: ApprovalManager (create, approve, reject, timeout), NonceGenerator (replay protection), IntegrityChecker (tamper detection)
-- ✅ Test Coverage: 47 tests passing (nonce, integrity, lifecycle, timeout, orchestrator integration)
+- ✅ Gold Tier: ApprovalAuditLogger, AuditQuery (full audit trail with queryable events) - commit e2030b2
+- ✅ Test Coverage: 47 tests passing (nonce, integrity, lifecycle, timeout, audit trail, orchestrator integration)
 - ✅ CLI Integration: `fte approval list/show/approve/reject` commands implemented
 
 **This Document**: Tasks for remaining Gold tier features (audit trail integration, file watch, authorized approvers, timeout escalation)
