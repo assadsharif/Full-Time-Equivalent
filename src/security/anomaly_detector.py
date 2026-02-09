@@ -332,9 +332,7 @@ class AnomalyDetector:
                     for e in events
                     if e.get("mcp_server") == mcp_server
                     and e.get("event_type") == "mcp_action"
-                    and baseline_start
-                    <= self._parse_timestamp(e["timestamp"])
-                    < window_end
+                    and current <= self._parse_timestamp(e["timestamp"]) < window_end
                 ]
             )
             window_counts.append(count)

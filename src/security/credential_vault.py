@@ -17,9 +17,11 @@ from cryptography.fernet import Fernet
 
 try:
     import keyring as _keyring
+    import keyring.errors
 
     _KEYRING_AVAILABLE = True
 except ImportError:
+    _keyring = None
     _KEYRING_AVAILABLE = False
 
 
@@ -52,23 +54,42 @@ class CredentialVault:
     def store(self, service: str, username: str, credential: str) -> None:
         """Store a credential for the given service / username."""
         if _KEYRING_AVAILABLE:
-            _keyring.set_password(self._SERVICE_PREFIX + service, username, credential)
+            try:
+                _keyring.set_password(
+                    self._SERVICE_PREFIX + service, username, credential
+                )
+            except (keyring.errors.NoKeyringError, keyring.errors.KeyringError):
+                # Keyring available but no backend — fall back to file storage
+                self._store_fallback(service, username, credential)
         else:
             self._store_fallback(service, username, credential)
 
     def retrieve(self, service: str, username: str) -> str:
         """Retrieve a credential.  Raises CredentialNotFoundError if missing."""
         if _KEYRING_AVAILABLE:
-            value = _keyring.get_password(self._SERVICE_PREFIX + service, username)
-            if value is None:
-                raise CredentialNotFoundError(f"No credential for {service}/{username}")
-            return value
+            try:
+                value = _keyring.get_password(self._SERVICE_PREFIX + service, username)
+                if value is None:
+                    raise CredentialNotFoundError(
+                        f"No credential for {service}/{username}"
+                    )
+                return value
+            except (keyring.errors.NoKeyringError, keyring.errors.KeyringError):
+                # Keyring available but no backend — fall back to file storage
+                return self._retrieve_fallback(service, username)
         return self._retrieve_fallback(service, username)
 
     def delete(self, service: str, username: str) -> None:
         """Delete a credential.  Raises CredentialNotFoundError if missing."""
         if _KEYRING_AVAILABLE:
-            _keyring.delete_password(self._SERVICE_PREFIX + service, username)
+            try:
+                _keyring.delete_password(self._SERVICE_PREFIX + service, username)
+            except keyring.errors.PasswordDeleteError:
+                # Credential not found in keyring
+                raise CredentialNotFoundError(f"No credential for {service}/{username}")
+            except (keyring.errors.NoKeyringError, keyring.errors.KeyringError):
+                # Keyring available but no backend — fall back to file storage
+                self._delete_fallback(service, username)
         else:
             self._delete_fallback(service, username)
 
