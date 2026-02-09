@@ -67,7 +67,9 @@ class CircuitBreakerStatus:
 
 
 @dataclass
+@dataclass
 class AlertEntry:
+    alert_id: str
     timestamp: str
     anomaly_type: str
     severity: str
@@ -197,6 +199,7 @@ class SecurityDashboard:
             raw = json.loads(line)
             alerts.append(
                 AlertEntry(
+                    alert_id=raw.get("alert_id", ""),
                     timestamp=raw.get("timestamp", ""),
                     anomaly_type=raw.get("anomaly_type", ""),
                     severity=raw.get("severity", ""),

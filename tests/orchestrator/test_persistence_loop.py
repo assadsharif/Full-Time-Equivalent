@@ -486,7 +486,7 @@ class TestOrchestratorPersist:
 
         assert len(exits) == 1
         assert exits[0].success is True
-        assert exits[0].reason == "done"
+        assert exits[0].reason == "dry-run"
 
         done_file = vault_dir / "Done" / "persist-safe.md"
         assert done_file.exists()
@@ -533,7 +533,7 @@ class TestOrchestratorPersist:
 
         assert len(exits) == 1
         assert exits[0].success is True
-        assert exits[0].reason == "done"
+        assert exits[0].reason == "dry-run"
         assert (vault_dir / "Done" / "retry-recover.md").exists()
 
     def test_hard_failure_reaches_rejected(self, vault_dir):

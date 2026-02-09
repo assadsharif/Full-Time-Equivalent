@@ -405,7 +405,7 @@ class TestOrchestratorLoop:
 
         assert len(exits) == 1
         assert exits[0].success is True
-        assert exits[0].reason == "done"
+        assert exits[0].reason == "dry-run"
         # File should be in Done
         assert (vault_dir / "Done" / "safe-task.md").exists()
 
@@ -541,7 +541,7 @@ class TestHITLResumeFlow:
 
         assert len(exits2) == 1
         assert exits2[0].success is True
-        assert exits2[0].reason == "done"
+        assert exits2[0].reason == "dry-run"
         assert (vault_dir / "Done" / "deploy-svc.md").exists()
 
     def test_unapproved_task_not_resumed(self, vault_dir):
