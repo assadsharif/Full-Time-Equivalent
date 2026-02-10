@@ -175,6 +175,9 @@ class Orchestrator:
         self._iteration += 1
         self._log("Orchestrator: single-sweep mode")
 
+        # Track starting position to return only new exits from this run
+        start_exit_count = len(self._exit_log)
+
         # --- capture resource snapshot ---
         self._metrics.resource_snapshot()
 
@@ -193,7 +196,7 @@ class Orchestrator:
 
         self._save_checkpoint()
         self._print_summary()
-        return list(self._exit_log)
+        return list(self._exit_log[start_exit_count:])
 
     # ------------------------------------------------------------------
     # Internal — discovery
