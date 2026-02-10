@@ -35,6 +35,7 @@ mcp = FastMCP("linkedin_mcp")
 # Security & Configuration
 # ---------------------------------------------------------------------------
 
+
 def _check_dangerous_content(text: str) -> str:
     """Basic content safety check."""
     dangerous_patterns = ["</script>", "<script", "javascript:", "onerror="]
@@ -62,18 +63,16 @@ def _load_credentials() -> dict[str, str]:
     if not access_token or not user_id:
         return {
             "error": "LinkedIn credentials not configured",
-            "setup": "Set LINKEDIN_ACCESS_TOKEN and LINKEDIN_USER_ID environment variables"
+            "setup": "Set LINKEDIN_ACCESS_TOKEN and LINKEDIN_USER_ID environment variables",
         }
 
-    return {
-        "access_token": access_token,
-        "user_id": user_id
-    }
+    return {"access_token": access_token, "user_id": user_id}
 
 
 # ---------------------------------------------------------------------------
 # Pydantic Input Models
 # ---------------------------------------------------------------------------
+
 
 class LinkedInPostInput(BaseModel):
     """Input for linkedin_post."""
@@ -81,20 +80,17 @@ class LinkedInPostInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     content: str = Field(
-        ..., min_length=1, max_length=3000,
-        description="Post content (max 3000 characters)"
+        ...,
+        min_length=1,
+        max_length=3000,
+        description="Post content (max 3000 characters)",
     )
     visibility: Literal["PUBLIC", "CONNECTIONS", "LOGGED_IN"] = Field(
-        default="PUBLIC",
-        description="Post visibility level"
+        default="PUBLIC", description="Post visibility level"
     )
-    link_url: Optional[str] = Field(
-        None,
-        description="Optional URL to attach to post"
-    )
+    link_url: Optional[str] = Field(None, description="Optional URL to attach to post")
     image_path: Optional[str] = Field(
-        None,
-        description="Optional path to image file to attach"
+        None, description="Optional path to image file to attach"
     )
 
     @field_validator("content")
@@ -109,8 +105,7 @@ class LinkedInGetProfileInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     profile_id: Optional[str] = Field(
-        None,
-        description="LinkedIn profile ID (defaults to authenticated user)"
+        None, description="LinkedIn profile ID (defaults to authenticated user)"
     )
 
 
@@ -120,13 +115,9 @@ class LinkedInGetFeedInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     count: int = Field(
-        default=10, ge=1, le=50,
-        description="Number of posts to retrieve (1-50)"
+        default=10, ge=1, le=50, description="Number of posts to retrieve (1-50)"
     )
-    offset: int = Field(
-        default=0, ge=0,
-        description="Pagination offset"
-    )
+    offset: int = Field(default=0, ge=0, description="Pagination offset")
 
 
 class LinkedInShareArticleInput(BaseModel):
@@ -135,16 +126,13 @@ class LinkedInShareArticleInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     article_url: str = Field(
-        ..., min_length=1,
-        description="URL of the article to share"
+        ..., min_length=1, description="URL of the article to share"
     )
     commentary: str = Field(
-        ..., min_length=1, max_length=3000,
-        description="Your commentary on the article"
+        ..., min_length=1, max_length=3000, description="Your commentary on the article"
     )
     visibility: Literal["PUBLIC", "CONNECTIONS", "LOGGED_IN"] = Field(
-        default="PUBLIC",
-        description="Post visibility level"
+        default="PUBLIC", description="Post visibility level"
     )
 
     @field_validator("commentary")
@@ -159,12 +147,13 @@ class LinkedInSendMessageInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     recipient_id: str = Field(
-        ..., min_length=1,
-        description="LinkedIn ID of message recipient"
+        ..., min_length=1, description="LinkedIn ID of message recipient"
     )
     message: str = Field(
-        ..., min_length=1, max_length=8000,
-        description="Message content (max 8000 characters)"
+        ...,
+        min_length=1,
+        max_length=8000,
+        description="Message content (max 8000 characters)",
     )
 
     @field_validator("message")
@@ -178,18 +167,11 @@ class LinkedInSearchPeopleInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    keywords: str = Field(
-        ..., min_length=1,
-        description="Search keywords"
-    )
+    keywords: str = Field(..., min_length=1, description="Search keywords")
     filters: Optional[dict[str, str]] = Field(
-        None,
-        description="Optional filters (title, company, location, etc.)"
+        None, description="Optional filters (title, company, location, etc.)"
     )
-    count: int = Field(
-        default=10, ge=1, le=50,
-        description="Number of results (1-50)"
-    )
+    count: int = Field(default=10, ge=1, le=50, description="Number of results (1-50)")
 
 
 class LinkedInListConnectionsInput(BaseModel):
@@ -198,13 +180,9 @@ class LinkedInListConnectionsInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     count: int = Field(
-        default=50, ge=1, le=500,
-        description="Number of connections to retrieve"
+        default=50, ge=1, le=500, description="Number of connections to retrieve"
     )
-    offset: int = Field(
-        default=0, ge=0,
-        description="Pagination offset"
-    )
+    offset: int = Field(default=0, ge=0, description="Pagination offset")
 
 
 class LinkedInGetAnalyticsInput(BaseModel):
@@ -212,15 +190,13 @@ class LinkedInGetAnalyticsInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    post_id: str = Field(
-        ..., min_length=1,
-        description="LinkedIn post ID or URN"
-    )
+    post_id: str = Field(..., min_length=1, description="LinkedIn post ID or URN")
 
 
 # ---------------------------------------------------------------------------
 # MCP Tools
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 def linkedin_post(input: LinkedInPostInput) -> dict:
@@ -238,7 +214,7 @@ def linkedin_post(input: LinkedInPostInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     # In production, this would call LinkedIn API
@@ -252,12 +228,12 @@ def linkedin_post(input: LinkedInPostInput) -> dict:
             "visibility": input.visibility,
             "link_url": input.link_url,
             "image_path": input.image_path,
-            "author": creds["user_id"]
+            "author": creds["user_id"],
         },
         "approval_required": True,
         "message": "Post queued for approval. Move to /Approved to publish.",
         "mock_mode": True,
-        "note": "TODO: Implement actual LinkedIn API integration with OAuth 2.0"
+        "note": "TODO: Implement actual LinkedIn API integration with OAuth 2.0",
     }
 
 
@@ -276,7 +252,7 @@ def linkedin_get_profile(input: LinkedInGetProfileInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     profile_id = input.profile_id or creds["user_id"]
@@ -289,10 +265,10 @@ def linkedin_get_profile(input: LinkedInGetProfileInput) -> dict:
             "headline": "[Professional Headline]",
             "location": "[Location]",
             "connections": 500,
-            "followers": 1000
+            "followers": 1000,
         },
         "mock_mode": True,
-        "note": "TODO: Implement actual LinkedIn API integration"
+        "note": "TODO: Implement actual LinkedIn API integration",
     }
 
 
@@ -312,7 +288,7 @@ def linkedin_get_feed(input: LinkedInGetFeedInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     return {
@@ -324,14 +300,14 @@ def linkedin_get_feed(input: LinkedInGetFeedInput) -> dict:
                 "content": f"Sample post content {i}",
                 "likes": 10 * i,
                 "comments": 2 * i,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
             for i in range(1, input.count + 1)
         ],
         "count": input.count,
         "offset": input.offset,
         "mock_mode": True,
-        "note": "TODO: Implement actual LinkedIn API integration"
+        "note": "TODO: Implement actual LinkedIn API integration",
     }
 
 
@@ -351,7 +327,7 @@ def linkedin_share_article(input: LinkedInShareArticleInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     return {
@@ -361,12 +337,12 @@ def linkedin_share_article(input: LinkedInShareArticleInput) -> dict:
             "article_url": input.article_url,
             "commentary": input.commentary,
             "visibility": input.visibility,
-            "author": creds["user_id"]
+            "author": creds["user_id"],
         },
         "approval_required": True,
         "message": "Article share queued for approval. Move to /Approved to publish.",
         "mock_mode": True,
-        "note": "TODO: Implement actual LinkedIn API integration"
+        "note": "TODO: Implement actual LinkedIn API integration",
     }
 
 
@@ -386,7 +362,7 @@ def linkedin_send_message(input: LinkedInSendMessageInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     return {
@@ -395,12 +371,12 @@ def linkedin_send_message(input: LinkedInSendMessageInput) -> dict:
         "message_preview": {
             "recipient_id": input.recipient_id,
             "message": input.message,
-            "sender": creds["user_id"]
+            "sender": creds["user_id"],
         },
         "approval_required": True,
         "message": "Message queued for approval. Move to /Approved to send.",
         "mock_mode": True,
-        "note": "TODO: Implement actual LinkedIn API integration"
+        "note": "TODO: Implement actual LinkedIn API integration",
     }
 
 
@@ -420,7 +396,7 @@ def linkedin_search_people(input: LinkedInSearchPeopleInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     return {
@@ -431,7 +407,7 @@ def linkedin_search_people(input: LinkedInSearchPeopleInput) -> dict:
                 "name": f"Person {i}",
                 "headline": f"Professional headline {i}",
                 "location": "Location",
-                "is_connection": False
+                "is_connection": False,
             }
             for i in range(1, input.count + 1)
         ],
@@ -439,7 +415,7 @@ def linkedin_search_people(input: LinkedInSearchPeopleInput) -> dict:
         "filters": input.filters,
         "count": input.count,
         "mock_mode": True,
-        "note": "TODO: Implement actual LinkedIn API integration"
+        "note": "TODO: Implement actual LinkedIn API integration",
     }
 
 
@@ -459,7 +435,7 @@ def linkedin_list_connections(input: LinkedInListConnectionsInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     return {
@@ -469,7 +445,7 @@ def linkedin_list_connections(input: LinkedInListConnectionsInput) -> dict:
                 "id": f"connection_{i}",
                 "name": f"Connection {i}",
                 "headline": f"Professional at Company {i}",
-                "connected_at": datetime.now().isoformat()
+                "connected_at": datetime.now().isoformat(),
             }
             for i in range(1, min(input.count, 10) + 1)
         ],
@@ -477,7 +453,7 @@ def linkedin_list_connections(input: LinkedInListConnectionsInput) -> dict:
         "offset": input.offset,
         "total_connections": 500,
         "mock_mode": True,
-        "note": "TODO: Implement actual LinkedIn API integration"
+        "note": "TODO: Implement actual LinkedIn API integration",
     }
 
 
@@ -497,7 +473,7 @@ def linkedin_get_analytics(input: LinkedInGetAnalyticsInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     return {
@@ -510,11 +486,11 @@ def linkedin_get_analytics(input: LinkedInGetAnalyticsInput) -> dict:
             "comments": 12,
             "shares": 8,
             "click_through_rate": 0.023,
-            "engagement_rate": 0.067
+            "engagement_rate": 0.067,
         },
         "time_period": "all_time",
         "mock_mode": True,
-        "note": "TODO: Implement actual LinkedIn API integration"
+        "note": "TODO: Implement actual LinkedIn API integration",
     }
 
 

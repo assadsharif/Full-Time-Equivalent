@@ -3,6 +3,7 @@
 Personal AI Employee - Web Dashboard
 Platinum Tier - 24/7 Cloud Deployment
 """
+
 import os
 from pathlib import Path
 from flask import Flask, render_template_string
@@ -223,34 +224,28 @@ HTML_TEMPLATE = """
 
 def get_task_counts():
     """Get task counts from vault folders."""
-    counts = {
-        "inbox": 0,
-        "needs_action": 0,
-        "pending": 0,
-        "done": 0
-    }
+    counts = {"inbox": 0, "needs_action": 0, "pending": 0, "done": 0}
 
     if VAULT_DIR.exists():
         folders = {
             "inbox": VAULT_DIR / "Inbox",
             "needs_action": VAULT_DIR / "Needs_Action",
             "pending": VAULT_DIR / "Pending_Approval",
-            "done": VAULT_DIR / "Done"
+            "done": VAULT_DIR / "Done",
         }
 
         for key, folder in folders.items():
             if folder.exists():
-                counts[key] = len([f for f in folder.iterdir() if f.is_file() and f.suffix == ".md"])
+                counts[key] = len(
+                    [f for f in folder.iterdir() if f.is_file() and f.suffix == ".md"]
+                )
 
     return counts
 
 
 def get_vault_info():
     """Get vault information."""
-    info = {
-        "exists": VAULT_DIR.exists(),
-        "file_count": 0
-    }
+    info = {"exists": VAULT_DIR.exists(), "file_count": 0}
 
     if VAULT_DIR.exists():
         info["file_count"] = len([f for f in VAULT_DIR.rglob("*.md")])
@@ -258,7 +253,7 @@ def get_vault_info():
     return info
 
 
-@app.route('/')
+@app.route("/")
 def dashboard():
     """Main dashboard view."""
     tasks = get_task_counts()
@@ -268,28 +263,32 @@ def dashboard():
         HTML_TEMPLATE,
         timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         tasks=tasks,
-        services={
-            "watcher": True,  # Assume running in Docker
-            "orchestrator": True
-        },
+        services={"watcher": True, "orchestrator": True},  # Assume running in Docker
         vault=vault,
-        uptime="Running in Docker"
+        uptime="Running in Docker",
     )
 
 
-@app.route('/health')
+@app.route("/health")
 def health():
     """Health check endpoint."""
     return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Ensure vault directory exists
     VAULT_DIR.mkdir(parents=True, exist_ok=True)
 
     # Create basic vault structure
-    for folder in ["Inbox", "Needs_Action", "Pending_Approval", "Approved", "Rejected", "Done"]:
+    for folder in [
+        "Inbox",
+        "Needs_Action",
+        "Pending_Approval",
+        "Approved",
+        "Rejected",
+        "Done",
+    ]:
         (VAULT_DIR / folder).mkdir(parents=True, exist_ok=True)
 
     # Run Flask app
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host="0.0.0.0", port=5000, debug=False)

@@ -37,6 +37,7 @@ mcp = FastMCP("twitter_mcp")
 # Security & Configuration
 # ---------------------------------------------------------------------------
 
+
 def _check_dangerous_content(text: str) -> str:
     """Basic content safety check."""
     dangerous_patterns = ["</script>", "<script", "javascript:", "onerror="]
@@ -70,7 +71,7 @@ def _load_credentials() -> dict[str, str]:
     if not bearer_token or not access_token:
         return {
             "error": "Twitter API credentials not configured",
-            "setup": "Set TWITTER_BEARER_TOKEN, TWITTER_API_KEY, TWITTER_API_SECRET, TWITTER_ACCESS_TOKEN, and TWITTER_ACCESS_SECRET environment variables"
+            "setup": "Set TWITTER_BEARER_TOKEN, TWITTER_API_KEY, TWITTER_API_SECRET, TWITTER_ACCESS_TOKEN, and TWITTER_ACCESS_SECRET environment variables",
         }
 
     return {
@@ -78,7 +79,7 @@ def _load_credentials() -> dict[str, str]:
         "api_key": api_key,
         "api_secret": api_secret,
         "access_token": access_token,
-        "access_secret": access_secret
+        "access_secret": access_secret,
     }
 
 
@@ -86,26 +87,23 @@ def _load_credentials() -> dict[str, str]:
 # Pydantic Input Models
 # ---------------------------------------------------------------------------
 
+
 class TwitterPostTweetInput(BaseModel):
     """Input for twitter_post_tweet."""
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     text: str = Field(
-        ..., min_length=1, max_length=280,
-        description="Tweet text (max 280 characters)"
+        ..., min_length=1, max_length=280, description="Tweet text (max 280 characters)"
     )
     media_path: Optional[str] = Field(
-        None,
-        description="Optional path to image/video file"
+        None, description="Optional path to image/video file"
     )
     reply_to_tweet_id: Optional[str] = Field(
-        None,
-        description="Tweet ID to reply to (creates a reply)"
+        None, description="Tweet ID to reply to (creates a reply)"
     )
     quote_tweet_id: Optional[str] = Field(
-        None,
-        description="Tweet ID to quote (creates a quote tweet)"
+        None, description="Tweet ID to quote (creates a quote tweet)"
     )
 
     @field_validator("text")
@@ -120,8 +118,10 @@ class TwitterPostThreadInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     tweets: list[str] = Field(
-        ..., min_length=2, max_length=25,
-        description="List of tweet texts (2-25 tweets, each max 280 chars)"
+        ...,
+        min_length=2,
+        max_length=25,
+        description="List of tweet texts (2-25 tweets, each max 280 chars)",
     )
 
     @field_validator("tweets")
@@ -140,16 +140,13 @@ class TwitterGetTimelineInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     max_results: int = Field(
-        default=10, ge=5, le=100,
-        description="Number of tweets to retrieve (5-100)"
+        default=10, ge=5, le=100, description="Number of tweets to retrieve (5-100)"
     )
     exclude_replies: bool = Field(
-        default=False,
-        description="Exclude replies from timeline"
+        default=False, description="Exclude replies from timeline"
     )
     exclude_retweets: bool = Field(
-        default=False,
-        description="Exclude retweets from timeline"
+        default=False, description="Exclude retweets from timeline"
     )
 
 
@@ -159,12 +156,13 @@ class TwitterGetMentionsInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     max_results: int = Field(
-        default=10, ge=5, le=100,
-        description="Number of mentions to retrieve (5-100)"
+        default=10, ge=5, le=100, description="Number of mentions to retrieve (5-100)"
     )
     since_hours: Optional[int] = Field(
-        None, ge=1, le=168,
-        description="Get mentions from last N hours (max 168 = 1 week)"
+        None,
+        ge=1,
+        le=168,
+        description="Get mentions from last N hours (max 168 = 1 week)",
     )
 
 
@@ -174,16 +172,16 @@ class TwitterSearchTweetsInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     query: str = Field(
-        ..., min_length=1, max_length=512,
-        description="Search query (supports Twitter search operators)"
+        ...,
+        min_length=1,
+        max_length=512,
+        description="Search query (supports Twitter search operators)",
     )
     max_results: int = Field(
-        default=10, ge=10, le=100,
-        description="Number of results (10-100)"
+        default=10, ge=10, le=100, description="Number of results (10-100)"
     )
     sort_order: Literal["recency", "relevancy"] = Field(
-        default="recency",
-        description="Sort order for results"
+        default="recency", description="Sort order for results"
     )
 
 
@@ -193,8 +191,7 @@ class TwitterGetTrendsInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     woeid: int = Field(
-        default=1,
-        description="Where On Earth ID (1=Worldwide, 23424977=USA)"
+        default=1, description="Where On Earth ID (1=Worldwide, 23424977=USA)"
     )
 
 
@@ -203,10 +200,7 @@ class TwitterLikeTweetInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    tweet_id: str = Field(
-        ..., min_length=1,
-        description="Tweet ID to like"
-    )
+    tweet_id: str = Field(..., min_length=1, description="Tweet ID to like")
 
 
 class TwitterRetweetInput(BaseModel):
@@ -214,10 +208,7 @@ class TwitterRetweetInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    tweet_id: str = Field(
-        ..., min_length=1,
-        description="Tweet ID to retweet"
-    )
+    tweet_id: str = Field(..., min_length=1, description="Tweet ID to retweet")
 
 
 class TwitterReplyInput(BaseModel):
@@ -225,13 +216,9 @@ class TwitterReplyInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    tweet_id: str = Field(
-        ..., min_length=1,
-        description="Tweet ID to reply to"
-    )
+    tweet_id: str = Field(..., min_length=1, description="Tweet ID to reply to")
     reply_text: str = Field(
-        ..., min_length=1, max_length=280,
-        description="Reply text (max 280 characters)"
+        ..., min_length=1, max_length=280, description="Reply text (max 280 characters)"
     )
 
     @field_validator("reply_text")
@@ -246,8 +233,7 @@ class TwitterGetAnalyticsInput(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     tweet_id: str = Field(
-        ..., min_length=1,
-        description="Tweet ID to get analytics for"
+        ..., min_length=1, description="Tweet ID to get analytics for"
     )
 
 
@@ -256,23 +242,17 @@ class TwitterGenerateSummaryInput(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
-    include_timeline: bool = Field(
-        default=True,
-        description="Include timeline summary"
-    )
-    include_mentions: bool = Field(
-        default=True,
-        description="Include mentions summary"
-    )
+    include_timeline: bool = Field(default=True, description="Include timeline summary")
+    include_mentions: bool = Field(default=True, description="Include mentions summary")
     days: int = Field(
-        default=7, ge=1, le=7,
-        description="Number of days to summarize (1-7)"
+        default=7, ge=1, le=7, description="Number of days to summarize (1-7)"
     )
 
 
 # ---------------------------------------------------------------------------
 # MCP Tools
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 def twitter_post_tweet(input: TwitterPostTweetInput) -> dict:
@@ -290,7 +270,7 @@ def twitter_post_tweet(input: TwitterPostTweetInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     return {
@@ -301,12 +281,12 @@ def twitter_post_tweet(input: TwitterPostTweetInput) -> dict:
             "media_path": input.media_path,
             "reply_to_tweet_id": input.reply_to_tweet_id,
             "quote_tweet_id": input.quote_tweet_id,
-            "character_count": len(input.text)
+            "character_count": len(input.text),
         },
         "approval_required": True,
         "message": "Tweet queued for approval. Move to /Approved to publish.",
         "mock_mode": True,
-        "note": "TODO: Implement actual Twitter API v2 integration"
+        "note": "TODO: Implement actual Twitter API v2 integration",
     }
 
 
@@ -326,7 +306,7 @@ def twitter_post_thread(input: TwitterPostThreadInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     return {
@@ -334,19 +314,15 @@ def twitter_post_thread(input: TwitterPostThreadInput) -> dict:
         "status": "pending_approval",
         "thread_preview": {
             "tweets": [
-                {
-                    "index": i + 1,
-                    "text": tweet,
-                    "character_count": len(tweet)
-                }
+                {"index": i + 1, "text": tweet, "character_count": len(tweet)}
                 for i, tweet in enumerate(input.tweets)
             ],
-            "total_tweets": len(input.tweets)
+            "total_tweets": len(input.tweets),
         },
         "approval_required": True,
         "message": f"Thread of {len(input.tweets)} tweets queued for approval.",
         "mock_mode": True,
-        "note": "TODO: Implement actual Twitter API v2 integration"
+        "note": "TODO: Implement actual Twitter API v2 integration",
     }
 
 
@@ -366,7 +342,7 @@ def twitter_get_timeline(input: TwitterGetTimelineInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     mock_tweets = [
@@ -374,11 +350,11 @@ def twitter_get_timeline(input: TwitterGetTimelineInput) -> dict:
             "tweet_id": f"tweet_{i}",
             "text": f"Sample timeline tweet {i}",
             "author": f"@user{i}",
-            "created_at": (datetime.now() - timedelta(hours=i*6)).isoformat(),
+            "created_at": (datetime.now() - timedelta(hours=i * 6)).isoformat(),
             "likes": 10 * i,
             "retweets": 2 * i,
             "replies": i,
-            "is_retweet": False
+            "is_retweet": False,
         }
         for i in range(1, min(input.max_results, 10) + 1)
     ]
@@ -389,10 +365,10 @@ def twitter_get_timeline(input: TwitterGetTimelineInput) -> dict:
         "count": len(mock_tweets),
         "filters": {
             "exclude_replies": input.exclude_replies,
-            "exclude_retweets": input.exclude_retweets
+            "exclude_retweets": input.exclude_retweets,
         },
         "mock_mode": True,
-        "note": "TODO: Implement actual Twitter API v2 integration"
+        "note": "TODO: Implement actual Twitter API v2 integration",
     }
 
 
@@ -412,7 +388,7 @@ def twitter_get_mentions(input: TwitterGetMentionsInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     mock_mentions = [
@@ -420,9 +396,9 @@ def twitter_get_mentions(input: TwitterGetMentionsInput) -> dict:
             "tweet_id": f"mention_{i}",
             "text": f"Sample mention tweet {i} @you",
             "author": f"@mentioner{i}",
-            "created_at": (datetime.now() - timedelta(hours=i*2)).isoformat(),
+            "created_at": (datetime.now() - timedelta(hours=i * 2)).isoformat(),
             "likes": 5 * i,
-            "is_reply": i % 2 == 0
+            "is_reply": i % 2 == 0,
         }
         for i in range(1, min(input.max_results, 10) + 1)
     ]
@@ -433,7 +409,7 @@ def twitter_get_mentions(input: TwitterGetMentionsInput) -> dict:
         "count": len(mock_mentions),
         "since_hours": input.since_hours,
         "mock_mode": True,
-        "note": "TODO: Implement actual Twitter API v2 integration"
+        "note": "TODO: Implement actual Twitter API v2 integration",
     }
 
 
@@ -453,7 +429,7 @@ def twitter_search_tweets(input: TwitterSearchTweetsInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     mock_results = [
@@ -463,7 +439,7 @@ def twitter_search_tweets(input: TwitterSearchTweetsInput) -> dict:
             "author": f"@author{i}",
             "created_at": (datetime.now() - timedelta(hours=i)).isoformat(),
             "likes": 8 * i,
-            "retweets": i
+            "retweets": i,
         }
         for i in range(1, min(input.max_results, 10) + 1)
     ]
@@ -475,7 +451,7 @@ def twitter_search_tweets(input: TwitterSearchTweetsInput) -> dict:
         "query": input.query,
         "sort_order": input.sort_order,
         "mock_mode": True,
-        "note": "TODO: Implement actual Twitter API v2 integration"
+        "note": "TODO: Implement actual Twitter API v2 integration",
     }
 
 
@@ -495,14 +471,14 @@ def twitter_get_trends(input: TwitterGetTrendsInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     mock_trends = [
         {
             "name": f"#TrendingTopic{i}",
             "tweet_volume": 10000 * (11 - i),
-            "url": f"https://twitter.com/search?q=%23TrendingTopic{i}"
+            "url": f"https://twitter.com/search?q=%23TrendingTopic{i}",
         }
         for i in range(1, 11)
     ]
@@ -514,7 +490,7 @@ def twitter_get_trends(input: TwitterGetTrendsInput) -> dict:
         "location": "Worldwide" if input.woeid == 1 else f"WOEID-{input.woeid}",
         "as_of": datetime.now().isoformat(),
         "mock_mode": True,
-        "note": "TODO: Implement actual Twitter API v2 integration"
+        "note": "TODO: Implement actual Twitter API v2 integration",
     }
 
 
@@ -533,20 +509,17 @@ def twitter_like_tweet(input: TwitterLikeTweetInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     return {
         "success": True,
         "status": "pending_approval",
-        "action": {
-            "type": "like",
-            "tweet_id": input.tweet_id
-        },
+        "action": {"type": "like", "tweet_id": input.tweet_id},
         "approval_required": True,
         "message": "Like action queued for approval.",
         "mock_mode": True,
-        "note": "TODO: Implement actual Twitter API v2 integration"
+        "note": "TODO: Implement actual Twitter API v2 integration",
     }
 
 
@@ -565,20 +538,17 @@ def twitter_retweet(input: TwitterRetweetInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     return {
         "success": True,
         "status": "pending_approval",
-        "action": {
-            "type": "retweet",
-            "tweet_id": input.tweet_id
-        },
+        "action": {"type": "retweet", "tweet_id": input.tweet_id},
         "approval_required": True,
         "message": "Retweet action queued for approval.",
         "mock_mode": True,
-        "note": "TODO: Implement actual Twitter API v2 integration"
+        "note": "TODO: Implement actual Twitter API v2 integration",
     }
 
 
@@ -597,7 +567,7 @@ def twitter_reply_to_tweet(input: TwitterReplyInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     return {
@@ -606,12 +576,12 @@ def twitter_reply_to_tweet(input: TwitterReplyInput) -> dict:
         "reply_preview": {
             "tweet_id": input.tweet_id,
             "reply_text": input.reply_text,
-            "character_count": len(input.reply_text)
+            "character_count": len(input.reply_text),
         },
         "approval_required": True,
         "message": "Reply queued for approval. Move to /Approved to post.",
         "mock_mode": True,
-        "note": "TODO: Implement actual Twitter API v2 integration"
+        "note": "TODO: Implement actual Twitter API v2 integration",
     }
 
 
@@ -631,7 +601,7 @@ def twitter_get_analytics(input: TwitterGetAnalyticsInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     return {
@@ -646,10 +616,10 @@ def twitter_get_analytics(input: TwitterGetAnalyticsInput) -> dict:
             "replies": 23,
             "profile_clicks": 45,
             "url_clicks": 67,
-            "detail_expands": 89
+            "detail_expands": 89,
         },
         "mock_mode": True,
-        "note": "TODO: Implement actual Twitter API v2 integration"
+        "note": "TODO: Implement actual Twitter API v2 integration",
     }
 
 
@@ -669,12 +639,12 @@ def twitter_generate_summary(input: TwitterGenerateSummaryInput) -> dict:
         return {
             "success": False,
             "error": creds["error"],
-            "setup_instructions": creds["setup"]
+            "setup_instructions": creds["setup"],
         }
 
     summary = {
         "period": f"Last {input.days} days",
-        "generated_at": datetime.now().isoformat()
+        "generated_at": datetime.now().isoformat(),
     }
 
     if input.include_timeline:
@@ -686,8 +656,8 @@ def twitter_generate_summary(input: TwitterGenerateSummaryInput) -> dict:
             "top_tweet": {
                 "text": "Sample top-performing tweet",
                 "impressions": 8500,
-                "engagements": 450
-            }
+                "engagements": 450,
+            },
         }
 
     if input.include_mentions:
@@ -698,15 +668,15 @@ def twitter_generate_summary(input: TwitterGenerateSummaryInput) -> dict:
             "top_mention": {
                 "author": "@topmentioner",
                 "text": "Great content!",
-                "engagement": 23
-            }
+                "engagement": 23,
+            },
         }
 
     return {
         "success": True,
         "summary": summary,
         "mock_mode": True,
-        "note": "TODO: Implement actual Twitter API v2 integration"
+        "note": "TODO: Implement actual Twitter API v2 integration",
     }
 
 
