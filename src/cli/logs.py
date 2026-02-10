@@ -23,8 +23,8 @@ except ImportError:
     )
     sys.exit(1)
 
-from ..logging.models import LogLevel, LogQuery
-from ..logging.query_service import QueryService
+from ..fte_logging.models import LogLevel, LogQuery
+from ..fte_logging.query_service import QueryService
 
 
 @click.group(name="logs")
