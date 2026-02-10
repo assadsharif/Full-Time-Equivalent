@@ -14,8 +14,8 @@ import re
 from pathlib import Path
 from typing import Optional
 
-from src.approval.approval_manager import ApprovalManager
-from src.orchestrator.models import OrchestratorConfig
+from approval.approval_manager import ApprovalManager
+from .models import OrchestratorConfig
 
 # Keyword → canonical action_type mapping (first match wins)
 _ACTION_TYPE_MAP: list[tuple[list[str], str]] = [

@@ -17,10 +17,10 @@ from typing import Optional
 
 import yaml
 
-from src.approval.audit_logger import ApprovalAuditLogger
-from src.approval.integrity_checker import IntegrityChecker
-from src.approval.models import ApprovalRequest, ApprovalStatus
-from src.approval.nonce_generator import NonceGenerator
+from .audit_logger import ApprovalAuditLogger
+from .integrity_checker import IntegrityChecker
+from .models import ApprovalRequest, ApprovalStatus
+from .nonce_generator import NonceGenerator
 
 
 class ApprovalManager:

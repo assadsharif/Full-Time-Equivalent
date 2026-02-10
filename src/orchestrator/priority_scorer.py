@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from src.orchestrator.models import OrchestratorConfig
+from .models import OrchestratorConfig
 
 # ---------------------------------------------------------------------------
 # Keyword → urgency score tables

@@ -10,7 +10,7 @@ Constitutional compliance:
 from pathlib import Path
 from typing import Optional
 
-from src.control_plane.errors import FileOperationError
+from control_plane.errors import FileOperationError
 
 
 def atomic_move(source: Path, destination: Path) -> None:

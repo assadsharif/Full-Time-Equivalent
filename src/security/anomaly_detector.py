@@ -17,7 +17,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
-from src.security.models import RiskLevel
+from .models import RiskLevel
 
 
 @dataclass

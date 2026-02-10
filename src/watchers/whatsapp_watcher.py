@@ -48,10 +48,10 @@ except ImportError:
         return logging.getLogger(name)
 
 
-from src.watchers.base_watcher import BaseWatcher, PermanentError
-from src.watchers.markdown_formatter import MarkdownFormatter
-from src.watchers.models import WhatsAppMessage
-from src.watchers.pii_redactor import PIIRedactor
+from .base_watcher import BaseWatcher, PermanentError
+from .markdown_formatter import MarkdownFormatter
+from .models import WhatsAppMessage
+from .pii_redactor import PIIRedactor
 
 logger = get_logger(__name__)
 

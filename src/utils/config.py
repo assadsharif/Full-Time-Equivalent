@@ -11,7 +11,7 @@ from typing import Any, Dict, Optional
 
 import yaml
 
-from src.control_plane.errors import FileOperationError
+from control_plane.errors import FileOperationError
 
 
 def load_config(config_name: str, config_dir: Optional[Path] = None) -> Dict[str, Any]:

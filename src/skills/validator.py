@@ -17,7 +17,7 @@ from typing import Optional
 
 import yaml
 
-from src.skills.models import SkillMetadata
+from .models import SkillMetadata
 
 _VALID_SAFETY_LEVELS = {"low", "medium", "high"}
 _REQUIRED_FM_FIELDS = ["name", "description", "category"]

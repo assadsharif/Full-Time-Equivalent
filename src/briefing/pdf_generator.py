@@ -10,7 +10,7 @@ from pathlib import Path
 
 from fpdf import FPDF
 
-from src.briefing.models import BriefingData
+from .models import BriefingData
 
 # ---------------------------------------------------------------------------
 # Layout constants

@@ -26,8 +26,8 @@ from typing import Optional
 
 import yaml
 
-from src.orchestrator.claude_invoker import ClaudeInvoker, InvocationResult
-from src.orchestrator.stop_hook import StopHook
+from .claude_invoker import ClaudeInvoker, InvocationResult
+from .stop_hook import StopHook
 
 # ---------------------------------------------------------------------------
 # Transient-error heuristics (case-insensitive regex on stderr)

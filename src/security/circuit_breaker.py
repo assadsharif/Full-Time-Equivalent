@@ -17,7 +17,7 @@ Usage::
         logger.warning("payment-mcp circuit open — retry in %ss", exc.time_until_retry)
 """
 
-from src.watchers.circuit_breaker import (
+from watchers.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerError,
     CircuitBreakerRegistry,

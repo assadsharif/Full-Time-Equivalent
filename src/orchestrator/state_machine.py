@@ -17,7 +17,7 @@ folders to keep the file system in sync with logical state.
 
 from pathlib import Path
 
-from src.orchestrator.models import TaskState
+from .models import TaskState
 
 # Adjacency map: state → set of valid next states
 _TRANSITIONS: dict[TaskState, set[TaskState]] = {

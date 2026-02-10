@@ -12,7 +12,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
-from src.orchestrator.metrics import MetricsCollector
+from .metrics import MetricsCollector
 
 
 class HealthCheck:

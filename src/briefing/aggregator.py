@@ -17,7 +17,7 @@ from pathlib import Path
 
 import yaml
 
-from src.briefing.models import BriefingData, TaskSummary
+from .models import BriefingData, TaskSummary
 
 # ---------------------------------------------------------------------------
 # Field extractors (case-insensitive regex)

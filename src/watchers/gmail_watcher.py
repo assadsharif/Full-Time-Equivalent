@@ -51,10 +51,10 @@ except ImportError:
         return logging.getLogger(name)
 
 
-from src.watchers.base_watcher import BaseWatcher, PermanentError
-from src.watchers.markdown_formatter import MarkdownFormatter
-from src.watchers.models import EmailMessage
-from src.watchers.pii_redactor import PIIRedactor
+from .base_watcher import BaseWatcher, PermanentError
+from .markdown_formatter import MarkdownFormatter
+from .models import EmailMessage
+from .pii_redactor import PIIRedactor
 
 logger = get_logger(__name__)
 

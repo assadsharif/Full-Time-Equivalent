@@ -22,20 +22,20 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from src.orchestrator.models import (
+from .models import (
     OrchestratorConfig,
     TaskRecord,
     TaskState,
     LoopExit,
 )
-from src.orchestrator.priority_scorer import PriorityScorer
-from src.orchestrator.stop_hook import StopHook
-from src.orchestrator.approval_checker import ApprovalChecker
-from src.orchestrator.state_machine import StateMachine, TransitionError
-from src.orchestrator.claude_invoker import ClaudeInvoker
-from src.orchestrator.persistence_loop import PersistenceLoop, RetryPolicy
-from src.orchestrator.metrics import MetricsCollector
-from src.orchestrator.webhooks import WebhookNotifier
+from .priority_scorer import PriorityScorer
+from .stop_hook import StopHook
+from .approval_checker import ApprovalChecker
+from .state_machine import StateMachine, TransitionError
+from .claude_invoker import ClaudeInvoker
+from .persistence_loop import PersistenceLoop, RetryPolicy
+from .metrics import MetricsCollector
+from .webhooks import WebhookNotifier
 
 
 class Orchestrator:

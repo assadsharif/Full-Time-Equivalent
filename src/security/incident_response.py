@@ -17,9 +17,9 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
-from src.security.audit_logger import SecurityAuditLogger
-from src.security.credential_vault import CredentialVault
-from src.security.models import RiskLevel
+from .audit_logger import SecurityAuditLogger
+from .credential_vault import CredentialVault
+from .models import RiskLevel
 
 
 @dataclass

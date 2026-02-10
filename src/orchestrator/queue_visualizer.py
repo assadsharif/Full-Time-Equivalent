@@ -10,8 +10,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from src.orchestrator.priority_scorer import PriorityScorer
-from src.orchestrator.models import OrchestratorConfig
+from .priority_scorer import PriorityScorer
+from .models import OrchestratorConfig
 
 
 class QueueVisualizer:

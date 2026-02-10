@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 from typing import Optional
 
-from src.security.models import RiskLevel, SecurityEvent
+from .models import RiskLevel, SecurityEvent
 
 
 class SecurityAuditLogger:

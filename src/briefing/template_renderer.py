@@ -9,7 +9,7 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
-from src.briefing.models import BriefingData
+from .models import BriefingData
 
 
 class TemplateRenderer:

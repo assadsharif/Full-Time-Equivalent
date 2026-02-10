@@ -11,7 +11,7 @@ from typing import Optional
 
 import yaml
 
-from src.skills.models import SkillMetadata
+from .models import SkillMetadata
 
 
 class SkillRegistry:

@@ -19,7 +19,7 @@ except ImportError:
         return logging.getLogger(name)
 
 
-from src.watchers.models import CheckpointData
+from .models import CheckpointData
 
 logger = get_logger(__name__)
 

@@ -13,10 +13,10 @@ fires, the call is rejected and the failure is logged.
 import time
 from typing import Callable, TypeVar
 
-from src.security.audit_logger import SecurityAuditLogger
-from src.security.models import RiskLevel
-from src.security.rate_limiter import RateLimiter, RateLimitExceededError
-from src.security.circuit_breaker import CircuitBreaker, CircuitBreakerError
+from .audit_logger import SecurityAuditLogger
+from .models import RiskLevel
+from .rate_limiter import RateLimiter, RateLimitExceededError
+from .circuit_breaker import CircuitBreaker, CircuitBreakerError
 
 T = TypeVar("T")
 

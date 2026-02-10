@@ -40,9 +40,9 @@ except ImportError:
         return logging.getLogger(name)
 
 
-from src.watchers.base_watcher import BaseWatcher
-from src.watchers.markdown_formatter import MarkdownFormatter
-from src.watchers.models import FileEvent
+from .base_watcher import BaseWatcher
+from .markdown_formatter import MarkdownFormatter
+from .models import FileEvent
 
 logger = get_logger(__name__)
 

@@ -20,7 +20,7 @@ except ImportError:
         return logging.getLogger(name)
 
 
-from src.watchers.models import EmailMessage, FileEvent, WhatsAppMessage, WatcherEvent
+from .models import EmailMessage, FileEvent, WhatsAppMessage, WatcherEvent
 
 logger = get_logger(__name__)
 

@@ -13,8 +13,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Callable, Optional, TypeVar
 
-from src.watchers.checkpoint import CheckpointManager
-from src.watchers.models import CheckpointData
+from .checkpoint import CheckpointManager
+from .models import CheckpointData
 
 # Try to import the logging module, fall back to standard logging
 try:
