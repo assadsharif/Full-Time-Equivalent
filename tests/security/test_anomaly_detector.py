@@ -377,7 +377,8 @@ class TestBaselineCalculation:
         )
 
         assert baseline is not None
-        assert 8 <= baseline.mean <= 12  # Should be ~10 (allow for windowing edge effects)
+        # Should be ~10 (allow for windowing edge effects)
+        assert 8 <= baseline.mean <= 12
         assert baseline.std_dev < 4  # Very consistent
 
     def test_baseline_with_variable_traffic(self, detector, temp_logs):
