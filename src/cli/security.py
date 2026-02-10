@@ -15,9 +15,11 @@ from rich.console import Console
 from rich.table import Table
 
 from cli.config import get_config
-from src.security.anomaly_detector import AnomalyDetector
-from src.security.incident_response import IncidentResponse
-from src.security.credential_vault import CredentialVault
+
+# Use relative imports for installed package compatibility
+from ..security.anomaly_detector import AnomalyDetector
+from ..security.incident_response import IncidentResponse
+from ..security.credential_vault import CredentialVault
 
 console = Console()
 
