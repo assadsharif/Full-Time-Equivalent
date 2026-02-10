@@ -174,7 +174,7 @@ class TestConcurrencySimulation:
         high_priority_indices = [
             idx
             for idx, exit in enumerate(exits)
-            if "URGENT" in (vault_path / "Needs_Action" / exit.task_name).read_text()
+            if "URGENT" in (vault_path / "Done" / exit.task_name).read_text()
         ]
 
         # Most high-priority tasks should be in first 20 processed
