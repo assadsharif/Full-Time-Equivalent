@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from src.orchestrator.health_check import HealthCheck
-from src.orchestrator.metrics import MetricsCollector
+from orchestrator.health_check import HealthCheck
+from orchestrator.metrics import MetricsCollector
 
 # ---------------------------------------------------------------------------
 # Fixtures

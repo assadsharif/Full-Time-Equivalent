@@ -21,9 +21,9 @@ from pathlib import Path
 
 import pytest
 
-from src.briefing.aggregator import BriefingAggregator
-from src.briefing.models import BriefingData, TaskSummary
-from src.briefing.template_renderer import TemplateRenderer
+from briefing.aggregator import BriefingAggregator
+from briefing.models import BriefingData, TaskSummary
+from briefing.template_renderer import TemplateRenderer
 
 # ---------------------------------------------------------------------------
 # Fixtures

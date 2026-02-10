@@ -9,8 +9,8 @@ import pytest
 import json
 from pathlib import Path
 from datetime import datetime
-from src.control_plane.models import WorkflowState, StateTransition
-from src.control_plane.logger import AuditLogger
+from control_plane.models import WorkflowState, StateTransition
+from control_plane.logger import AuditLogger
 
 
 class TestAuditLogger:

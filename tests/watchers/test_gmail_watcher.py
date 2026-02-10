@@ -8,8 +8,8 @@ from unittest import mock
 
 import pytest
 
-from src.watchers.gmail_watcher import GmailWatcher, GmailAuthenticationError
-from src.watchers.models import EmailMessage
+from watchers.gmail_watcher import GmailWatcher, GmailAuthenticationError
+from watchers.models import EmailMessage
 
 
 class TestGmailWatcher:

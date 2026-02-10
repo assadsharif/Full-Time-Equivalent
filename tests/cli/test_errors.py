@@ -9,7 +9,7 @@ import sys
 
 sys.path.insert(0, ".")
 
-from src.cli.errors import (
+from cli.errors import (
     CLIError,
     VaultNotFoundError,
     VaultNotInitializedError,

@@ -19,8 +19,8 @@ from pathlib import Path
 
 import pytest
 
-from src.logging.models import LogLevel, LogQuery
-from src.logging.query_service import QueryService
+from logging.models import LogLevel, LogQuery
+from logging.query_service import QueryService
 
 
 @pytest.fixture

@@ -23,13 +23,13 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 # P1 imports (frozen control plane)
-from src.control_plane.logger import AuditLogger
-from src.control_plane.state_machine import StateMachine
+from control_plane.logger import AuditLogger
+from control_plane.state_machine import StateMachine
 
 # P2 imports (new logging infrastructure)
 from src.logging import init_logging, get_logger
-from src.logging.models import LogLevel
-from src.logging.query_service import QueryService, LogQuery
+from logging.models import LogLevel
+from logging.query_service import QueryService, LogQuery
 
 
 @pytest.fixture

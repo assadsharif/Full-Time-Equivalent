@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from src.vault.initializer import CORE_FOLDERS, VaultInitializer, _SCHEMAS
+from vault.initializer import CORE_FOLDERS, VaultInitializer, _SCHEMAS
 
 # ---------------------------------------------------------------------------
 # Fixtures

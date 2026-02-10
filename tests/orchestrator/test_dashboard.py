@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from src.orchestrator.dashboard import OrchestratorDashboard
+from orchestrator.dashboard import OrchestratorDashboard
 
 # ---------------------------------------------------------------------------
 # Fixtures

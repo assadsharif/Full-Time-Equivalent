@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from src.security.dashboard import SecurityDashboard, DashboardSnapshot
+from security.dashboard import SecurityDashboard, DashboardSnapshot
 
 
 @pytest.fixture

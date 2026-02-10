@@ -16,9 +16,9 @@ from pathlib import Path
 
 import pytest
 
-from src.security.audit_logger import SecurityAuditLogger
-from src.security.metrics import SecurityMetrics
-from src.security.models import RiskLevel
+from security.audit_logger import SecurityAuditLogger
+from security.metrics import SecurityMetrics
+from security.models import RiskLevel
 
 # ---------------------------------------------------------------------------
 # Helpers

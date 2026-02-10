@@ -20,10 +20,10 @@ from pathlib import Path
 
 import pytest
 
-from src.approval.approval_manager import ApprovalManager
-from src.approval.integrity_checker import IntegrityChecker
-from src.approval.models import ApprovalRequest, ApprovalStatus
-from src.approval.nonce_generator import NonceGenerator
+from approval.approval_manager import ApprovalManager
+from approval.integrity_checker import IntegrityChecker
+from approval.models import ApprovalRequest, ApprovalStatus
+from approval.nonce_generator import NonceGenerator
 
 # ---------------------------------------------------------------------------
 # Fixtures

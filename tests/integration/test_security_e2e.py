@@ -14,12 +14,12 @@ from unittest.mock import patch
 
 import pytest
 
-from src.security.audit_logger import SecurityAuditLogger
-from src.security.anomaly_detector import AnomalyDetector
-from src.security.incident_response import IncidentResponse
-from src.security.dashboard import SecurityDashboard
-from src.security.metrics import SecurityMetrics
-from src.security.models import RiskLevel
+from security.audit_logger import SecurityAuditLogger
+from security.anomaly_detector import AnomalyDetector
+from security.incident_response import IncidentResponse
+from security.dashboard import SecurityDashboard
+from security.metrics import SecurityMetrics
+from security.models import RiskLevel
 
 
 @pytest.fixture

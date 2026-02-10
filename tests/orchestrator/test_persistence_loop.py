@@ -20,9 +20,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from src.orchestrator.persistence_loop import PersistenceLoop, RetryPolicy, Checkpoint
-from src.orchestrator.claude_invoker import ClaudeInvoker, InvocationResult
-from src.orchestrator.stop_hook import StopHook
+from orchestrator.persistence_loop import PersistenceLoop, RetryPolicy, Checkpoint
+from orchestrator.claude_invoker import ClaudeInvoker, InvocationResult
+from orchestrator.stop_hook import StopHook
 
 # ---------------------------------------------------------------------------
 # Helpers

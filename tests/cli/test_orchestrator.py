@@ -29,7 +29,7 @@ if "cli" not in sys.modules:
     sys.modules["cli"] = types.ModuleType("cli")
 sys.modules["cli.utils"] = _cli_utils_stub
 
-from src.cli.orchestrator import _parse_since
+from cli.orchestrator import _parse_since
 
 # ---------------------------------------------------------------------------
 # _parse_since — valid inputs

@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.watchers.pii_redactor import PIIRedactor, RedactionResult
+from watchers.pii_redactor import PIIRedactor, RedactionResult
 
 
 class TestPIIRedactor:

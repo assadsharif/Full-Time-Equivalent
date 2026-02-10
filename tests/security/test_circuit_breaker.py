@@ -18,7 +18,7 @@ import time
 # ---------------------------------------------------------------------------
 sys.path.insert(0, ".")
 
-from src.security.circuit_breaker import (
+from security.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerError,
     CircuitBreakerRegistry,

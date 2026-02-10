@@ -13,10 +13,10 @@ import json
 from pathlib import Path
 from datetime import datetime
 from unittest.mock import patch
-from src.control_plane.models import WorkflowState, TaskFile, StateTransition
-from src.control_plane.state_machine import StateMachine
-from src.control_plane.logger import AuditLogger
-from src.control_plane.errors import InvalidTransitionError, FileOperationError
+from control_plane.models import WorkflowState, TaskFile, StateTransition
+from control_plane.state_machine import StateMachine
+from control_plane.logger import AuditLogger
+from control_plane.errors import InvalidTransitionError, FileOperationError
 
 
 class TestCompleteWorkflow:

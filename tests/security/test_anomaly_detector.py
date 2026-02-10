@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from src.security.anomaly_detector import AnomalyDetector, AnomalyAlert
-from src.security.models import RiskLevel
+from security.anomaly_detector import AnomalyDetector, AnomalyAlert
+from security.models import RiskLevel
 
 
 @pytest.fixture

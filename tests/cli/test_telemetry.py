@@ -37,7 +37,7 @@ if "cli" not in sys.modules:
     sys.modules["cli"] = types.ModuleType("cli")
 sys.modules["cli.config"] = _cli_config_stub
 
-from src.cli.telemetry import (
+from cli.telemetry import (
     TelemetryCollector,
     TelemetryContext,
     get_telemetry_status,

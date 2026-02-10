@@ -9,7 +9,7 @@ Constitutional compliance:
 import pytest
 from pathlib import Path
 from datetime import datetime
-from src.control_plane.models import WorkflowState, TaskFile, StateTransition
+from control_plane.models import WorkflowState, TaskFile, StateTransition
 
 
 class TestWorkflowState:

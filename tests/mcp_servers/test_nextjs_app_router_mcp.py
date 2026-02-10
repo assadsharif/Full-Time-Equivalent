@@ -18,7 +18,7 @@ import json
 import pytest
 from pydantic import ValidationError
 
-from src.mcp_servers.nextjs_app_router_mcp import (
+from mcp_servers.nextjs_app_router_mcp import (
     mcp,
     # Tools
     nextjs_scaffold_app,

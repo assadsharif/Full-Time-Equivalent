@@ -7,8 +7,8 @@ from unittest import mock
 
 import pytest
 
-from src.watchers.filesystem_watcher import FileSystemWatcher
-from src.watchers.models import FileEvent
+from watchers.filesystem_watcher import FileSystemWatcher
+from watchers.models import FileEvent
 
 try:
     import pathspec

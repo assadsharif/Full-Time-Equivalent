@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from src.cli.config import (
+from cli.config import (
     CLIConfig,
     ConfigLoader,
     get_config,

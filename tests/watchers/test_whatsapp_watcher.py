@@ -10,8 +10,8 @@ from unittest import mock
 
 import pytest
 
-from src.watchers.whatsapp_watcher import WhatsAppWatcher, WhatsAppAuthenticationError
-from src.watchers.models import WhatsAppMessage
+from watchers.whatsapp_watcher import WhatsAppWatcher, WhatsAppAuthenticationError
+from watchers.models import WhatsAppMessage
 
 try:
     from flask import Flask

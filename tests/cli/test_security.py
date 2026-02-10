@@ -28,7 +28,7 @@ if "cli" not in sys.modules:
     sys.modules["cli"] = types.ModuleType("cli")
 sys.modules["cli.config"] = _cli_config_stub
 
-from src.cli.security import _parse_time_window
+from cli.security import _parse_time_window
 
 # ---------------------------------------------------------------------------
 # _parse_time_window — hours

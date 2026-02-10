@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from src.approval.audit_logger import ApprovalAuditLogger
-from src.approval.audit_query import ApprovalAuditQuery
+from approval.audit_logger import ApprovalAuditLogger
+from approval.audit_query import ApprovalAuditQuery
 
 
 @pytest.fixture

@@ -6,12 +6,12 @@ from pathlib import Path
 
 import pytest
 
-from src.security.incident_response import (
+from security.incident_response import (
     IncidentResponse,
     IncidentReport,
     IsolationRecord,
 )
-from src.security.models import RiskLevel
+from security.models import RiskLevel
 
 
 @pytest.fixture

@@ -18,7 +18,7 @@ import json
 import pytest
 from pydantic import ValidationError
 
-from src.mcp_servers.sqlmodel_orm_mcp import (
+from mcp_servers.sqlmodel_orm_mcp import (
     mcp,
     # Tools
     sqlmodel_generate_table,

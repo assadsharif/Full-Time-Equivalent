@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from src.vault.validator import (
+from vault.validator import (
     ApprovalValidator,
     BriefingValidator,
     TaskValidator,

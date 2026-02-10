@@ -5,7 +5,7 @@ from unittest import mock
 
 import pytest
 
-from src.watchers.circuit_breaker import (
+from watchers.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerError,
     CircuitBreakerRegistry,

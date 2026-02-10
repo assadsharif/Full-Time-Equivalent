@@ -9,8 +9,8 @@ from unittest.mock import patch
 
 import pytest
 
-from src.cli.errors import VaultNotFoundError
-from src.cli.utils import (
+from cli.errors import VaultNotFoundError
+from cli.utils import (
     auto_detect_vault,
     confirm_action,
     expand_path,

@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.briefing.email_delivery import EmailDeliveryService, SMTPConfig
+from briefing.email_delivery import EmailDeliveryService, SMTPConfig
 
 # ---------------------------------------------------------------------------
 # Fixtures

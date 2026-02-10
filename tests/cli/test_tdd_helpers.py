@@ -10,7 +10,7 @@ import sys
 sys.path.insert(0, ".")
 
 from unittest.mock import patch, MagicMock
-from src.cli.tdd_helpers import run_pytest, parse_pytest_summary
+from cli.tdd_helpers import run_pytest, parse_pytest_summary
 
 # ---------------------------------------------------------------------------
 # parse_pytest_summary

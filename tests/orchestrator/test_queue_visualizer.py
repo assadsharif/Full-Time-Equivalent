@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from src.orchestrator.queue_visualizer import QueueVisualizer
+from orchestrator.queue_visualizer import QueueVisualizer
 
 # ---------------------------------------------------------------------------
 # Fixtures

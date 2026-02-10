@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from src.orchestrator.metrics import MetricsCollector
+from orchestrator.metrics import MetricsCollector
 
 # ---------------------------------------------------------------------------
 # Fixtures & helpers

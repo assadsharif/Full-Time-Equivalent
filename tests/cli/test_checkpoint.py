@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from src.cli.checkpoint import (
+from cli.checkpoint import (
     Checkpoint,
     CheckpointManager,
     WatcherCheckpoint,
