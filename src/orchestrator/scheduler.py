@@ -172,6 +172,7 @@ class Orchestrator:
         Does NOT loop.  Useful for testing and CI.
         """
         self._started_at = datetime.now(timezone.utc)
+        self._iteration += 1
         self._log("Orchestrator: single-sweep mode")
 
         # --- capture resource snapshot ---
