@@ -1,7 +1,7 @@
 """Vault utilities — schema validation and structure checks."""
 
-from src.vault.initializer import VaultInitializer
-from src.vault.validator import (
+from .initializer import VaultInitializer
+from .validator import (
     VaultValidator,
     TaskValidator,
     ApprovalValidator,

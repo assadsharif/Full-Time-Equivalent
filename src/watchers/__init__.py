@@ -13,15 +13,15 @@ Constitutional Compliance:
 - Section 9: Graceful error recovery with retries
 """
 
-from src.watchers.base_watcher import BaseWatcher, PermanentError, TransientError
-from src.watchers.pii_redactor import PIIRedactor
-from src.watchers.markdown_formatter import MarkdownFormatter
-from src.watchers.checkpoint import CheckpointManager
-from src.watchers.models import WatcherEvent, EmailMessage, FileEvent, WhatsAppMessage
-from src.watchers.filesystem_watcher import FileSystemWatcher
-from src.watchers.gmail_watcher import GmailWatcher, GmailAuthenticationError
-from src.watchers.whatsapp_watcher import WhatsAppWatcher, WhatsAppAuthenticationError
-from src.watchers.circuit_breaker import (
+from .base_watcher import BaseWatcher, PermanentError, TransientError
+from .pii_redactor import PIIRedactor
+from .markdown_formatter import MarkdownFormatter
+from .checkpoint import CheckpointManager
+from .models import WatcherEvent, EmailMessage, FileEvent, WhatsAppMessage
+from .filesystem_watcher import FileSystemWatcher
+from .gmail_watcher import GmailWatcher, GmailAuthenticationError
+from .whatsapp_watcher import WhatsAppWatcher, WhatsAppAuthenticationError
+from .circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerError,
     CircuitBreakerRegistry,

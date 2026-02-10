@@ -13,24 +13,24 @@ Constitutional Compliance:
 - Section 10: Ralph Wiggum Rule — loop until /Done or hard failure
 """
 
-from src.orchestrator.models import (
+from .models import (
     TaskState,
     OrchestratorConfig,
     TaskRecord,
     LoopExit,
 )
-from src.orchestrator.priority_scorer import PriorityScorer
-from src.orchestrator.stop_hook import StopHook
-from src.orchestrator.approval_checker import ApprovalChecker
-from src.orchestrator.state_machine import StateMachine
-from src.orchestrator.claude_invoker import ClaudeInvoker
-from src.orchestrator.persistence_loop import PersistenceLoop
-from src.orchestrator.metrics import MetricsCollector
-from src.orchestrator.health_check import HealthCheck
-from src.orchestrator.dashboard import OrchestratorDashboard
-from src.orchestrator.queue_visualizer import QueueVisualizer
-from src.orchestrator.webhooks import WebhookNotifier
-from src.orchestrator.scheduler import Orchestrator
+from .priority_scorer import PriorityScorer
+from .stop_hook import StopHook
+from .approval_checker import ApprovalChecker
+from .state_machine import StateMachine
+from .claude_invoker import ClaudeInvoker
+from .persistence_loop import PersistenceLoop
+from .metrics import MetricsCollector
+from .health_check import HealthCheck
+from .dashboard import OrchestratorDashboard
+from .queue_visualizer import QueueVisualizer
+from .webhooks import WebhookNotifier
+from .scheduler import Orchestrator
 
 __all__ = [
     # Models
