@@ -18,10 +18,8 @@ sys.path.insert(0, ".")
 
 
 # ---------------------------------------------------------------------------
-# Stub cli.config before importing telemetry to avoid the logging shadow.
-# telemetry.py does "from cli.config import get_config" which requires src/
-# on sys.path, but adding src/ triggers src/logging/__init__.py shadow.
-# Pre-seeding cli.config in sys.modules sidesteps the issue entirely.
+# Test configuration stub
+# telemetry.py uses relative imports, so we import from src.cli.telemetry
 # ---------------------------------------------------------------------------
 class _StubConfig:
     class telemetry:
@@ -31,13 +29,8 @@ class _StubConfig:
         path = "/tmp"
 
 
-_cli_config_stub = types.ModuleType("cli.config")
-_cli_config_stub.get_config = lambda: _StubConfig()
-if "cli" not in sys.modules:
-    sys.modules["cli"] = types.ModuleType("cli")
-sys.modules["cli.config"] = _cli_config_stub
-
-from cli.telemetry import (
+# Import from src.cli.telemetry (matches installed package structure)
+from src.cli.telemetry import (
     TelemetryCollector,
     TelemetryContext,
     get_telemetry_status,
@@ -249,7 +242,7 @@ def test_telemetry_context_records_success(tmp_path):
         with TelemetryContext("test cmd"):
             pass  # no exception
 
-        assert len(c.events) == 1
+        assert len(c.events) == 1, f"Expected 1 event, got {len(c.events)}: {c.events}"
         assert c.events[0]["success"] is True
         assert c.events[0]["command"] == "test cmd"
         assert c.events[0]["duration_ms"] is not None
@@ -272,7 +265,7 @@ def test_telemetry_context_records_failure(tmp_path):
         except ValueError:
             pass
 
-        assert len(c.events) == 1
+        assert len(c.events) == 1, f"Expected 1 event, got {len(c.events)}: {c.events}"
         assert c.events[0]["success"] is False
         assert c.events[0]["error_type"] == "ValueError"
     finally:
