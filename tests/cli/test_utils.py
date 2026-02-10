@@ -12,8 +12,8 @@ import pytest
 # Unit tests for CLI utilities - all tests active
 # Root cause of previous import issues was resolved by converting cli.config import to relative import
 
-from cli.errors import VaultNotFoundError
-from cli.utils import (
+from src.cli.errors import VaultNotFoundError
+from src.cli.utils import (
     auto_detect_vault,
     confirm_action,
     expand_path,
@@ -93,7 +93,7 @@ class TestVaultDetection:
 
     def test_validate_vault_or_error_invalid(self, tmp_path):
         """Test validate_vault_or_error raises for invalid vault"""
-        from cli.errors import VaultNotFoundError as VNFError
+        from src.cli.errors import VaultNotFoundError as VNFError
 
         vault_path = tmp_path / "invalid"
 
