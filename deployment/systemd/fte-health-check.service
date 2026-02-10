@@ -1,0 +1,24 @@
+[Unit]
+Description=FTE Health Check - System health monitoring
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=fte
+Group=fte
+WorkingDirectory=/opt/fte-employee
+ExecStart=/opt/fte-employee/.venv/bin/python3 -c "from src.orchestrator.health_check import HealthCheck; hc = HealthCheck(); result = hc.run_all_checks(); print(result)"
+StandardOutput=append:/var/log/fte/health-check.log
+StandardError=append:/var/log/fte/health-check-error.log
+
+# Environment variables
+EnvironmentFile=-/etc/fte/health-check.env
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/log/fte
+
+[Install]
+WantedBy=multi-user.target

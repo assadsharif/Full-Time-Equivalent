@@ -1,0 +1,28 @@
+[Unit]
+Description=FTE Gmail Watcher - Monitor Gmail for new tasks
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=fte
+Group=fte
+WorkingDirectory=/opt/fte-employee
+ExecStart=/opt/fte-employee/.venv/bin/python3 /opt/fte-employee/src/watchers/gmail_watcher.py
+Restart=always
+RestartSec=60
+StandardOutput=append:/var/log/fte/gmail-watcher.log
+StandardError=append:/var/log/fte/gmail-watcher-error.log
+
+# Environment variables (use systemd EnvironmentFile for secrets)
+EnvironmentFile=-/etc/fte/gmail-watcher.env
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/fte-employee /var/log/fte
+
+[Install]
+WantedBy=multi-user.target

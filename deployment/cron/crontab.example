@@ -1,0 +1,34 @@
+# FTE Personal AI Employee - Cron Schedule Example
+#
+# This is an example crontab for scheduling FTE operations.
+# Install with: crontab -e
+#
+# Format: minute hour day month weekday command
+
+# Watchers (continuous - use systemd instead, but for reference)
+# @reboot cd /opt/fte-employee && .venv/bin/python3 src/watchers/gmail_watcher.py >> /var/log/fte/gmail-watcher.log 2>&1 &
+# @reboot cd /opt/fte-employee && .venv/bin/python3 src/watchers/filesystem_watcher.py >> /var/log/fte/filesystem-watcher.log 2>&1 &
+
+# Orchestrator - Run every 5 minutes to process Needs_Action tasks
+*/5 * * * * cd /opt/fte-employee && .venv/bin/python3 -m src.orchestrator.scheduler >> /var/log/fte/orchestrator.log 2>&1
+
+# Health Check - Run every 5 minutes
+*/5 * * * * cd /opt/fte-employee && .venv/bin/python3 -c "from src.orchestrator.health_check import HealthCheck; hc = HealthCheck(); hc.run_all_checks()" >> /var/log/fte/health-check.log 2>&1
+
+# CEO Briefing - Generate and email every Monday at 9 AM
+0 9 * * 1 cd /opt/fte-employee && .venv/bin/fte briefing generate --email >> /var/log/fte/briefing.log 2>&1
+
+# Task Triage - Process Inbox tasks every hour
+0 * * * * cd /opt/fte-employee && .venv/bin/fte task triage >> /var/log/fte/task-triage.log 2>&1
+
+# Security Scan - Daily at 2 AM
+0 2 * * * cd /opt/fte-employee && .venv/bin/fte security scan >> /var/log/fte/security-scan.log 2>&1
+
+# Vault Validation - Daily at 3 AM
+0 3 * * * cd /opt/fte-employee && .venv/bin/fte vault validate >> /var/log/fte/vault-validate.log 2>&1
+
+# Cleanup old logs - Monthly on the 1st at 4 AM
+0 4 1 * * find /var/log/fte/ -name "*.log" -type f -mtime +90 -delete
+
+# Backup vault to Git - Daily at 5 AM (if using Git sync)
+0 5 * * * cd /home/fte/AI_Employee_Vault && git add -A && git commit -m "auto: daily backup $(date +\%Y-\%m-\%d)" && git push origin master >> /var/log/fte/vault-backup.log 2>&1

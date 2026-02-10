@@ -1,0 +1,29 @@
+[Unit]
+Description=FTE Orchestrator - Autonomous task execution (Ralph Wiggum Loop)
+After=network-online.target fte-gmail-watcher.service fte-filesystem-watcher.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=fte
+Group=fte
+WorkingDirectory=/opt/fte-employee
+ExecStart=/opt/fte-employee/.venv/bin/python3 /opt/fte-employee/src/orchestrator/scheduler.py --loop
+Restart=always
+RestartSec=120
+StandardOutput=append:/var/log/fte/orchestrator.log
+StandardError=append:/var/log/fte/orchestrator-error.log
+
+# Environment variables
+EnvironmentFile=-/etc/fte/orchestrator.env
+Environment="VAULT_DIR=/home/fte/AI_Employee_Vault"
+Environment="ORCHESTRATOR_POLL_INTERVAL=300"
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/fte-employee /home/fte/AI_Employee_Vault /var/log/fte
+
+[Install]
+WantedBy=multi-user.target

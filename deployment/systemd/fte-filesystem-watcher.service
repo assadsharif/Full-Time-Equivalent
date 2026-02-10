@@ -1,0 +1,29 @@
+[Unit]
+Description=FTE Filesystem Watcher - Monitor directories for new files
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=fte
+Group=fte
+WorkingDirectory=/opt/fte-employee
+ExecStart=/opt/fte-employee/.venv/bin/python3 /opt/fte-employee/src/watchers/filesystem_watcher.py
+Restart=always
+RestartSec=60
+StandardOutput=append:/var/log/fte/filesystem-watcher.log
+StandardError=append:/var/log/fte/filesystem-watcher-error.log
+
+# Environment variables
+EnvironmentFile=-/etc/fte/filesystem-watcher.env
+Environment="WATCH_DIR=/home/fte/AI_Employee_Vault/Watch"
+Environment="VAULT_DIR=/home/fte/AI_Employee_Vault"
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/fte-employee /home/fte/AI_Employee_Vault /var/log/fte
+
+[Install]
+WantedBy=multi-user.target

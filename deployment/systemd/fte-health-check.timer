@@ -1,0 +1,11 @@
+[Unit]
+Description=FTE Health Check Timer - Run health checks every 5 minutes
+Requires=fte-health-check.service
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+AccuracySec=30s
+
+[Install]
+WantedBy=timers.target
