@@ -217,7 +217,7 @@ This task will attempt forbidden transition.
         task = TaskFile.from_file(task_path)
 
         # Attempt forbidden transition: Plans → Approved (skips Pending_Approval)
-        from src.control_plane.errors import InvalidTransitionError
+        from control_plane.errors import InvalidTransitionError
 
         with pytest.raises(InvalidTransitionError) as exc_info:
             state_machine.transition(
@@ -239,7 +239,7 @@ This task will attempt forbidden transition.
         Constitutional requirement (Section 4): Atomic operations, no partial states.
         """
         from unittest.mock import patch
-        from src.control_plane.errors import FileOperationError
+        from control_plane.errors import FileOperationError
 
         state_machine = StateMachine(root_dir=isolated_fs)
 

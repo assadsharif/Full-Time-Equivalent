@@ -543,7 +543,7 @@ class TestMCPGuard:
         assert events[-1]["result"] == "rate_limit_exceeded"
 
     def test_circuit_breaker_opens_after_failures(self, tmp_dir):
-        from src.watchers.circuit_breaker import CircuitBreakerError
+        from watchers.circuit_breaker import CircuitBreakerError
 
         guard = self._guard(tmp_dir)  # failure_threshold=2
 
