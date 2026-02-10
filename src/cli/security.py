@@ -16,10 +16,10 @@ from rich.table import Table
 
 from cli.config import get_config
 
-# Use relative imports for installed package compatibility
-from ..security.anomaly_detector import AnomalyDetector
-from ..security.incident_response import IncidentResponse
-from ..security.credential_vault import CredentialVault
+# Import security modules as sibling packages (both are top-level under src/)
+from security.anomaly_detector import AnomalyDetector
+from security.incident_response import IncidentResponse
+from security.credential_vault import CredentialVault
 
 console = Console()
 
