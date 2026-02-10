@@ -14,7 +14,7 @@ services:
     environment:
       - VAULT_DIR=/vault
       - FLASK_ENV=production
-    command: python3 /tmp/fte_dashboard.py
+    command: python3 -m src.dashboard.app
     restart: unless-stopped
     networks:
       - fte-network
@@ -35,7 +35,7 @@ services:
     environment:
       - VAULT_DIR=/vault
       - WATCH_DIR=/vault/watch
-    command: python3 /tmp/start_filesystem_watcher.py
+    command: python3 -m src.watchers.filesystem_watcher
     restart: unless-stopped
     networks:
       - fte-network
@@ -53,7 +53,7 @@ services:
     environment:
       - VAULT_DIR=/vault
       - ORCHESTRATOR_INTERVAL=300
-    command: python3 /tmp/start_orchestrator.py
+    command: python3 -m src.orchestrator.scheduler
     restart: unless-stopped
     networks:
       - fte-network
