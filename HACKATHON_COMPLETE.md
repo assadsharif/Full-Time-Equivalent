@@ -267,9 +267,9 @@ See `deployment/README.md` for full instructions.
 
 ---
 
-## Demo Video & Screenshots
+## Demo Video
 
-Demo video and screenshots will be provided separately to demonstrate:
+Demo video will be provided separately to demonstrate:
 1. Email arrives → Task created in /Inbox
 2. Orchestrator picks up task → Generates plan
 3. Human approves in /Pending_Approval
@@ -377,7 +377,6 @@ pytest tests/ --cov=src --cov-report=html
 - [x] Comprehensive test suite (1529 tests passing)
 - [x] Documentation (20+ files)
 - [x] Demo video (to be provided separately)
-- [x] Screenshots (to be provided separately)
 - [x] HACKATHON_COMPLETE.md (this file)
 - [x] Architecture diagrams (in docs/)
 - [x] Deployment guides (3 platforms)
