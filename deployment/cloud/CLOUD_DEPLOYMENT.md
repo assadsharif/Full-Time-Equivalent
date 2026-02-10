@@ -71,9 +71,51 @@ chmod +x deployment/cloud/deploy-aws.sh
 
 ---
 
-### Option 3: Manual Docker Deployment
+### Option 3: Google Cloud Platform (GCP)
 
-**For any cloud provider (GCP, Azure, Linode, etc.)**
+**Cost:** ~$35/month (FREE with $300 credit for 90 days)
+**Specs:** e2-medium (2 vCPUs, 4GB RAM)
+**Region:** us-central1-a (configurable)
+
+**Pros:**
+- $300 free credit for new users (90 days)
+- Excellent global infrastructure
+- Easy-to-use console
+- Strong security features
+- Integrated with Google services
+
+**Deploy:**
+```bash
+chmod +x deployment/cloud/deploy-gcp.sh
+./deployment/cloud/deploy-gcp.sh
+```
+
+**Requirements:**
+1. GCP account
+2. Install `gcloud` CLI
+3. Run `gcloud auth login`
+4. Run `gcloud config set project YOUR_PROJECT_ID`
+
+**Example Deployment:**
+```bash
+# The script will:
+# 1. Create firewall rules for port 5000
+# 2. Create e2-medium instance with Debian 11
+# 3. Install Docker and Docker Compose
+# 4. Deploy your application
+# 5. Provide dashboard URL
+
+# Successfully tested with:
+# - Instance: fte-employee
+# - External IP: 34.42.97.43
+# - Dashboard: http://34.42.97.43:5000
+```
+
+---
+
+### Option 4: Manual Docker Deployment
+
+**For any cloud provider (Azure, Linode, etc.)**
 
 ```bash
 # 1. SSH into your server
