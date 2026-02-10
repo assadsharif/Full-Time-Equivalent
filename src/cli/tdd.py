@@ -13,10 +13,10 @@ import click
 from rich.console import Console
 from rich.table import Table
 
-from cli.tdd_helpers import parse_pytest_summary as _parse_pytest_summary
-from cli.tdd_helpers import run_pytest as _run_pytest
-from cli.tdd_state import TDDState
-from cli.utils import display_error, display_info, display_success, display_warning
+from .tdd_helpers import parse_pytest_summary as _parse_pytest_summary
+from .tdd_helpers import run_pytest as _run_pytest
+from .tdd_state import TDDState
+from .utils import display_error, display_info, display_success, display_warning
 
 console = Console()
 

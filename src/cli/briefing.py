@@ -15,10 +15,10 @@ import click
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from cli.checkpoint import get_checkpoint_manager
-from cli.config import get_config
-from cli.errors import BriefingError, BriefingNotFoundError, PDFGenerationError
-from cli.utils import (
+from .checkpoint import get_checkpoint_manager
+from .config import get_config
+from .errors import BriefingError, BriefingNotFoundError, PDFGenerationError
+from .utils import (
     display_error,
     display_info,
     display_success,

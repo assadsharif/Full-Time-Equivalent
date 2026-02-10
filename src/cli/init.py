@@ -11,10 +11,10 @@ from typing import Optional
 import click
 from rich.prompt import Prompt
 
-from cli.checkpoint import get_checkpoint_manager
-from cli.config import get_config
-from cli.errors import ConfigError
-from cli.utils import (
+from .checkpoint import get_checkpoint_manager
+from .config import get_config
+from .errors import ConfigError
+from .utils import (
     display_error,
     display_info,
     display_success,

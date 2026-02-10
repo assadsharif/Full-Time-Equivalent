@@ -15,7 +15,7 @@ import yaml
 from rich.console import Console
 from rich.table import Table
 
-from cli.utils import display_error, display_info, display_success
+from .utils import display_error, display_info, display_success
 
 console = Console()
 

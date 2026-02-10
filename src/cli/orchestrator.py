@@ -12,7 +12,7 @@ import click
 from rich.console import Console
 from rich.table import Table
 
-from cli.utils import (
+from .utils import (
     display_error,
     display_info,
     resolve_vault_path,

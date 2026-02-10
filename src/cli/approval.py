@@ -15,15 +15,15 @@ from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
 from rich.table import Table
 
-from cli.checkpoint import get_checkpoint_manager
-from cli.config import get_config
-from cli.errors import (
+from .checkpoint import get_checkpoint_manager
+from .config import get_config
+from .errors import (
     ApprovalExpiredError,
     ApprovalIntegrityError,
     ApprovalInvalidNonceError,
     ApprovalNotFoundError,
 )
-from cli.utils import (
+from .utils import (
     display_error,
     display_info,
     display_success,
@@ -31,7 +31,7 @@ from cli.utils import (
     resolve_vault_path,
     validate_vault_or_error,
 )
-from cli.vault import (
+from .vault import (
     parse_approval_file,
     update_approval_status,
     validate_nonce,

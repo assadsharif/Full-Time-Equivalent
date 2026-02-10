@@ -12,7 +12,7 @@ from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, Field
 
-from cli.utils import get_checkpoint_path
+from .utils import get_checkpoint_path
 
 
 class WatcherCheckpoint(BaseModel):

@@ -14,7 +14,7 @@ import structlog
 from rich.console import Console
 from rich.logging import RichHandler
 
-from cli.config import get_config
+from .config import get_config
 
 # Rich console for styled output
 console = Console(stderr=True)

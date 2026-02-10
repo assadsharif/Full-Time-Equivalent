@@ -20,15 +20,15 @@ from rich.console import Console
 from rich.prompt import Prompt
 from rich.table import Table
 
-from cli.checkpoint import get_checkpoint_manager
-from cli.config import get_config
-from cli.errors import (
+from .checkpoint import get_checkpoint_manager
+from .config import get_config
+from .errors import (
     ApprovalIntegrityError,
     ApprovalInvalidNonceError,
     ApprovalNotFoundError,
     VaultNotFoundError,
 )
-from cli.utils import (
+from .utils import (
     display_error,
     display_info,
     display_success,

@@ -20,9 +20,9 @@ from rich.console import Console
 from rich.table import Table
 from rich.tree import Tree
 
-from cli.checkpoint import get_checkpoint_manager
-from cli.config import get_config
-from cli.errors import (
+from .checkpoint import get_checkpoint_manager
+from .config import get_config
+from .errors import (
     CLIError,
     MCPError,
     MCPHealthCheckError,
@@ -30,7 +30,7 @@ from cli.errors import (
     MCPNotFoundError,
     MCPRegistryError,
 )
-from cli.utils import (
+from .utils import (
     display_error,
     display_info,
     display_success,

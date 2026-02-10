@@ -14,7 +14,7 @@ import click
 from rich.console import Console
 from rich.table import Table
 
-from cli.config import get_config
+from .config import get_config
 
 # Import security modules as sibling packages (both are top-level under src/)
 from security.anomaly_detector import AnomalyDetector

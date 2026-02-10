@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from cli.config import get_config
+from .config import get_config
 
 logger = logging.getLogger(__name__)
 
