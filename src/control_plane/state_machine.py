@@ -16,7 +16,7 @@ import uuid
 from .models import WorkflowState, TaskFile, StateTransition
 from .errors import InvalidTransitionError, FileOperationError
 from .logger import AuditLogger
-from utils.file_ops import atomic_move
+from src.utils.file_ops import atomic_move
 
 
 class StateMachine:
