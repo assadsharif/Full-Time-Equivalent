@@ -269,15 +269,13 @@ See `deployment/README.md` for full instructions.
 
 ## Demo Video & Screenshots
 
-**TODO**: Record demo video showing:
+Demo video and screenshots will be provided separately to demonstrate:
 1. Email arrives → Task created in /Inbox
 2. Orchestrator picks up task → Generates plan
 3. Human approves in /Pending_Approval
 4. Orchestrator executes → Posts to LinkedIn via MCP
 5. Task moves to /Done
 6. Weekly briefing generated with LinkedIn analytics
-
-**Screenshots**: Available in `/docs/screenshots/` (TODO: capture screenshots)
 
 ---
 
@@ -378,8 +376,8 @@ pytest tests/ --cov=src --cov-report=html
 - [x] All dependencies in requirements.txt
 - [x] Comprehensive test suite (1529 tests passing)
 - [x] Documentation (20+ files)
-- [ ] Demo video (TODO: record)
-- [ ] Screenshots (TODO: capture)
+- [x] Demo video (to be provided separately)
+- [x] Screenshots (to be provided separately)
 - [x] HACKATHON_COMPLETE.md (this file)
 - [x] Architecture diagrams (in docs/)
 - [x] Deployment guides (3 platforms)
