@@ -17,8 +17,8 @@ from pathlib import Path
 
 import pytest
 
-from logging.async_writer import AsyncWriter
-from logging.models import ExceptionInfo, LogEntry, LogLevel, StackFrame
+from src.logging.async_writer import AsyncWriter
+from src.logging.models import ExceptionInfo, LogEntry, LogLevel, StackFrame
 
 
 @pytest.fixture

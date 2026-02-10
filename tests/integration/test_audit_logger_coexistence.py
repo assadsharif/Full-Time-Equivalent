@@ -28,8 +28,8 @@ from control_plane.state_machine import StateMachine
 
 # P2 imports (new logging infrastructure)
 from src.logging import init_logging, get_logger
-from logging.models import LogLevel
-from logging.query_service import QueryService, LogQuery
+from src.logging.models import LogLevel
+from src.logging.query_service import QueryService, LogQuery
 
 
 @pytest.fixture

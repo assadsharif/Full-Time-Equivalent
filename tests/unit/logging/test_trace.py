@@ -12,7 +12,7 @@ import re
 
 import pytest
 
-from logging.trace import bind_trace_id, get_trace_id, new_trace_id
+from src.logging.trace import bind_trace_id, get_trace_id, new_trace_id
 
 
 class TestNewTraceId:

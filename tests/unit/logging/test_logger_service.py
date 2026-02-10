@@ -19,9 +19,9 @@ from pathlib import Path
 
 import pytest
 
-from logging.config import LoggerConfig
-from logging.logger_service import LoggerService
-from logging.models import LogLevel
+from src.logging.config import LoggerConfig
+from src.logging.logger_service import LoggerService
+from src.logging.models import LogLevel
 
 
 @pytest.fixture

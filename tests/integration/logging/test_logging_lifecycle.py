@@ -19,7 +19,7 @@ from pathlib import Path
 import pytest
 
 from src.logging import get_logger, init_logging
-from logging.models import LogLevel
+from src.logging.models import LogLevel
 
 
 @pytest.fixture

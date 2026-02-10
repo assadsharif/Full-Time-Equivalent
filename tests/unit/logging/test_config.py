@@ -13,8 +13,8 @@ from pathlib import Path
 
 import pytest
 
-from logging.config import from_env, from_file
-from logging.models import LoggerConfig, LogLevel
+from src.logging.config import from_env, from_file
+from src.logging.models import LoggerConfig, LogLevel
 
 
 class TestLoggerConfigDefaults:

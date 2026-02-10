@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from logging.models import (
+from src.logging.models import (
     ExceptionInfo,
     LogEntry,
     LogLevel,

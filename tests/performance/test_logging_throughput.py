@@ -16,7 +16,7 @@ from tempfile import TemporaryDirectory
 import pytest
 
 from src.logging import init_logging, get_logger
-from logging.models import LogLevel
+from src.logging.models import LogLevel
 
 
 class PerformanceMetrics:
