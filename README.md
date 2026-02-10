@@ -14,9 +14,31 @@ Digital FTE is an intelligent AI assistant system that operates through a file-d
 
 - **📁 Vault Management** - Organize tasks in an Obsidian-compatible vault
 - **👀 Event Watchers** - Monitor Gmail, WhatsApp, and filesystem events
-- **🔗 MCP Integration** - Connect external services via Model Context Protocol
+- **🔗 MCP Integration** - Connect external services via Model Context Protocol (30 servers, 230+ tools)
 - **✅ Approval Workflows** - Human-in-the-loop for high-risk actions
-- **📊 CEO Briefings** - Automated weekly executive summaries
+- **📊 CEO Briefings** - Automated weekly executive summaries with accounting + social media analytics
+
+---
+
+## 🏆 Hackathon Status
+
+**Achievement Level**: ✅ **GOLD TIER COMPLETE**
+
+| Tier | Status | Requirements Met |
+|------|--------|------------------|
+| **Bronze** | ✅ Complete | 5/5 - Vault, watchers, Agent Skills |
+| **Silver** | ✅ Complete | 7/7 - LinkedIn, orchestrator, HITL, scheduling |
+| **Gold** | ✅ Complete | 11/11 - Xero accounting, social media (Meta, Twitter), CEO briefing |
+| **Platinum** | ⚠️ Infrastructure Ready | 1/5 - Deployment configs ready, not deployed to cloud yet |
+
+**📊 [View Full Hackathon Completion Report →](HACKATHON_COMPLETE.md)**
+
+**Key Stats**:
+- 126 Python modules, 47K lines of code
+- 100% test pass rate (1529/1529 tests)
+- 30 MCP servers with 230+ tools
+- 46 Agent Skills (10 core FTE + 36 framework)
+- 20+ documentation files
 
 ---
 
