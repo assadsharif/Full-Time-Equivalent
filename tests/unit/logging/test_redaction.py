@@ -13,7 +13,7 @@ import time
 
 import pytest
 
-from src.logging.redaction import DEFAULT_SECRET_PATTERNS, SecretRedactor
+from src.fte_logging.redaction import DEFAULT_SECRET_PATTERNS, SecretRedactor
 
 
 class TestSecretRedactorBasics:

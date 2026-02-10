@@ -11,7 +11,7 @@ from pathlib import Path
 
 # Try to import the logging module, fall back to standard logging
 try:
-    from src.logging import get_logger
+    from src.fte_logging import get_logger
 except ImportError:
     import logging
 

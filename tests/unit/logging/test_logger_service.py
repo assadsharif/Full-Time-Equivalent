@@ -19,9 +19,9 @@ from pathlib import Path
 
 import pytest
 
-from src.logging.config import LoggerConfig
-from src.logging.logger_service import LoggerService
-from src.logging.models import LogLevel
+from src.fte_logging.config import LoggerConfig
+from src.fte_logging.logger_service import LoggerService
+from src.fte_logging.models import LogLevel
 
 
 @pytest.fixture
@@ -342,7 +342,7 @@ class TestPublicAPI:
 
     def test_init_logging_default(self, temp_log_dir):
         """Should initialize logging with defaults."""
-        from src.logging import init_logging
+        from src.fte_logging import init_logging
 
         logger = init_logging(log_dir=temp_log_dir)
 
@@ -351,7 +351,7 @@ class TestPublicAPI:
 
     def test_init_logging_with_level(self, temp_log_dir):
         """Should initialize with custom level."""
-        from src.logging import init_logging
+        from src.fte_logging import init_logging
 
         logger = init_logging(log_dir=temp_log_dir, level="DEBUG")
 
@@ -359,7 +359,7 @@ class TestPublicAPI:
 
     def test_get_logger(self, temp_log_dir):
         """Should get global logger instance."""
-        from src.logging import get_logger, init_logging
+        from src.fte_logging import get_logger, init_logging
 
         init_logging(log_dir=temp_log_dir)
         logger = get_logger(__name__)
@@ -369,10 +369,10 @@ class TestPublicAPI:
 
     def test_get_logger_auto_init(self):
         """Should auto-initialize if not initialized."""
-        from src.logging import get_logger
+        from src.fte_logging import get_logger
 
         # Reset global logger
-        import src.logging
+        import src.fte_logging
 
         src.logging._global_logger = None
 

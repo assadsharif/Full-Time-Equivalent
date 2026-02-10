@@ -27,9 +27,9 @@ from control_plane.logger import AuditLogger
 from control_plane.state_machine import StateMachine
 
 # P2 imports (new logging infrastructure)
-from src.logging import init_logging, get_logger
-from src.logging.models import LogLevel
-from src.logging.query_service import QueryService, LogQuery
+from src.fte_logging import init_logging, get_logger
+from src.fte_logging.models import LogLevel
+from src.fte_logging.query_service import QueryService, LogQuery
 
 
 @pytest.fixture
@@ -359,7 +359,7 @@ async def test_p2_logger_respects_frozen_code_constraint(p2_logger_service):
     - P2 is truly additive
     """
     import inspect
-    from src.logging.logger_service import LoggerService
+    from src.fte_logging.logger_service import LoggerService
 
     # Get LoggerService source file
     logger_service_file = inspect.getfile(LoggerService)
@@ -374,7 +374,7 @@ async def test_p2_logger_respects_frozen_code_constraint(p2_logger_service):
     ), "P2 logging should NOT be in control_plane (frozen code)"
 
     # Verify P2 doesn't import P1 AuditLogger
-    import src.logging
+    import src.fte_logging
 
     logger_module_file = inspect.getfile(src.logging)
     logger_module_source = inspect.getsource(src.logging)

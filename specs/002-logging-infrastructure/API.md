@@ -10,7 +10,7 @@
 
 ```python
 import asyncio
-from src.logging import init_logging, get_logger
+from src.fte_logging import init_logging, get_logger
 
 async def main():
     # Initialize logging system
@@ -349,7 +349,7 @@ High-performance log querying with DuckDB.
 
 ```python
 from pathlib import Path
-from src.logging.query_service import QueryService
+from src.fte_logging.query_service import QueryService
 
 service = QueryService(log_dir=Path("./Logs"))
 ```
@@ -376,7 +376,7 @@ def query(
 **Example:**
 ```python
 from datetime import datetime, timedelta
-from src.logging.models import LogQuery, LogLevel
+from src.fte_logging.models import LogQuery, LogLevel
 
 params = LogQuery(
     start_time=datetime.now() - timedelta(hours=1),
@@ -607,7 +607,7 @@ export LOGGING_REDACTION_TEXT="[HIDDEN]"
 Log severity levels (enum).
 
 ```python
-from src.logging.models import LogLevel
+from src.fte_logging.models import LogLevel
 
 LogLevel.DEBUG      # 10
 LogLevel.INFO       # 20

@@ -17,8 +17,8 @@ from pathlib import Path
 
 import pytest
 
-from src.logging import get_logger, init_logging, new_trace_id
-from src.logging.trace import get_trace_id
+from src.fte_logging import get_logger, init_logging, new_trace_id
+from src.fte_logging.trace import get_trace_id
 
 
 @pytest.fixture

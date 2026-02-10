@@ -1,6 +1,6 @@
 # API Contract: LoggerService
 
-**Module**: `src.logging.logger_service`
+**Module**: `src.fte_logging.logger_service`
 **Purpose**: Core logging service for structured, async logging with context and correlation
 **Status**: Planning
 
@@ -442,7 +442,7 @@ async def _async_writer_loop(self) -> None:
 ### Basic Logging
 
 ```python
-from src.logging import LoggerService, LoggerConfig, LogLevel
+from src.fte_logging import LoggerService, LoggerConfig, LogLevel
 
 # Initialize logger
 config = LoggerConfig.from_file("config/logging.yaml")

@@ -50,7 +50,7 @@ The Digital FTE system is **fully implemented** across all 10 priority specifica
 #### ✅ Spec 002: Logging Infrastructure
 - **Status**: Complete
 - **PR**: #2 (merged Feb 1)
-- **Implementation**: 9 modules in `src/logging/`
+- **Implementation**: 9 modules in `src/fte_logging/`
 - **Features**:
   - Structured logging (DEBUG/INFO/WARNING/ERROR/CRITICAL)
   - Async logger service with buffering

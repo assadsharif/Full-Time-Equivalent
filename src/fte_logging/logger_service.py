@@ -46,7 +46,7 @@ class LoggerService:
     - Section 9: Errors never hidden
 
     Example:
-        >>> from src.logging.config import from_file
+        >>> from src.fte_logging.config import from_file
         >>> config = from_file("config/logging.yaml")
         >>> logger = LoggerService(config)
         >>> logger.info("Application started")
