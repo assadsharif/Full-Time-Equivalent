@@ -93,11 +93,9 @@ class TestVaultDetection:
 
     def test_validate_vault_or_error_invalid(self, tmp_path):
         """Test validate_vault_or_error raises for invalid vault"""
-        from src.cli.errors import VaultNotFoundError as VNFError
-
         vault_path = tmp_path / "invalid"
 
-        with pytest.raises(VNFError):
+        with pytest.raises(VaultNotFoundError):
             validate_vault_or_error(vault_path)
 
     @patch("src.cli.utils.is_valid_vault")

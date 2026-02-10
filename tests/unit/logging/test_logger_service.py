@@ -374,7 +374,7 @@ class TestPublicAPI:
         # Reset global logger
         import src.fte_logging
 
-        src.logging._global_logger = None
+        src.fte_logging._global_logger = None
 
         logger = get_logger(__name__)
 
