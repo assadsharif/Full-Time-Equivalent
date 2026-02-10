@@ -9,14 +9,8 @@ from unittest.mock import patch
 
 import pytest
 
-# This file is ignored via pytest.ini (--ignore flag) due to module loading issue
-# Issue: cli.utils fails to load with "(unknown location)" error during pytest collection
-# Root cause under investigation - likely related to package installation or import chain
-# The pytestmark skip below doesn't work because ImportError occurs before pytest can process it
-# All other CLI tests pass successfully (99.93% pass rate achieved)
-pytestmark = pytest.mark.skip(
-    reason="cli.utils module loading issue in CI - ignored via pytest.ini"
-)
+# Unit tests for CLI utilities - all tests active
+# Root cause of previous import issues was resolved by converting cli.config import to relative import
 
 from cli.errors import VaultNotFoundError
 from cli.utils import (

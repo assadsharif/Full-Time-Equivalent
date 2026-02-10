@@ -13,7 +13,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
-from cli.config import get_config
+from .config import get_config
 
 console = Console()
 
