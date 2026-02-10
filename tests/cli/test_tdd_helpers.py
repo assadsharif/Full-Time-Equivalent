@@ -97,8 +97,8 @@ def test_run_pytest_default_args(mock_run):
     cmd = args[0][0]  # first positional arg is the command list
     assert cmd[-2] == "-v"
     assert cmd[-1] == "--tb=short"
-    assert cmd[2] == "-m"  # sys.executable -m pytest
-    assert cmd[3] == "pytest"
+    assert cmd[1] == "-m"  # sys.executable -m pytest
+    assert cmd[2] == "pytest"
 
 
 @patch("src.cli.tdd_helpers.subprocess.run")

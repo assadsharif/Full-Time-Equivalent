@@ -765,6 +765,8 @@ async def nextjs_generate_api_client(
     if (!res.ok) throw new Error('Failed to delete {resource_name}')
   }}''')
 
+    methods_joined = ",\n".join(methods)
+
     code = f'''const API_BASE = {base_url_code}'{base_url}'
 
 // Types - define these in types/{resource_name}.ts
@@ -785,7 +787,6 @@ export const {resource_name}Api = {{
 {methods_joined}
 }}
 '''
-    methods_joined = ",\n".join(methods)
 
     return json.dumps({
         "success": True,
